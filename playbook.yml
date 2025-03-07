@@ -1,0 +1,101 @@
+---
+# استقرار پروژه با Docker Compose، تنظیم دسترسی‌ها و اجرای درخواست‌ها 
+- name: Deploy project with Docker Compose, set permissions, and send requests   
+  hosts: all  
+  become: yes  
+
+  vars:  
+    project_path: "/opt/simple-log-manager"                             # مسیر پروژه را به عنوان متغیر تعریف می‌کنیم  
+    container_name: "{{ containers[inventory_hostname] }}"              # نام کانتینر برای هر مشتری  
+    backend_port: "{{ customer_backend_ports[inventory_hostname] }}"    # پورت بک‌اند اختصاصی برای هر مشتری  
+    frontend_port: "{{ customer_frontend_ports[inventory_hostname] }}"  # پورت فرانت‌اند اختصاصی برای هر مشتری  
+    network_name: "{{ customer_network_name[inventory_hostname] }}"     # شبکه اختصاصی برای هر مشتری  
+    customer_git_branches:  
+      customer1: "main"  
+      customer2: "main"  
+      customer3: "dev"  
+    customer_git_tags:  
+      customer1: "last01"  
+      customer2: "last02"  
+      customer3: "last03"  
+    customer_backend_ports:  
+      customer1: 8002  
+      customer2: 8003  
+      customer3: 8001  
+    customer_frontend_ports:  
+      customer1: 3001  
+      customer2: 3002  
+      customer3: 3003  
+    customer_network_name:  
+      customer1: "customer1_network"  
+      customer2: "customer2_network"  
+      customer3: "customer3_network"  
+    containers:  
+      customer1: "customer1-container"  
+      customer2: "customer2-container"  
+      customer3: "customer3-container"  
+
+  tasks:  
+    # کلون کردن پروژه از گیت برای هر مشتری  
+    - name: Clone the repository for each customer    
+      git:  
+        repo: 'https://github.com/samadelmakchi/simple-log-manager.git'  
+        dest: "{{ project_path }}"  
+        version: "{{ customer_git_tags[inventory_hostname] }}"  
+        update: yes  
+        clone: yes  
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]  
+      
+    # اجرای داکر کامپوز برای هر مشتری  
+    - name: Run Docker Compose for each customer    
+      shell: |  
+        cd "{{ project_path }}"  
+        docker-compose -f docker-compose.yml up -d  
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]  
+      
+    # اعطای دسترسی نوشتن به پوشه‌ها در کانتینر  
+    - name: Grant write permissions to folders in the container    
+      docker_exec:  
+        container: "{{ container_name }}"  
+        cmd: chmod -R 777 /path/to/img /path/to/recaptcha  
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]  
+      
+    # ارسال درخواست HTTP به آدرس اول برای هر مشتری  
+    - name: Send HTTP request to the first endpoint for each customer    
+      uri:  
+        url: "http://{{ ansible_host }}:{{ backend_port }}/migration/index/false"  
+        method: GET  
+        return_content: yes  
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]  
+      
+    # ارسال درخواست HTTP به آدرس دوم برای هر مشتری  
+    - name: Send HTTP request to the second endpoint for each customer    
+      uri:  
+        url: "http://{{ ansible_host }}:{{ backend_port }}/migration2/index/false"  
+        method: GET  
+        return_content: yes  
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]  
+
+    # کپی کردن اسکریپت بکاپ به سرور  
+    - name: Copy backup script to the server  
+      copy:
+        content: |
+          #!/bin/bash
+          BACKUP_DIR="/opt/backup/{{ inventory_hostname }}/$(date +'%Y-%m-%d')"
+          mkdir -p $BACKUP_DIR  # ایجاد پوشه بکاپ برای تاریخ امروز
+          VOLUMES=$(docker volume ls -q)
+          for VOLUME in $VOLUMES; do
+            docker run --rm -v $VOLUME:/volume -v $BACKUP_DIR:/backup alpine \
+              tar czf /backup/$VOLUME.tar.gz -C /volume .  # بکاپ و فشرده‌سازی ولوم‌ها
+          done
+        dest: "/opt/backup/{{ inventory_hostname }}/backup_volumes.sh"
+        mode: '0755'  # اعطای دسترسی اجرایی به اسکریپت
+
+    # تنظیم Cron job برای بکاپ  
+    - name: Set up cron job for backup  
+      cron:
+        name: "Backup Docker Volumes"
+        minute: "0"
+        hour: "0,8,16"  # اجرای بکاپ سه بار در روز (0:00، 8:00، 16:00)
+        job: "/bin/bash /opt/backup/{{ inventory_hostname }}/backup_volumes.sh"
+        user: root

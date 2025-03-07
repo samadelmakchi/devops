@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: "{{ container_name }}-backend"  # نام کانتینر اختصاصی برای بک‌اند
+    ports:
+      - "{{ backend_port }}:8000"  # پورت بک‌اند برای هر مشتری
+    depends_on:
+      - db  # وابستگی به دیتابیس
+    environment:
+      - DATABASE_URL="postgresql://log_user:log_password@db:5432/log_db"
+      - NODE_ENV=production
+      - CUSTOMER_NAME={{ customer_name }}  # متغیر محیطی اختصاصی برای هر مشتری
+    networks:
+      - "{{ network_name }}"  # شبکه اختصاصی برای هر مشتری
+    volumes:
+      - ./backend:/app
+    command: ["/bin/sh", "-c", "until pg_isready -h db -p 5432; do sleep 2; done && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"]
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: "{{ container_name }}-frontend"  # نام کانتینر اختصاصی برای فرانت‌اند
+    ports:
+      - "{{ frontend_port }}:80"  # پورت فرانت‌اند برای هر مشتری
+    depends_on:
+      - backend  # وابستگی به بک‌اند
+    networks:
+      - "{{ network_name }}"  # شبکه اختصاصی برای هر مشتری
+    environment:
+      - NODE_ENV=production
+      - CUSTOMER_NAME={{ customer_name }}  # متغیر محیطی اختصاصی برای هر مشتری
+    volumes:
+      - ./frontend:/app  # اتصال کل دایرکتوری frontend
+      - /app/node_modules  # جلوگیری از هم‌پوشانی node_modules
+    command: ["nginx", "-g", "daemon off;"]
+
+  db:
+    image: postgres:15
+    container_name: "{{ container_name }}-db"  # نام کانتینر دیتابیس اختصاصی
+    restart: always
+    environment:
+      POSTGRES_DB: log_db
+      POSTGRES_USER: log_user
+      POSTGRES_PASSWORD: log_password
+    ports:
+      - "5432:5432"
+    networks:
+      - "{{ network_name }}"  # شبکه اختصاصی برای هر مشتری
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+networks:
+  {{ network_name }}:
+    driver: bridge
+
+volumes:
+  pgdata:
+  pgadmin_data:

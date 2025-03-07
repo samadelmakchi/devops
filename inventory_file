@@ -1,0 +1,17 @@
+[customers]
+customer1.elmakchi.ir
+customer2.elmakchi.ir
+customer3.elmakchi.ir
+
+[customers:vars]
+ansible_ssh_private_key_file=./id_rsa  # مسیر دقیق کلید خصوصی
+ansible_ssh_user=customer_user  # کاربر عمومی برای همه مشتری‌ها (اختیاری)
+
+[customer1:vars]
+ansible_ssh_user=customer1_user
+
+[customer2:vars]
+ansible_ssh_user=customer2_user
+
+[customer3:vars]
+ansible_ssh_user=customer3_user
