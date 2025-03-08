@@ -1,4 +1,3 @@
----
 # استقرار پروژه با Docker Compose، تنظیم دسترسی‌ها و اجرای درخواست‌ها 
 - name: Deploy project with Docker Compose, set permissions, and send requests   
   hosts: all  
@@ -6,6 +5,7 @@
 
   vars:  
     project_path: "/opt/simple-log-manager"                             # مسیر پروژه را به عنوان متغیر تعریف می‌کنیم  
+    backup_path: "/opt/backup"                                          # مسیر بکاپ را به عنوان متغیر تعریف می‌کنیم
     container_name: "{{ containers[inventory_hostname] }}"              # نام کانتینر برای هر مشتری  
     backend_port: "{{ customer_backend_ports[inventory_hostname] }}"    # پورت بک‌اند اختصاصی برای هر مشتری  
     frontend_port: "{{ customer_frontend_ports[inventory_hostname] }}"  # پورت فرانت‌اند اختصاصی برای هر مشتری  
@@ -35,16 +35,101 @@
       customer2: "customer2-container"  
       customer3: "customer3-container"  
 
+    # اطلاعات SonarQube
+    sonar_url: "http://your-sonarqube-server"  # URL سرور SonarQube
+    sonar_token: "your_sonarqube_token"        # توکن SonarQube
+    sonar_project_key: "simple-log-manager"    # کلید پروژه در SonarQube
+    sonar_project_name: "Simple Log Manager"   # نام پروژه در SonarQube
+
+    # اطلاعات دیتابیس برای هر مشتری (با سه دیتابیس برای هر مشتری)
+    customer_databases:
+      customer1:
+        - { type: "postgresql", name: "customer1_db1", user: "customer1_user1", password: "customer1_password1", host: "localhost" }
+        - { type: "mysql", name: "customer1_db2", user: "customer1_user2", password: "customer1_password2", host: "localhost" }
+        - { type: "postgresql", name: "customer1_db3", user: "customer1_user3", password: "customer1_password3", host: "localhost" }
+      customer2:
+        - { type: "mysql", name: "customer2_db1", user: "customer2_user1", password: "customer2_password1", host: "localhost" }
+        - { type: "postgresql", name: "customer2_db2", user: "customer2_user2", password: "customer2_password2", host: "localhost" }
+        - { type: "mysql", name: "customer2_db3", user: "customer2_user3", password: "customer2_password3", host: "localhost" }
+      customer3:
+        - { type: "postgresql", name: "customer3_db1", user: "customer3_user1", password: "customer3_password1", host: "localhost" }
+        - { type: "mysql", name: "customer3_db2", user: "customer3_user2", password: "customer3_password2", host: "localhost" }
+        - { type: "postgresql", name: "customer3_db3", user: "customer3_user3", password: "customer3_password3", host: "localhost" }
+
   tasks:  
+    # ایجاد دایرکتوری .ssh در سرور مقصد
+    - name: Ensure .ssh directory exists
+      file:
+        path: "/home/{{ ansible_user }}/.ssh"
+        state: directory
+        mode: '0700'
+      become: yes
+
+    # کپی کردن کلید خصوصی SSH به سرور
+    - name: Copy SSH private key to the server
+      copy:
+        src: "~/.ssh/id_rsa"
+        dest: "/home/{{ ansible_user }}/.ssh/id_rsa"
+        mode: '0600'
+      become: yes
+
+    # کپی کردن کلید عمومی SSH به سرور (اختیاری)
+    - name: Copy SSH public key to the server
+      copy:
+        src: "~/.ssh/id_rsa.pub"
+        dest: "/home/{{ ansible_user }}/.ssh/authorized_keys"
+        mode: '0600'
+      become: yes
+
+    # تست اتصال SSH به GitLab
+    - name: Test SSH connection to GitLab
+      shell: "ssh -T git@gitlab.com"
+      register: ssh_test_result
+      ignore_errors: yes
+
+    # نمایش نتیجه تست SSH
+    - name: Print SSH test result
+      debug:
+        msg: "{{ ssh_test_result.stdout }}"
+      when: ssh_test_result is defined
+
     # کلون کردن پروژه از گیت برای هر مشتری  
-    - name: Clone the repository for each customer    
-      git:  
-        repo: 'https://github.com/samadelmakchi/simple-log-manager.git'  
-        dest: "{{ project_path }}"  
-        version: "{{ customer_git_tags[inventory_hostname] }}"  
-        update: yes  
-        clone: yes  
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]  
+    - name: Clone the Calibri repository from GitLab
+      git:
+        repo: 'git@gitlab.com:nasser-man/calibri.git'
+        dest: "{{ project_path }}/calibri"
+        version: "main"
+        update: yes
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+
+    - name: Clone the Calibri Portal repository from GitLab
+      git:
+        repo: 'git@gitlab.com:nasser-man/calibri-portal.git'
+        dest: "{{ project_path }}/calibri-portal"
+        version: "main"
+        update: yes
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+
+    - name: Clone the Calibri Portal Frontend repository from GitLab
+      git:
+        repo: 'git@gitlab.com:nasser-man/calibri-portal-frontend.git'
+        dest: "{{ project_path }}/calibri-portal-frontend"
+        version: "main"
+        update: yes
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+
+
+
+
+    # کلون کردن پروژه از گیت برای هر مشتری  
+    # - name: Clone the repository for each customer    
+    #   git:  
+    #     repo: 'https://github.com/samadelmakchi/simple-log-manager.git'  
+    #     dest: "{{ project_path }}"  
+    #     version: "{{ customer_git_tags[inventory_hostname] }}"  
+    #     update: yes  
+    #     clone: yes  
+    #   when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]  
       
     # اجرای داکر کامپوز برای هر مشتری  
     - name: Run Docker Compose for each customer    
@@ -54,12 +139,37 @@
       when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]  
       
     # اعطای دسترسی نوشتن به پوشه‌ها در کانتینر  
-    - name: Grant write permissions to folders in the container    
-      docker_exec:  
+    - name: Grant write permissions to folders in the container
+      docker_exec:
         container: "{{ container_name }}"  
         cmd: chmod -R 777 /path/to/img /path/to/recaptcha  
       when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]  
-      
+    
+    # اعطای دسترسی‌های لازم به پوشه بکاپ  
+    - name: Set permissions on the backup directory
+      file:
+        path: "{{ backup_path }}/{{ inventory_hostname }}"
+        state: directory
+        mode: '0777'  # دادن دسترسی خواندن، نوشتن و اجرا به همه کاربران
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+
+    # یافتن پوشه های ولوم از فایل داکر کامپوز
+    - name: Extract volume names from docker-compose.yml
+      shell: |
+        volumes=$(grep -oP '^\s*-\s*(\S+):' {{ project_path }}/docker-compose.yml | sed 's/^- //')
+        echo "$volumes" > /tmp/volumes.txt
+      register: volumes_result
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+
+    # اعطای دسترسی به پوشه‌های ولوم
+    - name: Grant write permissions to Docker volume directories on the host
+      file:
+        path: "/var/lib/docker/volumes/{{ item }}/_data"
+        state: directory
+        mode: '0777'
+      loop: "{{ lookup('file', '/tmp/volumes.txt').splitlines() }}"
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+
     # ارسال درخواست HTTP به آدرس اول برای هر مشتری  
     - name: Send HTTP request to the first endpoint for each customer    
       uri:  
@@ -76,26 +186,113 @@
         return_content: yes  
       when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]  
 
+    # اجرای تست‌های اتوماتیک برای همه مشتریان
+    - name: Run integration, migration, usability, load, and database tests for all customers
+      shell: |
+        cd "{{ project_path }}/test"
+        python3 integration_test.py       # تست‌های یکپارچگی برای بررسی تعامل بخش‌های مختلف سیستم
+        python3 migration_test.py         # تست‌های مهاجرت برای بررسی صحت فرآیند انتقال داده‌ها
+        python3 usability_test.py         # تست‌های استفاده‌پذیری برای ارزیابی تجربه کاربری
+        python3 load_test.py              # تست‌های بار برای بررسی رفتار سیستم تحت بار زیاد
+        python3 database_test.py          # تست‌های پایگاه داده برای بررسی صحت داده‌ها و عملیات پایگاه داده
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+
+    # اجرای تست‌های CI/CD برای مشتری اول
+    - name: Run additional tests for customer1
+      shell: |
+        cd "{{ project_path }}/test"
+        python3 api_test.py                # تست‌هایی برای بررسی عملکرد و صحت API‌ها
+        python3 performance_test.py        # تست‌های عملکردی برای ارزیابی سرعت و پاسخ‌دهی سیستم
+        python3 security_test.py           # تست‌های امنیتی برای شناسایی آسیب‌پذیری‌ها و تهدیدات
+        python3 smoke_test.py              # تست‌های دود برای اطمینان از اینکه سیستم به درستی راه‌اندازی شده است
+        python3 acceptance_test.py         # تست‌های پذیرش برای بررسی اینکه سیستم نیازهای کاربر را برآورده می‌کند
+        python3 reliability_test.py        # تست‌های قابلیت اطمینان برای ارزیابی پایداری و عملکرد سیستم
+        python3 stress_test.py             # تست‌های استرس برای بررسی عملکرد سیستم تحت بارهای شدید
+        python3 ui_test.py                 # تست‌های رابط کاربری برای بررسی تعامل کاربر با سیستم
+        python3 system_test.py             # تست‌های سیستم برای ارزیابی یکپارچگی کل سیستم
+        python3 regression_test.py         # تست‌های رگرسیون برای اطمینان از اینکه تغییرات جدید باعث اختلال در عملکردهای قبلی نمی‌شود
+      when: inventory_hostname == "customer1.elmakchi.ir"
+
+    # اجرای اسکن SonarQube  
+    - name: Run SonarQube scan  
+      shell: |  
+        cd "{{ project_path }}"  
+        ./gradlew sonarqube -Dsonar.projectKey={{ sonar_project_key }} -Dsonar.projectName="{{ sonar_project_name }}" -Dsonar.host.url={{ sonar_url }} -Dsonar.login={{ sonar_token }}  
+      when: inventory_hostname == "customer1.elmakchi.ir"
+
     # کپی کردن اسکریپت بکاپ به سرور  
     - name: Copy backup script to the server  
       copy:
         content: |
           #!/bin/bash
-          BACKUP_DIR="/opt/backup/{{ inventory_hostname }}/$(date +'%Y-%m-%d')"
-          mkdir -p $BACKUP_DIR  # ایجاد پوشه بکاپ برای تاریخ امروز
+
+          # مسیر بکاپ
+          BACKUP_DIR="{{ backup_path }}/{{ inventory_hostname }}/$(date +'%Y-%m-%d')"
+          mkdir -p $BACKUP_DIR  # ایجاد پوشه برای بکاپ
+
+          # فایل گزارش
+          BACKUP_LOG="$BACKUP_DIR/backup_log.txt"
+          echo "Backup started at $(date)" >> $BACKUP_LOG
+
+          # گرفتن لیست از ولوم‌ها
           VOLUMES=$(docker volume ls -q)
+
+          # بکاپ از هر ولوم
           for VOLUME in $VOLUMES; do
             docker run --rm -v $VOLUME:/volume -v $BACKUP_DIR:/backup alpine \
-              tar czf /backup/$VOLUME.tar.gz -C /volume .  # بکاپ و فشرده‌سازی ولوم‌ها
+              tar czf /backup/$VOLUME.tar.gz -C /volume .  # فشرده‌سازی و ذخیره بکاپ
+            echo "Backup for volume $VOLUME completed at $(date)" >> $BACKUP_LOG
           done
-        dest: "/opt/backup/{{ inventory_hostname }}/backup_volumes.sh"
+
+          # بکاپ دیتابیس‌ها
+          for DB in "{{ customer_databases[inventory_hostname] }}"; do
+            DB_TYPE="{{ DB.type }}"
+            DB_NAME="{{ DB.name }}"
+            DB_USER="{{ DB.user }}"
+            DB_PASSWORD="{{ DB.password }}"
+            DB_HOST="{{ DB.host }}"
+
+            if [[ "$DB_TYPE" == "mysql" ]]; then
+              # گرفتن بکاپ از دیتابیس MySQL
+              BACKUP_FILE="$BACKUP_DIR/$DB_NAME-mysql.sql.gz"
+              echo "Backing up MySQL database $DB_NAME..." >> $BACKUP_LOG
+              mysqldump -u $DB_USER -p$DB_PASSWORD -h $DB_HOST $DB_NAME | gzip > $BACKUP_FILE
+              echo "Backup for MySQL database $DB_NAME completed at $(date)" >> $BACKUP_LOG
+
+            elif [[ "$DB_TYPE" == "postgresql" ]]; then
+              # گرفتن بکاپ از دیتابیس PostgreSQL
+              BACKUP_FILE="$BACKUP_DIR/$DB_NAME-postgresql.sql.gz"
+              echo "Backing up PostgreSQL database $DB_NAME..." >> $BACKUP_LOG
+              pg_dump -U $DB_USER -h $DB_HOST -d $DB_NAME | gzip > $BACKUP_FILE
+              echo "Backup for PostgreSQL database $DB_NAME completed at $(date)" >> $BACKUP_LOG
+            fi
+          done
+
+          # ارسال فایل بکاپ به تلگرام
+          TELEGRAM_TOKEN="YOUR_BOT_TOKEN" 
+          CHAT_ID="YOUR_CHAT_ID"
+          BACKUP_FILE_PATH="$BACKUP_DIR/*.tar.gz"
+          curl -X POST "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument" \
+            -F document=@"$BACKUP_FILE_PATH" \
+            -F chat_id="$CHAT_ID"
+
+          # ارسال فایل به FTP
+          FTP_SERVER="ftp.server.com"
+          FTP_USER="ftp_user"
+          FTP_PASSWORD="ftp_password"
+          curl -T $BACKUP_FILE_PATH ftp://$FTP_SERVER/path/ --user $FTP_USER:$FTP_PASSWORD
+          
+          echo "Backup completed at $(date)" >> $BACKUP_LOG
+
+        dest: "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
         mode: '0755'  # اعطای دسترسی اجرایی به اسکریپت
 
     # تنظیم Cron job برای بکاپ  
     - name: Set up cron job for backup  
       cron:
-        name: "Backup Docker Volumes"
+        name: "Backup Docker Volumes and Databases"
         minute: "0"
         hour: "0,8,16"  # اجرای بکاپ سه بار در روز (0:00، 8:00، 16:00)
-        job: "/bin/bash /opt/backup/{{ inventory_hostname }}/backup_volumes.sh"
+        job: "/bin/bash {{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
         user: root
+        state: present  # این باعث می‌شود فقط اگر کرون جاب وجود نداشته باشد، تعریف شود
