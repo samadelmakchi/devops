@@ -1,39 +1,44 @@
-# استقرار پروژه با Docker Compose، تنظیم دسترسی‌ها و اجرای درخواست‌ها 
-- name: Deploy project with Docker Compose, set permissions, and send requests   
-  hosts: all  
-  become: yes  
+# استقرار پروژه با Docker Compose، تنظیم دسترسی‌ها و اجرای درخواست‌ها
+- name: Deploy project with Docker Compose, set permissions, and send requests
+  hosts: all
+  become: true
 
-  vars:  
-    project_path: "/opt/simple-log-manager"                             # مسیر پروژه را به عنوان متغیر تعریف می‌کنیم  
-    backup_path: "/opt/backup"                                          # مسیر بکاپ را به عنوان متغیر تعریف می‌کنیم
-    container_name: "{{ containers[inventory_hostname] }}"              # نام کانتینر برای هر مشتری  
-    backend_port: "{{ customer_backend_ports[inventory_hostname] }}"    # پورت بک‌اند اختصاصی برای هر مشتری  
-    frontend_port: "{{ customer_frontend_ports[inventory_hostname] }}"  # پورت فرانت‌اند اختصاصی برای هر مشتری  
-    network_name: "{{ customer_network_name[inventory_hostname] }}"     # شبکه اختصاصی برای هر مشتری  
-    customer_git_branches:  
-      customer1: "main"  
-      customer2: "main"  
-      customer3: "dev"  
-    customer_git_tags:  
-      customer1: "last01"  
-      customer2: "last02"  
-      customer3: "last03"  
-    customer_backend_ports:  
-      customer1: 8002  
-      customer2: 8003  
-      customer3: 8001  
-    customer_frontend_ports:  
-      customer1: 3001  
-      customer2: 3002  
-      customer3: 3003  
-    customer_network_name:  
-      customer1: "customer1_network"  
-      customer2: "customer2_network"  
-      customer3: "customer3_network"  
-    containers:  
-      customer1: "customer1-container"  
-      customer2: "customer2-container"  
-      customer3: "customer3-container"  
+  vars:
+    # مسیرهای پروژه
+    project_path: "/opt/project"   # مسیر پروژه
+    backup_path: "/opt/backup"     # مسیر بکاپ
+    info_path: "/opt/info"         # مسیر اطلاعات
+    log_path: "/opt/log"           # مسیر لاگ ها
+
+    # متغیرهای مشتریان
+    container_name: "{{ containers[inventory_hostname] }}"              # نام کانتینر برای هر مشتری
+    backend_port: "{{ customer_backend_ports[inventory_hostname] }}"    # پورت بک‌اند اختصاصی برای هر مشتری
+    frontend_port: "{{ customer_frontend_ports[inventory_hostname] }}"  # پورت فرانت‌اند اختصاصی برای هر مشتری
+    network_name: "{{ customer_network_name[inventory_hostname] }}"     # شبکه اختصاصی برای هر مشتری
+    customer_git_branches:
+      customer1: "main"
+      customer2: "main"
+      customer3: "dev"
+    customer_git_tags:
+      customer1: "last01"
+      customer2: "last02"
+      customer3: "last03"
+    customer_backend_ports:
+      customer1: 8001
+      customer2: 8002
+      customer3: 8003
+    customer_frontend_ports:
+      customer1: 3001
+      customer2: 3002
+      customer3: 3003
+    customer_network_name:
+      customer1: "customer1_network"
+      customer2: "customer2_network"
+      customer3: "customer3_network"
+    containers:
+      customer1: "customer1-container"
+      customer2: "customer2-container"
+      customer3: "customer3-container"
 
     # اطلاعات SonarQube
     sonar_url: "http://your-sonarqube-server"  # URL سرور SonarQube
@@ -56,150 +61,192 @@
         - { type: "mysql", name: "customer3_db2", user: "customer3_user2", password: "customer3_password2", host: "localhost" }
         - { type: "postgresql", name: "customer3_db3", user: "customer3_user3", password: "customer3_password3", host: "localhost" }
 
-  tasks:  
+  tasks:
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ لاگین به گیت لب
     # ایجاد دایرکتوری .ssh در سرور مقصد
     - name: Ensure .ssh directory exists
-      file:
+      ansible.builtin.file:
         path: "/home/{{ ansible_user }}/.ssh"
         state: directory
         mode: '0700'
-      become: yes
+      become: true
 
     # کپی کردن کلید خصوصی SSH به سرور
     - name: Copy SSH private key to the server
-      copy:
+      ansible.builtin.copy:
         src: "~/.ssh/id_rsa"
         dest: "/home/{{ ansible_user }}/.ssh/id_rsa"
         mode: '0600'
-      become: yes
+      become: true
 
     # کپی کردن کلید عمومی SSH به سرور (اختیاری)
     - name: Copy SSH public key to the server
-      copy:
+      ansible.builtin.copy:
         src: "~/.ssh/id_rsa.pub"
         dest: "/home/{{ ansible_user }}/.ssh/authorized_keys"
         mode: '0600'
-      become: yes
+      become: true
 
     # تست اتصال SSH به GitLab
     - name: Test SSH connection to GitLab
-      shell: "ssh -T git@gitlab.com"
+      ansible.builtin.command:
+        cmd: "ssh -T git@gitlab.com"
       register: ssh_test_result
-      ignore_errors: yes
+      ignore_errors: true
+      changed_when: false  # از اینجا استفاده می‌شود که به آنسیبل می‌گوید دستور هیچ تغییری ایجاد نمی‌کند
 
     # نمایش نتیجه تست SSH
     - name: Print SSH test result
-      debug:
+      ansible.builtin.debug:
         msg: "{{ ssh_test_result.stdout }}"
       when: ssh_test_result is defined
 
-    # کلون کردن پروژه از گیت برای هر مشتری  
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ کلون و چک‌اوت کردن تگ
+    # کلون کردن پروژه کالیبری از گیت برای هر مشتری
     - name: Clone the Calibri repository from GitLab
-      git:
+      ansible.builtin.git:
         repo: 'git@gitlab.com:nasser-man/calibri.git'
         dest: "{{ project_path }}/calibri"
-        version: "main"
-        update: yes
+        version: "{{ customer_git_branches[inventory_hostname] }}"
+        update: true
+        clone: true
       when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
 
+    # چک‌اوت کردن تگ خاص برای هر مشتری در کالیبری
+    - name: Checkout the specific tag for customers (Calibri)
+      ansible.builtin.shell: |
+        cd "{{ project_path }}/calibri"
+        git checkout {{ customer_git_tags[inventory_hostname] }}
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+
+    # کلون کردن پروژه کالیبری پرتال از گیت برای هر مشتری
     - name: Clone the Calibri Portal repository from GitLab
-      git:
+      ansible.builtin.git:
         repo: 'git@gitlab.com:nasser-man/calibri-portal.git'
         dest: "{{ project_path }}/calibri-portal"
-        version: "main"
-        update: yes
+        version: "{{ customer_git_branches[inventory_hostname] }}"
+        update: true
+        clone: true
       when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
 
+    # چک‌اوت کردن تگ خاص برای هر مشتری در کالیبری پرتال
+    - name: Checkout the specific tag for customers (Calibri Portal)
+      ansible.builtin.shell: |
+        cd "{{ project_path }}/calibri-portal"
+        git checkout {{ customer_git_tags[inventory_hostname] }}
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+
+    # کلون کردن پروژه کالیبری پرتال فرانت اند از گیت برای هر مشتری
     - name: Clone the Calibri Portal Frontend repository from GitLab
-      git:
+      ansible.builtin.git:
         repo: 'git@gitlab.com:nasser-man/calibri-portal-frontend.git'
         dest: "{{ project_path }}/calibri-portal-frontend"
-        version: "main"
-        update: yes
+        version: "{{ customer_git_branches[inventory_hostname] }}"
+        update: true
+        clone: true
       when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
 
+    # چک‌اوت کردن تگ خاص برای هر مشتری در کالیبری پرتال فرانت اند
+    - name: Checkout the specific tag for customers (Calibri Portal Frontend)
+      ansible.builtin.shell: |
+        cd "{{ project_path }}/calibri-portal-frontend"
+        git checkout {{ customer_git_tags[inventory_hostname] }}
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
 
-
-
-    # کلون کردن پروژه از گیت برای هر مشتری  
-    # - name: Clone the repository for each customer    
-    #   git:  
-    #     repo: 'https://github.com/samadelmakchi/simple-log-manager.git'  
-    #     dest: "{{ project_path }}"  
-    #     version: "{{ customer_git_tags[inventory_hostname] }}"  
-    #     update: yes  
-    #     clone: yes  
-    #   when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]  
-      
-    # اجرای داکر کامپوز برای هر مشتری  
-    - name: Run Docker Compose for each customer    
-      shell: |  
-        cd "{{ project_path }}"  
-        docker-compose -f docker-compose.yml up -d  
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]  
-      
-    # اعطای دسترسی نوشتن به پوشه‌ها در کانتینر  
-    - name: Grant write permissions to folders in the container
-      docker_exec:
-        container: "{{ container_name }}"  
-        cmd: chmod -R 777 /path/to/img /path/to/recaptcha  
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]  
-    
-    # اعطای دسترسی‌های لازم به پوشه بکاپ  
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ دسترسی به پوشه بکاپ
+    # اعطای دسترسی‌های لازم به پوشه بکاپ
     - name: Set permissions on the backup directory
-      file:
+      ansible.builtin.file:
         path: "{{ backup_path }}/{{ inventory_hostname }}"
         state: directory
-        mode: '0777'  # دادن دسترسی خواندن، نوشتن و اجرا به همه کاربران
+        mode: '0777'
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+
+    # بررسی وجود فایل گزارش
+    - name: Check if the test report for customer exists
+      ansible.builtin.stat:
+        path: "{{ log_path }}/test/{{ inventory_hostname }}.txt"
+      register: test_report_file
+
+    # ساخت فایل ها و پوشه ها : volumes - test - backup - برای هر مشتری یک فایل به اسم مشتری در داخل این پوشه ها
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر و میگریشن ها
+    # اجرای داکر کامپوز برای هر مشتری
+    - name: Run Docker Compose for each customer
+      community.docker.docker_compose:
+        project_src: "{{ project_path }}"
+        restarted: true
+        definition: "{{ project_path }}/docker-compose.yml"
       when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
 
     # یافتن پوشه های ولوم از فایل داکر کامپوز
     - name: Extract volume names from docker-compose.yml
-      shell: |
+      ansible.builtin.shell: |
+        set -o pipefail
         volumes=$(grep -oP '^\s*-\s*(\S+):' {{ project_path }}/docker-compose.yml | sed 's/^- //')
-        echo "$volumes" > /tmp/volumes.txt
+        echo "$volumes" > "{{ info_path }}/volumes/{{ inventory_hostname }}.txt"
       register: volumes_result
       when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      changed_when: false
 
-    # اعطای دسترسی به پوشه‌های ولوم
+    # یافتن پایگاه داده‌ها برای هر مشتری و ذخیره در یک فایل متنی
+    - name: Extract database information for each customer
+      ansible.builtin.shell: |
+        # استخراج اطلاعات پایگاه داده‌ها از تنظیمات Ansible
+        for DB in "{{ customer_databases[inventory_hostname] }}"; do
+          DB_TYPE="{{ DB.type }}"
+          DB_NAME="{{ DB.name }}"
+          DB_USER="{{ DB.user }}"
+          DB_PASSWORD="{{ DB.password }}"
+          DB_HOST="{{ DB.host }}"
+          echo "$DB_TYPE,$DB_NAME,$DB_USER,$DB_PASSWORD,$DB_HOST" >> "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
+        done
+      register: db_info_result
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      changed_when: false
+
+    # اعطای دسترسی به پوشه‌های ولوم بر اساس فایل ولوم‌های هر مشتری
     - name: Grant write permissions to Docker volume directories on the host
-      file:
+      ansible.builtin.file:
         path: "/var/lib/docker/volumes/{{ item }}/_data"
         state: directory
         mode: '0777'
-      loop: "{{ lookup('file', '/tmp/volumes.txt').splitlines() }}"
+      loop: "{{ lookup('file', '{{ info_path }}/volumes/{{ inventory_hostname }}.txt').splitlines() }}"
+      become: true
       when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
 
-    # ارسال درخواست HTTP به آدرس اول برای هر مشتری  
-    - name: Send HTTP request to the first endpoint for each customer    
-      uri:  
-        url: "http://{{ ansible_host }}:{{ backend_port }}/migration/index/false"  
-        method: GET  
-        return_content: yes  
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]  
-      
-    # ارسال درخواست HTTP به آدرس دوم برای هر مشتری  
-    - name: Send HTTP request to the second endpoint for each customer    
-      uri:  
-        url: "http://{{ ansible_host }}:{{ backend_port }}/migration2/index/false"  
-        method: GET  
-        return_content: yes  
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]  
+    # اعطای دسترسی نوشتن به پوشه‌ها در کانتینر
+    - name: Grant write permissions to folders in the container
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        command: "chmod -R 777 /path/to/img /path/to/recaptcha"
+        state: started
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
 
-    # اجرای تست‌های اتوماتیک برای همه مشتریان
+    # ارسال درخواست HTTP به آدرس اول برای هر مشتری
+    - name: Send HTTP request to the first endpoint for each customer
+      ansible.builtin.uri:
+        url: "http://{{ ansible_host }}:{{ backend_port }}/migration/index/false"
+        method: GET
+        return_content: true
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ تست ها
+    # اجرای تست‌های یکپارچگی، مهاجرت، استفاده‌پذیری، بار و پایگاه داده برای همه مشتریان
     - name: Run integration, migration, usability, load, and database tests for all customers
-      shell: |
-        cd "{{ project_path }}/test"
-        python3 integration_test.py       # تست‌های یکپارچگی برای بررسی تعامل بخش‌های مختلف سیستم
-        python3 migration_test.py         # تست‌های مهاجرت برای بررسی صحت فرآیند انتقال داده‌ها
-        python3 usability_test.py         # تست‌های استفاده‌پذیری برای ارزیابی تجربه کاربری
-        python3 load_test.py              # تست‌های بار برای بررسی رفتار سیستم تحت بار زیاد
-        python3 database_test.py          # تست‌های پایگاه داده برای بررسی صحت داده‌ها و عملیات پایگاه داده
+      ansible.builtin.shell: |
+        cd "{{ project_path }}/test" && \
+        python3 integration_test.py && \     # تست‌های یکپارچگی برای بررسی تعامل بخش‌های مختلف سیستم
+        python3 migration_test.py && \       # تست‌های مهاجرت برای بررسی صحت فرآیند انتقال داده‌ها
+        python3 usability_test.py && \       # تست‌های استفاده‌پذیری برای ارزیابی تجربه کاربری
+        python3 load_test.py && \            # تست‌های بار برای بررسی رفتار سیستم تحت بار زیاد
+        python3 database_test.py             # تست‌های پایگاه داده برای بررسی صحت داده‌ها و عملیات پایگاه داده
       when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      changed_when: true                     # به منظور شناسایی تغییر در هر بار اجرای این تسک
 
     # اجرای تست‌های CI/CD برای مشتری اول
     - name: Run additional tests for customer1
-      shell: |
+      ansible.builtin.shell: |
         cd "{{ project_path }}/test"
         python3 api_test.py                # تست‌هایی برای بررسی عملکرد و صحت API‌ها
         python3 performance_test.py        # تست‌های عملکردی برای ارزیابی سرعت و پاسخ‌دهی سیستم
@@ -212,17 +259,24 @@
         python3 system_test.py             # تست‌های سیستم برای ارزیابی یکپارچگی کل سیستم
         python3 regression_test.py         # تست‌های رگرسیون برای اطمینان از اینکه تغییرات جدید باعث اختلال در عملکردهای قبلی نمی‌شود
       when: inventory_hostname == "customer1.elmakchi.ir"
+      changed_when: true                   # به منظور شناسایی تغییر در هر بار اجرای این تسک
 
-    # اجرای اسکن SonarQube  
-    - name: Run SonarQube scan  
-      shell: |  
-        cd "{{ project_path }}"  
-        ./gradlew sonarqube -Dsonar.projectKey={{ sonar_project_key }} -Dsonar.projectName="{{ sonar_project_name }}" -Dsonar.host.url={{ sonar_url }} -Dsonar.login={{ sonar_token }}  
+    # اجرای اسکن SonarQube
+    - name: Run SonarQube scan
+      ansible.builtin.shell: |
+        cd "{{ project_path }}"
+        ./gradlew sonarqube \
+          -Dsonar.projectKey={{ sonar_project_key }} \
+          -Dsonar.projectName="{{ sonar_project_name }}" \
+          -Dsonar.host.url={{ sonar_url }} \
+          -Dsonar.login={{ sonar_token }}
       when: inventory_hostname == "customer1.elmakchi.ir"
+      changed_when: true                   # اسکن همیشه به عنوان تغییر شناسایی می‌شود
 
-    # کپی کردن اسکریپت بکاپ به سرور  
-    - name: Copy backup script to the server  
-      copy:
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ بکاپ گرفتن
+    # کپی کردن اسکریپت بکاپ به سرور
+    - name: Copy backup script to the server
+      ansible.builtin.copy:
         content: |
           #!/bin/bash
 
@@ -231,11 +285,11 @@
           mkdir -p $BACKUP_DIR  # ایجاد پوشه برای بکاپ
 
           # فایل گزارش
-          BACKUP_LOG="$BACKUP_DIR/backup_log.txt"
+          BACKUP_LOG="{{ log_path }}/backup/{{ inventory_hostname }}.txt"
           echo "Backup started at $(date)" >> $BACKUP_LOG
 
-          # گرفتن لیست از ولوم‌ها
-          VOLUMES=$(docker volume ls -q)
+          # گرفتن لیست از ولوم‌ها از فایل مخصوص هر مشتری
+          VOLUMES=$(cat {{ info_path }}/volumes/{{ inventory_hostname }}.txt)
 
           # بکاپ از هر ولوم
           for VOLUME in $VOLUMES; do
@@ -244,14 +298,10 @@
             echo "Backup for volume $VOLUME completed at $(date)" >> $BACKUP_LOG
           done
 
-          # بکاپ دیتابیس‌ها
-          for DB in "{{ customer_databases[inventory_hostname] }}"; do
-            DB_TYPE="{{ DB.type }}"
-            DB_NAME="{{ DB.name }}"
-            DB_USER="{{ DB.user }}"
-            DB_PASSWORD="{{ DB.password }}"
-            DB_HOST="{{ DB.host }}"
+          # گرفتن لیست از دیتابیس‌ها از فایل مخصوص هر مشتری
+          DATABASES="{{ info_path }}/databases/{{ inventory_hostname }}.txt"
 
+          while IFS=',' read -r DB_TYPE DB_NAME DB_USER DB_PASSWORD DB_HOST; do
             if [[ "$DB_TYPE" == "mysql" ]]; then
               # گرفتن بکاپ از دیتابیس MySQL
               BACKUP_FILE="$BACKUP_DIR/$DB_NAME-mysql.sql.gz"
@@ -266,10 +316,10 @@
               pg_dump -U $DB_USER -h $DB_HOST -d $DB_NAME | gzip > $BACKUP_FILE
               echo "Backup for PostgreSQL database $DB_NAME completed at $(date)" >> $BACKUP_LOG
             fi
-          done
+          done < "$DATABASES"
 
           # ارسال فایل بکاپ به تلگرام
-          TELEGRAM_TOKEN="YOUR_BOT_TOKEN" 
+          TELEGRAM_TOKEN="YOUR_BOT_TOKEN"
           CHAT_ID="YOUR_CHAT_ID"
           BACKUP_FILE_PATH="$BACKUP_DIR/*.tar.gz"
           curl -X POST "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument" \
@@ -281,15 +331,15 @@
           FTP_USER="ftp_user"
           FTP_PASSWORD="ftp_password"
           curl -T $BACKUP_FILE_PATH ftp://$FTP_SERVER/path/ --user $FTP_USER:$FTP_PASSWORD
-          
+
           echo "Backup completed at $(date)" >> $BACKUP_LOG
 
         dest: "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
         mode: '0755'  # اعطای دسترسی اجرایی به اسکریپت
 
-    # تنظیم Cron job برای بکاپ  
-    - name: Set up cron job for backup  
-      cron:
+    # تنظیم Cron job برای بکاپ
+    - name: Set up cron job for backup
+      ansible.builtin.cron:
         name: "Backup Docker Volumes and Databases"
         minute: "0"
         hour: "0,8,16"  # اجرای بکاپ سه بار در روز (0:00، 8:00، 16:00)
