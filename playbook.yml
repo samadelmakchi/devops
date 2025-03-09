@@ -62,6 +62,72 @@
         - { type: "postgresql", name: "customer3_db3", user: "customer3_user3", password: "customer3_password3", host: "localhost" }
 
   tasks:
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ایجاد پوشه‌ها و فایل‌ها
+    # ایجاد پوشه‌ها و فایل‌ها برای هر مشتری
+    - name: Ensure main directories exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - "{{ project_path }}"
+        - "{{ backup_path }}"
+        - "{{ info_path }}"
+        - "{{ log_path }}"
+
+    - name: Ensure customer directories in backup_path exist
+      ansible.builtin.file:
+        path: "{{ backup_path }}/{{ inventory_hostname }}"
+        state: directory
+        mode: '0755'
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+
+    - name: Ensure directories for test and backup in log_path exist
+      ansible.builtin.file:
+        path: "{{ log_path }}/{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - "test"
+        - "backup"
+
+    - name: Ensure directories for volumes and databases in info_path exist
+      ansible.builtin.file:
+        path: "{{ info_path }}/{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - "volumes"
+        - "databases"
+
+    - name: Create a text file in test folder for each customer
+      ansible.builtin.file:
+        path: "{{ log_path }}/test/{{ inventory_hostname }}.txt"
+        state: touch
+        mode: '0644'
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+
+    - name: Create a text file in backup folder for each customer
+      ansible.builtin.file:
+        path: "{{ log_path }}/backup/{{ inventory_hostname }}.txt"
+        state: touch
+        mode: '0644'
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+
+    - name: Create a text file in volumes folder for each customer
+      ansible.builtin.file:
+        path: "{{ info_path }}/volumes/{{ inventory_hostname }}.txt"
+        state: touch
+        mode: '0644'
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+
+    - name: Create a text file in databases folder for each customer
+      ansible.builtin.file:
+        path: "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
+        state: touch
+        mode: '0644'
+      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ لاگین به گیت لب
     # ایجاد دایرکتوری .ssh در سرور مقصد
     - name: Ensure .ssh directory exists
@@ -152,23 +218,6 @@
         cd "{{ project_path }}/calibri-portal-frontend"
         git checkout {{ customer_git_tags[inventory_hostname] }}
       when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ دسترسی به پوشه بکاپ
-    # اعطای دسترسی‌های لازم به پوشه بکاپ
-    - name: Set permissions on the backup directory
-      ansible.builtin.file:
-        path: "{{ backup_path }}/{{ inventory_hostname }}"
-        state: directory
-        mode: '0777'
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
-
-    # بررسی وجود فایل گزارش
-    - name: Check if the test report for customer exists
-      ansible.builtin.stat:
-        path: "{{ log_path }}/test/{{ inventory_hostname }}.txt"
-      register: test_report_file
-
-    # ساخت فایل ها و پوشه ها : volumes - test - backup - برای هر مشتری یک فایل به اسم مشتری در داخل این پوشه ها
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر و میگریشن ها
     # اجرای داکر کامپوز برای هر مشتری
