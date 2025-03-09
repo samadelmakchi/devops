@@ -80,7 +80,7 @@
         path: "{{ backup_path }}/{{ inventory_hostname }}"
         state: directory
         mode: '0755'
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      when: customer_type in ["test", "VIP", "regular"]
 
     - name: Ensure directories for test and backup in log_path exist
       ansible.builtin.file:
@@ -105,28 +105,28 @@
         path: "{{ log_path }}/test/{{ inventory_hostname }}.txt"
         state: touch
         mode: '0644'
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      when: customer_type in ["test", "VIP", "regular"]
 
     - name: Create a text file in backup folder for each customer
       ansible.builtin.file:
         path: "{{ log_path }}/backup/{{ inventory_hostname }}.txt"
         state: touch
         mode: '0644'
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      when: customer_type in ["test", "VIP", "regular"]
 
     - name: Create a text file in volumes folder for each customer
       ansible.builtin.file:
         path: "{{ info_path }}/volumes/{{ inventory_hostname }}.txt"
         state: touch
         mode: '0644'
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      when: customer_type in ["test", "VIP", "regular"]
 
     - name: Create a text file in databases folder for each customer
       ansible.builtin.file:
         path: "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
         state: touch
         mode: '0644'
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      when: customer_type in ["test", "VIP", "regular"]
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ لاگین به گیت لب
     # ایجاد دایرکتوری .ssh در سرور مقصد
@@ -176,14 +176,14 @@
         version: "{{ customer_git_branches[inventory_hostname] }}"
         update: true
         clone: true
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      when: customer_type in ["test", "VIP", "regular"]
 
     # چک‌اوت کردن تگ خاص برای هر مشتری در کالیبری
     - name: Checkout the specific tag for customers (Calibri)
       ansible.builtin.shell: |
         cd "{{ project_path }}/calibri"
         git checkout {{ customer_git_tags[inventory_hostname] }}
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      when: customer_type in ["test", "VIP", "regular"]
 
     # کلون کردن پروژه کالیبری پرتال از گیت برای هر مشتری
     - name: Clone the Calibri Portal repository from GitLab
@@ -193,14 +193,14 @@
         version: "{{ customer_git_branches[inventory_hostname] }}"
         update: true
         clone: true
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      when: customer_type in ["test", "VIP", "regular"]
 
     # چک‌اوت کردن تگ خاص برای هر مشتری در کالیبری پرتال
     - name: Checkout the specific tag for customers (Calibri Portal)
       ansible.builtin.shell: |
         cd "{{ project_path }}/calibri-portal"
         git checkout {{ customer_git_tags[inventory_hostname] }}
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      when: customer_type in ["test", "VIP", "regular"]
 
     # کلون کردن پروژه کالیبری پرتال فرانت اند از گیت برای هر مشتری
     - name: Clone the Calibri Portal Frontend repository from GitLab
@@ -210,14 +210,14 @@
         version: "{{ customer_git_branches[inventory_hostname] }}"
         update: true
         clone: true
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      when: customer_type in ["test", "VIP", "regular"]
 
     # چک‌اوت کردن تگ خاص برای هر مشتری در کالیبری پرتال فرانت اند
     - name: Checkout the specific tag for customers (Calibri Portal Frontend)
       ansible.builtin.shell: |
         cd "{{ project_path }}/calibri-portal-frontend"
         git checkout {{ customer_git_tags[inventory_hostname] }}
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      when: customer_type in ["test", "VIP", "regular"]
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر و میگریشن ها
     # اجرای داکر کامپوز برای هر مشتری
@@ -226,7 +226,7 @@
         project_src: "{{ project_path }}"
         restarted: true
         definition: "{{ project_path }}/docker-compose.yml"
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      when: customer_type in ["test", "VIP", "regular"]
 
     # یافتن پوشه های ولوم از فایل داکر کامپوز
     - name: Extract volume names from docker-compose.yml
@@ -235,7 +235,7 @@
         volumes=$(grep -oP '^\s*-\s*(\S+):' {{ project_path }}/docker-compose.yml | sed 's/^- //')
         echo "$volumes" > "{{ info_path }}/volumes/{{ inventory_hostname }}.txt"
       register: volumes_result
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      when: customer_type in ["test", "VIP", "regular"]
       changed_when: false
 
     # یافتن پایگاه داده‌ها برای هر مشتری و ذخیره در یک فایل متنی
@@ -251,7 +251,7 @@
           echo "$DB_TYPE,$DB_NAME,$DB_USER,$DB_PASSWORD,$DB_HOST" >> "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
         done
       register: db_info_result
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      when: customer_type in ["test", "VIP", "regular"]
       changed_when: false
 
     # اعطای دسترسی به پوشه‌های ولوم بر اساس فایل ولوم‌های هر مشتری
@@ -262,7 +262,7 @@
         mode: '0777'
       loop: "{{ lookup('file', '{{ info_path }}/volumes/{{ inventory_hostname }}.txt').splitlines() }}"
       become: true
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      when: customer_type in ["test", "VIP", "regular"]
 
     # اعطای دسترسی نوشتن به پوشه‌ها در کانتینر
     - name: Grant write permissions to folders in the container
@@ -270,7 +270,7 @@
         name: "{{ container_name }}"
         command: "chmod -R 777 /path/to/img /path/to/recaptcha"
         state: started
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      when: customer_type in ["test", "VIP", "regular"]
 
     # ارسال درخواست HTTP به آدرس اول برای هر مشتری
     - name: Send HTTP request to the first endpoint for each customer
@@ -278,7 +278,7 @@
         url: "http://{{ ansible_host }}:{{ backend_port }}/migration/index/false"
         method: GET
         return_content: true
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      when: customer_type in ["test", "VIP", "regular"]
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ تست ها
     # اجرای تست‌های یکپارچگی، مهاجرت، استفاده‌پذیری، بار و پایگاه داده برای همه مشتریان
@@ -290,11 +290,11 @@
         python3 usability_test.py && \       # تست‌های استفاده‌پذیری برای ارزیابی تجربه کاربری
         python3 load_test.py && \            # تست‌های بار برای بررسی رفتار سیستم تحت بار زیاد
         python3 database_test.py             # تست‌های پایگاه داده برای بررسی صحت داده‌ها و عملیات پایگاه داده
-      when: inventory_hostname in ["customer1.elmakchi.ir", "customer2.elmakchi.ir", "customer3.elmakchi.ir"]
+      when: customer_type in ["test", "VIP", "regular"]
       changed_when: true                     # به منظور شناسایی تغییر در هر بار اجرای این تسک
 
     # اجرای تست‌های CI/CD برای مشتری اول
-    - name: Run additional tests for customer1
+    - name: Run additional tests for customer test
       ansible.builtin.shell: |
         cd "{{ project_path }}/test"
         python3 api_test.py                # تست‌هایی برای بررسی عملکرد و صحت API‌ها
