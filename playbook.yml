@@ -307,7 +307,7 @@
         python3 ui_test.py                 # تست‌های رابط کاربری برای بررسی تعامل کاربر با سیستم
         python3 system_test.py             # تست‌های سیستم برای ارزیابی یکپارچگی کل سیستم
         python3 regression_test.py         # تست‌های رگرسیون برای اطمینان از اینکه تغییرات جدید باعث اختلال در عملکردهای قبلی نمی‌شود
-      when: inventory_hostname == "customer1.elmakchi.ir"
+      when: customer_type == "test"
       changed_when: true                   # به منظور شناسایی تغییر در هر بار اجرای این تسک
 
     # اجرای اسکن SonarQube
@@ -319,7 +319,7 @@
           -Dsonar.projectName="{{ sonar_project_name }}" \
           -Dsonar.host.url={{ sonar_url }} \
           -Dsonar.login={{ sonar_token }}
-      when: inventory_hostname == "customer1.elmakchi.ir"
+      when: customer_type == "test"
       changed_when: true                   # اسکن همیشه به عنوان تغییر شناسایی می‌شود
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ بکاپ گرفتن
