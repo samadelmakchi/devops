@@ -1,0 +1,55 @@
+services:
+  calibri-portal-backend:
+    container_name: {{ container_name }}-portal
+    build:
+      context: .
+    volumes:
+      - ..:/var/www
+    depends_on:
+      - {{ container_name }}-portal-db
+    ports:
+      - {{ frontend_port }}:80
+    networks:
+      - {{ network_name }}
+
+  {{ container_name }}-portal-db:
+    image: mariadb:10.6.20-focal
+    container_name: {{ container_name }}-portal-db
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+    volumes:
+      - ./init/:/docker-entrypoint-initdb.d/
+    networks:
+      - {{ network_name }}
+    ports:
+      - {{ database_port }}:3306
+
+networks:
+  {{ network_name }}:
+    name: {{ network_name }}
+    driver: bridge
+    external: true
+
+
+
+# git clone https://gitlab.com/nasser-man/calibri-portal.git
+# git checkout dev
+
+# DATABASE_URL="mysql://root:1234@[instance-name]_calibri_portal_backend_database:3306/calibri_portal?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
+# BASE_URL="http://[instance-name]_calibri_gateway"
+
+# docker network create [instance-name]_calibri_network
+
+# docker compose up -d
+
+# docker exec -it [instance-name]_calibri_portal_backend bash
+
+# composer install
+
+# php bin/console doctrine:database:create
+
+# php bin/console doctrine:migration:migrate
+
+
+

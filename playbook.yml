@@ -10,56 +10,19 @@
     info_path: "/opt/info"         # مسیر اطلاعات
     log_path: "/opt/log"           # مسیر لاگ ها
 
-    # متغیرهای مشتریان
-    container_name: "{{ containers[inventory_hostname] }}"              # نام کانتینر برای هر مشتری
-    backend_port: "{{ customer_backend_ports[inventory_hostname] }}"    # پورت بک‌اند اختصاصی برای هر مشتری
-    frontend_port: "{{ customer_frontend_ports[inventory_hostname] }}"  # پورت فرانت‌اند اختصاصی برای هر مشتری
-    network_name: "{{ customer_network_name[inventory_hostname] }}"     # شبکه اختصاصی برای هر مشتری
-    customer_git_branches:
-      customer1: "main"
-      customer2: "main"
-      customer3: "dev"
-    customer_git_tags:
-      customer1: "last01"
-      customer2: "last02"
-      customer3: "last03"
-    customer_backend_ports:
-      customer1: 8001
-      customer2: 8002
-      customer3: 8003
-    customer_frontend_ports:
-      customer1: 3001
-      customer2: 3002
-      customer3: 3003
-    customer_network_name:
-      customer1: "customer1_network"
-      customer2: "customer2_network"
-      customer3: "customer3_network"
-    containers:
-      customer1: "customer1-container"
-      customer2: "customer2-container"
-      customer3: "customer3-container"
-
     # اطلاعات SonarQube
     sonar_url: "http://your-sonarqube-server"  # URL سرور SonarQube
     sonar_token: "your_sonarqube_token"        # توکن SonarQube
     sonar_project_key: "simple-log-manager"    # کلید پروژه در SonarQube
     sonar_project_name: "Simple Log Manager"   # نام پروژه در SonarQube
 
-    # اطلاعات دیتابیس برای هر مشتری (با سه دیتابیس برای هر مشتری)
-    customer_databases:
-      customer1:
-        - { type: "postgresql", name: "customer1_db1", user: "customer1_user1", password: "customer1_password1", host: "localhost" }
-        - { type: "mysql", name: "customer1_db2", user: "customer1_user2", password: "customer1_password2", host: "localhost" }
-        - { type: "postgresql", name: "customer1_db3", user: "customer1_user3", password: "customer1_password3", host: "localhost" }
-      customer2:
-        - { type: "mysql", name: "customer2_db1", user: "customer2_user1", password: "customer2_password1", host: "localhost" }
-        - { type: "postgresql", name: "customer2_db2", user: "customer2_user2", password: "customer2_password2", host: "localhost" }
-        - { type: "mysql", name: "customer2_db3", user: "customer2_user3", password: "customer2_password3", host: "localhost" }
-      customer3:
-        - { type: "postgresql", name: "customer3_db1", user: "customer3_user1", password: "customer3_password1", host: "localhost" }
-        - { type: "mysql", name: "customer3_db2", user: "customer3_user2", password: "customer3_password2", host: "localhost" }
-        - { type: "postgresql", name: "customer3_db3", user: "customer3_user3", password: "customer3_password3", host: "localhost" }
+    # متغیرهای مشتریان
+    container_name: "{{ containers[inventory_hostname] }}"                     # نام کانتینر برای هر مشتری
+    network_name: "{{ customer_network_name[inventory_hostname] }}"            # شبکه اختصاصی برای هر مشتری
+    backend_port: "{{ customer_backend_ports[inventory_hostname] }}"           # پورت بک‌اند اختصاصی برای هر مشتری
+    frontend_port: "{{ customer_frontend_ports[inventory_hostname] }}"         # پورت فرانت‌اند اختصاصی برای هر مشتری
+    database_port: "{{ customer_database_ports[inventory_hostname] }}"         # پورت پایگاه داده اختصاصی برای هر مشتری
+    database_password: "{{ customer_database_password[inventory_hostname] }}"  # پسورد برای پایگاه داده اختصاصی برای هر مشتری
 
   tasks:
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ایجاد پوشه‌ها و فایل‌ها
@@ -159,7 +122,7 @@
         cmd: "ssh -T git@gitlab.com"
       register: ssh_test_result
       ignore_errors: true
-      changed_when: false  # از اینجا استفاده می‌شود که به آنسیبل می‌گوید دستور هیچ تغییری ایجاد نمی‌کند
+      changed_when: false
 
     # نمایش نتیجه تست SSH
     - name: Print SSH test result
@@ -168,56 +131,39 @@
       when: ssh_test_result is defined
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ کلون و چک‌اوت کردن تگ
-    # کلون کردن پروژه کالیبری از گیت برای هر مشتری
-    - name: Clone the Calibri repository from GitLab
+    # تعریف پروژه‌ها و نام‌های پوشه‌ها
+    - name: Clone repositories and checkout tags for each project
+      ansible.builtin.set_fact:
+        projects:
+          - name: "calibri"
+            repo: "git@gitlab.com:nasser-man/calibri.git"
+            folder: "calibri"
+          - name: "calibri-portal"
+            repo: "git@gitlab.com:nasser-man/calibri-portal.git"
+            folder: "calibri-portal"
+          - name: "calibri-portal-frontend"
+            repo: "git@gitlab.com:nasser-man/calibri-portal-frontend.git"
+            folder: "calibri-portal-frontend"
+
+    # کلون کردن پروژه از گیت برای هر مشتری
+    - name: Clone repository from GitLab
       ansible.builtin.git:
-        repo: 'git@gitlab.com:nasser-man/calibri.git'
-        dest: "{{ project_path }}/calibri"
+        repo: "{{ item.repo }}"
+        dest: "{{ project_path }}/{{ item.folder }}"
         version: "{{ customer_git_branches[inventory_hostname] }}"
         update: true
         clone: true
+      loop: "{{ projects }}"
       when: customer_type in ["test", "VIP", "regular"]
 
-    # چک‌اوت کردن تگ خاص برای هر مشتری در کالیبری
-    - name: Checkout the specific tag for customers (Calibri)
+    # چک‌اوت کردن تگ خاص برای هر مشتری
+    - name: Checkout the specific tag for each project
       ansible.builtin.shell: |
-        cd "{{ project_path }}/calibri"
+        cd "{{ project_path }}/{{ item.folder }}"
         git checkout {{ customer_git_tags[inventory_hostname] }}
+      loop: "{{ projects }}"
       when: customer_type in ["test", "VIP", "regular"]
-
-    # کلون کردن پروژه کالیبری پرتال از گیت برای هر مشتری
-    - name: Clone the Calibri Portal repository from GitLab
-      ansible.builtin.git:
-        repo: 'git@gitlab.com:nasser-man/calibri-portal.git'
-        dest: "{{ project_path }}/calibri-portal"
-        version: "{{ customer_git_branches[inventory_hostname] }}"
-        update: true
-        clone: true
-      when: customer_type in ["test", "VIP", "regular"]
-
-    # چک‌اوت کردن تگ خاص برای هر مشتری در کالیبری پرتال
-    - name: Checkout the specific tag for customers (Calibri Portal)
-      ansible.builtin.shell: |
-        cd "{{ project_path }}/calibri-portal"
-        git checkout {{ customer_git_tags[inventory_hostname] }}
-      when: customer_type in ["test", "VIP", "regular"]
-
-    # کلون کردن پروژه کالیبری پرتال فرانت اند از گیت برای هر مشتری
-    - name: Clone the Calibri Portal Frontend repository from GitLab
-      ansible.builtin.git:
-        repo: 'git@gitlab.com:nasser-man/calibri-portal-frontend.git'
-        dest: "{{ project_path }}/calibri-portal-frontend"
-        version: "{{ customer_git_branches[inventory_hostname] }}"
-        update: true
-        clone: true
-      when: customer_type in ["test", "VIP", "regular"]
-
-    # چک‌اوت کردن تگ خاص برای هر مشتری در کالیبری پرتال فرانت اند
-    - name: Checkout the specific tag for customers (Calibri Portal Frontend)
-      ansible.builtin.shell: |
-        cd "{{ project_path }}/calibri-portal-frontend"
-        git checkout {{ customer_git_tags[inventory_hostname] }}
-      when: customer_type in ["test", "VIP", "regular"]
+      changed_when: false
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر و میگریشن ها
     # اجرای داکر کامپوز برای هر مشتری

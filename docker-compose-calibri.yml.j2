@@ -1,0 +1,23 @@
+services:
+  calibri-gateway:
+    container_name: calibri_gateway
+    build: .
+    volumes:
+      - ../admin:/var/www/html
+      - ../admin/captcha_images:/var/www/html/captcha_images
+      - ../admin/uploads:/var/www/html/uploads
+
+  calibri-gateway-database:
+    image: mariadb:10.6.20-focal
+    container_name: calibri_gateway_database
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ./init/:/docker-entrypoint-initdb.d/
+      - ./db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: calibri_gateway
+      MYSQL_USER: calibri_gateway
+      MYSQL_PASSWORD: 1234
+
+

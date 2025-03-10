@@ -1,0 +1,29 @@
+services:
+  calibri-portal-frontend:
+    container_name: calibri_portal_frontend
+    image: node:22
+    working_dir: /app
+    volumes:
+      - ../:/app
+    command: bash -c "npm install && npm run dev"
+    ports:
+      - 5173:5173
+    networks:
+      - calibri_network
+
+networks:
+  calibri_network:
+    name: calibri_network
+    driver: bridge
+    external: true
+
+
+# git clone https://gitlab.com/nasser-man/calibri-portal-frontend.git
+# git checkout dev
+
+# const baseUrl = 'http://localhost:8101'
+# export default baseUrl
+
+# docker network create [instance-name]_calibri_network
+
+# docker compose up -d
