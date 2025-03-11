@@ -17,15 +17,30 @@
     sonar_project_name: "Simple Log Manager"   # نام پروژه در SonarQube
 
     # متغیرهای مشتریان
-    container_name: "{{ containers[inventory_hostname] }}"                     # نام کانتینر برای هر مشتری
-    network_name: "{{ customer_network_name[inventory_hostname] }}"            # شبکه اختصاصی برای هر مشتری
-    backend_port: "{{ customer_backend_ports[inventory_hostname] }}"           # پورت بک‌اند اختصاصی برای هر مشتری
-    frontend_port: "{{ customer_frontend_ports[inventory_hostname] }}"         # پورت فرانت‌اند اختصاصی برای هر مشتری
-    database_port: "{{ customer_database_ports[inventory_hostname] }}"         # پورت پایگاه داده اختصاصی برای هر مشتری
-    database_password: "{{ customer_database_password[inventory_hostname] }}"  # پسورد برای پایگاه داده اختصاصی برای هر مشتری
+    container_name: "{{ customer_containers[inventory_hostname] }}"                     # نام کانتینر برای هر مشتری
+    network_name: "{{ customer_network_names[inventory_hostname] }}"                    # شبکه اختصاصی برای هر مشتری
+    gateway_port: "{{ customer_gateway_ports[inventory_hostname] }}"                    # پورت بک‌اند اختصاصی برای هر مشتری
+    portal_port: "{{ customer_portal_ports[inventory_hostname] }}"                      # پورت فرانت‌اند اختصاصی برای هر مشتری
+    portal_frontend_port: "{{ customer_portal_frontend_ports[inventory_hostname] }}"    # پورت فرانت‌اند اختصاصی برای هر مشتری
+
+    # اطلاعات دیتابیس مشتریان
+    portal_database_type: "mysql"
+    portal_mysql_root_password: "1234"
+    portal_mysql_password: "1234"
+    portal_mysql_user: "calibri_portal"
+    portal_mysql_db_name: "calibri_portal"
+
+    gateway_database_type: "mysql"
+    gateway_mysql_root_password: "1234"
+    gateway_mysql_password: "1234"
+    gateway_mysql_user: "calibri_gateway"
+    gateway_mysql_db_name: "calibri_gateway"
 
   tasks:
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ایجاد پوشه‌ها و فایل‌ها
+
+    # SMD : چک کند اگر پوشه ها و فایل ها نباشد درست کند
+
     # ایجاد پوشه‌ها و فایل‌ها برای هر مشتری
     - name: Ensure main directories exist
       ansible.builtin.file:
@@ -38,6 +53,15 @@
         - "{{ info_path }}"
         - "{{ log_path }}"
 
+    # ایجاد پوشه مخصوص هر مشتری در مسیر پروژه‌ها
+    - name: Ensure customer-specific directories exist in project_path
+      ansible.builtin.file:
+        path: "{{ project_path }}/{{ inventory_hostname }}"
+        state: directory
+        mode: '0755'
+      when: customer_type in ["test", "VIP", "regular"]
+
+    # ایجاد پوشه مخصوص مشتری در مسیر پشتیبان‌ها
     - name: Ensure customer directories in backup_path exist
       ansible.builtin.file:
         path: "{{ backup_path }}/{{ inventory_hostname }}"
@@ -45,6 +69,7 @@
         mode: '0755'
       when: customer_type in ["test", "VIP", "regular"]
 
+    # ایجاد پوشه‌های test و backup در log_path
     - name: Ensure directories for test and backup in log_path exist
       ansible.builtin.file:
         path: "{{ log_path }}/{{ item }}"
@@ -54,6 +79,7 @@
         - "test"
         - "backup"
 
+    # ایجاد پوشه‌های volumes و databases در info_path
     - name: Ensure directories for volumes and databases in info_path exist
       ansible.builtin.file:
         path: "{{ info_path }}/{{ item }}"
@@ -63,6 +89,7 @@
         - "volumes"
         - "databases"
 
+    # برای هر مشتری یک فایل متنی در پوشه تست ایجاد کنید
     - name: Create a text file in test folder for each customer
       ansible.builtin.file:
         path: "{{ log_path }}/test/{{ inventory_hostname }}.txt"
@@ -70,6 +97,7 @@
         mode: '0644'
       when: customer_type in ["test", "VIP", "regular"]
 
+    # برای هر مشتری یک فایل متنی در پوشه پشتیبان ایجاد کنید
     - name: Create a text file in backup folder for each customer
       ansible.builtin.file:
         path: "{{ log_path }}/backup/{{ inventory_hostname }}.txt"
@@ -77,6 +105,7 @@
         mode: '0644'
       when: customer_type in ["test", "VIP", "regular"]
 
+    # برای هر مشتری یک فایل متنی در پوشه volumes ایجاد کنید
     - name: Create a text file in volumes folder for each customer
       ansible.builtin.file:
         path: "{{ info_path }}/volumes/{{ inventory_hostname }}.txt"
@@ -84,6 +113,7 @@
         mode: '0644'
       when: customer_type in ["test", "VIP", "regular"]
 
+    # برای هر مشتری یک فایل متنی در پوشه پایگاه داده ایجاد کنید
     - name: Create a text file in databases folder for each customer
       ansible.builtin.file:
         path: "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
@@ -92,6 +122,9 @@
       when: customer_type in ["test", "VIP", "regular"]
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ لاگین به گیت لب
+
+    # SMD : فقط یکبار لاگین کند و ناقص است
+
     # ایجاد دایرکتوری .ssh در سرور مقصد
     - name: Ensure .ssh directory exists
       ansible.builtin.file:
@@ -131,6 +164,9 @@
       when: ssh_test_result is defined
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ کلون و چک‌اوت کردن تگ
+
+    # SMD : برای کالیبری، پرتال و پرتال فرانت اند تگ و برنچ مستقل
+
     # تعریف پروژه‌ها و نام‌های پوشه‌ها
     - name: Clone repositories and checkout tags for each project
       ansible.builtin.set_fact:
@@ -149,7 +185,7 @@
     - name: Clone repository from GitLab
       ansible.builtin.git:
         repo: "{{ item.repo }}"
-        dest: "{{ project_path }}/{{ item.folder }}"
+        dest: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
         version: "{{ customer_git_branches[inventory_hostname] }}"
         update: true
         clone: true
@@ -159,20 +195,119 @@
     # چک‌اوت کردن تگ خاص برای هر مشتری
     - name: Checkout the specific tag for each project
       ansible.builtin.shell: |
-        cd "{{ project_path }}/{{ item.folder }}"
+        cd "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
         git checkout {{ customer_git_tags[inventory_hostname] }}
       loop: "{{ projects }}"
       when: customer_type in ["test", "VIP", "regular"]
       changed_when: false
 
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ کپی فایل ها
+
+    # SMD : کپی فایل داکر کامپوز برای هر مشتری
+
+    # ایجاد فایل bashUrl.js برای calibri-portal-frontend
+    - name: Create file for calibri-portal-frontend project
+      ansible.builtin.copy:
+        dest: "{{ project_path }}/{{ inventory_hostname }}/calibri-portal-frontend/bashUrl.js"
+        content: |
+          const baseUrl = 'http://localhost:{{ customer_portal_ports[inventory_hostname] }}';
+          export default baseUrl;
+        mode: '0644'
+      when: customer_type in ['test', 'VIP', 'regular']
+      changed_when: false
+      become: true
+
+    # SMD : چک کند اگر فایل ها نباشند ایجاد بکند
+
+    # ایجاد فایل .env.local برای calibri-portal
+    - name: Set variables for .env.local content
+      ansible.builtin.set_fact:
+        database_url: |
+          mysql://{{ portal_mysql_user }}:{{ portal_mysql_password }}@
+          {{ container_name }}-portal-db/{{ portal_mysql_db_name }}?
+          serverVersion=10.11.2-MariaDB&charset=utf8mb4
+        base_url: "http://localhost:{{ customer_gateway_ports[inventory_hostname] }}"
+
+    - name: Create file for calibri-portal project
+      ansible.builtin.copy:
+        dest: "{{ project_path }}/{{ inventory_hostname }}/calibri-portal-frontend/.env.local"
+        content: |
+          DATABASE_URL="{{ database_url }}"
+          BASE_URL="{{ base_url }}"
+        mode: '0644'
+      when: customer_type in ['test', 'VIP', 'regular']
+      changed_when: false
+      become: true
+
+    # ایجاد فایل my_database.php برای calibri
+    - name: Create my_database.php for calibri
+      ansible.builtin.copy:
+        dest: "{{ project_path }}/{{ inventory_hostname }}/calibri/my_database.php"
+        content: |
+          <?php defined('BASEPATH') OR exit('No direct script access allowed');
+          $active_group = 'default';
+          $query_builder = TRUE;
+          $db['default'] = array(
+              'dsn'  => '',
+              'hostname' => '{{ container_name }}-gateway-db',
+              'username' => '{{ gateway_mysql_user }}',
+              'password' => '{{ gateway_mysql_password }}',
+              'database' => '{{ gateway_mysql_db_name }}',
+              'dbdriver' => 'mysqli',
+              'dbprefix' => '',
+              'pconnect' => FALSE,
+              'db_debug' => (ENVIRONMENT !== 'production'),
+              'cache_on' => FALSE,
+              'cachedir' => '',
+              'char_set' => 'utf8',
+              'dbcollat' => 'utf8_general_ci',
+              'swap_pre' => '',
+              'encrypt' => FALSE,
+              'compress' => FALSE,
+              'stricton' => FALSE,
+              'failover' => array(),
+              'save_queries' => TRUE
+          );
+        mode: '0644'
+      when: customer_type in ['test', 'VIP', 'regular']
+      changed_when: false
+      become: true
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر و میگریشن ها
-    # اجرای داکر کامپوز برای هر مشتری
-    - name: Run Docker Compose for each customer
-      community.docker.docker_compose:
-        project_src: "{{ project_path }}"
-        restarted: true
-        definition: "{{ project_path }}/docker-compose.yml"
+
+    # SMD : قبل از اجرای داکر کامپز یک بکاپ از همه پایگاه داده های ان مشتری بگیرد
+
+    # SMD : چک کند اگر شبکه نباشد درست کند
+
+    # ساخت شبکه مخصوص به هر مشتری
+    - name: Create Docker network for each customer
+      community.docker.docker_network:
+        name: "{{ customer_network_names[inventory_hostname] }}"
+        state: present
       when: customer_type in ["test", "VIP", "regular"]
+
+    # SMD : اگر کامپوز ها اپ باشد این اجرا بشود : قبل از اجرای داکر کامپوز docker compose -o inventory_hostname down
+
+    # اجرای داکر کامپوز کالیبری برای هر مشتری
+    - name: Run Docker Compose for calibri project
+      ansible.builtin.command:
+        cmd: "docker compose -p {{ inventory_hostname }} -f {{ project_path }}/{{ inventory_hostname }}/docker-compose-calibri.yml.j2 up -d"
+      when: customer_type in ["test", "VIP", "regular"]
+      changed_when: false
+
+    # اجرای داکر کامپوز کالیبری برای هر مشتری
+    - name: Run Docker Compose for portal project
+      ansible.builtin.command:
+        cmd: "docker compose -p {{ inventory_hostname }} -f {{ project_path }}/{{ inventory_hostname }}/docker-compose-portal.yml.j2 up -d"
+      when: customer_type in ["test", "VIP", "regular"]
+      changed_when: false
+
+    # اجرای داکر کامپوز پرتال برای هر مشتری
+    - name: Run Docker Compose for portal frontend project
+      ansible.builtin.command:
+        cmd: "docker compose -p {{ inventory_hostname }} -f {{ project_path }}/{{ inventory_hostname }}/docker-compose-portal-frontend.yml.j2 up -d"
+      when: customer_type in ["test", "VIP", "regular"]
+      changed_when: false
 
     # یافتن پوشه های ولوم از فایل داکر کامپوز
     - name: Extract volume names from docker-compose.yml
@@ -181,22 +316,6 @@
         volumes=$(grep -oP '^\s*-\s*(\S+):' {{ project_path }}/docker-compose.yml | sed 's/^- //')
         echo "$volumes" > "{{ info_path }}/volumes/{{ inventory_hostname }}.txt"
       register: volumes_result
-      when: customer_type in ["test", "VIP", "regular"]
-      changed_when: false
-
-    # یافتن پایگاه داده‌ها برای هر مشتری و ذخیره در یک فایل متنی
-    - name: Extract database information for each customer
-      ansible.builtin.shell: |
-        # استخراج اطلاعات پایگاه داده‌ها از تنظیمات Ansible
-        for DB in "{{ customer_databases[inventory_hostname] }}"; do
-          DB_TYPE="{{ DB.type }}"
-          DB_NAME="{{ DB.name }}"
-          DB_USER="{{ DB.user }}"
-          DB_PASSWORD="{{ DB.password }}"
-          DB_HOST="{{ DB.host }}"
-          echo "$DB_TYPE,$DB_NAME,$DB_USER,$DB_PASSWORD,$DB_HOST" >> "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
-        done
-      register: db_info_result
       when: customer_type in ["test", "VIP", "regular"]
       changed_when: false
 
@@ -210,20 +329,25 @@
       become: true
       when: customer_type in ["test", "VIP", "regular"]
 
-    # اعطای دسترسی نوشتن به پوشه‌ها در کانتینر
+    # SMD : میگریشن در کانتینر پرتال و نصب کامپوزر
+    # docker exec -it {{ container_name }}-portal bash
+    # composer install
+    # php bin/console doctrine:migration:migrate
+
+    # اعطای دسترسی نوشتن به پوشه‌ها در کانتینر کالیبری
     - name: Grant write permissions to folders in the container
       community.docker.docker_container:
-        name: "{{ container_name }}"
-        command: "chmod -R 777 /path/to/img /path/to/recaptcha"
+        name: "{{ container_name }}-gateway"
+        command: "chmod -R 777 uploads captcha_images"
         state: started
       when: customer_type in ["test", "VIP", "regular"]
 
-    # ارسال درخواست HTTP به آدرس اول برای هر مشتری
-    - name: Send HTTP request to the first endpoint for each customer
-      ansible.builtin.uri:
-        url: "http://{{ ansible_host }}:{{ backend_port }}/migration/index/false"
-        method: GET
-        return_content: true
+    # میگریشن در کانتینر کالیبری
+    - name: Migration for calibri
+      community.docker.docker_container:
+        name: "{{ container_name }}-gateway"
+        command: "php index.php migrate index false"
+        state: started
       when: customer_type in ["test", "VIP", "regular"]
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ تست ها
@@ -239,7 +363,7 @@
       when: customer_type in ["test", "VIP", "regular"]
       changed_when: true                     # به منظور شناسایی تغییر در هر بار اجرای این تسک
 
-    # اجرای تست‌های CI/CD برای مشتری اول
+    # اجرای تست‌های CI/CD برای مشتریان تست
     - name: Run additional tests for customer test
       ansible.builtin.shell: |
         cd "{{ project_path }}/test"
@@ -254,7 +378,7 @@
         python3 system_test.py             # تست‌های سیستم برای ارزیابی یکپارچگی کل سیستم
         python3 regression_test.py         # تست‌های رگرسیون برای اطمینان از اینکه تغییرات جدید باعث اختلال در عملکردهای قبلی نمی‌شود
       when: customer_type == "test"
-      changed_when: true                   # به منظور شناسایی تغییر در هر بار اجرای این تسک
+      changed_when: true
 
     # اجرای اسکن SonarQube
     - name: Run SonarQube scan
@@ -266,9 +390,32 @@
           -Dsonar.host.url={{ sonar_url }} \
           -Dsonar.login={{ sonar_token }}
       when: customer_type == "test"
-      changed_when: true                   # اسکن همیشه به عنوان تغییر شناسایی می‌شود
+      changed_when: true
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ بکاپ گرفتن
+    # یافتن پایگاه داده‌ها برای هر مشتری و ذخیره در یک فایل متنی
+    - name: Extract database information for each customer
+      ansible.builtin.shell: |
+        # استخراج اطلاعات پایگاه داده‌ها از تنظیمات جدید Ansible
+        DB_TYPE="{{ portal_database_type }}"
+        DB_NAME="{{ portal_mysql_db_name }}"
+        DB_USER="{{ portal_mysql_user }}"
+        DB_PASSWORD="{{ portal_mysql_password }}"
+        DB_HOST="localhost"
+        echo "$DB_TYPE,$DB_NAME,$DB_USER,$DB_PASSWORD,$DB_HOST" >> "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
+
+        DB_TYPE="{{ gateway_database_type }}"
+        DB_NAME="{{ gateway_mysql_db_name }}"
+        DB_USER="{{ gateway_mysql_user }}"
+        DB_PASSWORD="{{ gateway_mysql_password }}"
+        DB_HOST="localhost"
+        echo "$DB_TYPE,$DB_NAME,$DB_USER,$DB_PASSWORD,$DB_HOST" >> "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
+      register: db_info_result
+      when: customer_type in ["test", "VIP", "regular"]
+      changed_when: false
+
+    # SMD : اگر فایل نباشد کپی بکند
+
     # کپی کردن اسکریپت بکاپ به سرور
     - name: Copy backup script to the server
       ansible.builtin.copy:

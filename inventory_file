@@ -40,18 +40,45 @@ customer_git_branches:
     customer1: "main"
     customer2: "main"
     customer3: "dev"
+    customer4: "dev"
+    customer5: "main"
 customer_git_tags:
     customer1: "last01"
     customer2: "last02"
     customer3: "last03"
-customer_backend_ports:
+    customer4: "last01"
+    customer5: "last02"
+customer_gateway_ports:
     customer1: 8001
     customer2: 8002
     customer3: 8003
-customer_frontend_ports:
+    customer4: 8004
+    customer5: 8005
+customer_portal_ports:
     customer1: 3001
     customer2: 3002
     customer3: 3003
+    customer4: 3004
+    customer5: 3005
+customer_portal_frontend_ports:
+    customer1: 4001
+    customer2: 4002
+    customer3: 4003
+    customer4: 4004
+    customer5: 4005
+customer_network_names:
+    customer1: "test_alfa_network"
+    customer2: "nikan_network"
+    customer3: "simnad_network"
+    customer4: "test_beta_network"
+    customer5: "pardazesh_network"
+customer_containers:
+    customer1: "test_alfa"
+    customer2: "nikan"
+    customer3: "simnad"
+    customer4: "test_beta"
+    customer5: "pardazesh"
+
 customer_database_ports:
     customer1: 3308
     customer2: 3307
@@ -60,28 +87,3 @@ customer_database_password:
     customer1: 1234
     customer2: 1234
     customer3: 1234
-customer_network_name:
-    customer1: "customer1_network"
-    customer2: "customer2_network"
-    customer3: "customer3_network"
-containers:
-    customer1: "customer1-container"
-    customer2: "customer2-container"
-    customer3: "customer3-container"
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# اطلاعات دیتابیس مشتریان
-customer_databases:
-    customer1:
-        - { type: "postgresql", name: "customer1_db1", user: "customer1_user1", password: "customer1_password1", host: "localhost" }
-        - { type: "mysql", name: "customer1_db2", user: "customer1_user2", password: "customer1_password2", host: "localhost" }
-        - { type: "postgresql", name: "customer1_db3", user: "customer1_user3", password: "customer1_password3", host: "localhost" }
-    customer2:
-        - { type: "mysql", name: "customer2_db1", user: "customer2_user1", password: "customer2_password1", host: "localhost" }
-        - { type: "postgresql", name: "customer2_db2", user: "customer2_user2", password: "customer2_password2", host: "localhost" }
-        - { type: "mysql", name: "customer2_db3", user: "customer2_user3", password: "customer2_password3", host: "localhost" }
-    customer3:
-        - { type: "postgresql", name: "customer3_db1", user: "customer3_user1", password: "customer3_password1", host: "localhost" }
-        - { type: "mysql", name: "customer3_db2", user: "customer3_user2", password: "customer3_password2", host: "localhost" }
-        - { type: "postgresql", name: "customer3_db3", user: "customer3_user3", password: "customer3_password3", host: "localhost" }
-
