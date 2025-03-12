@@ -1,9 +1,8 @@
-
-# Ansible Cheat Sheet
+# Ansible 
 
 ## 1. شروع با Ansible
 
-### نصب Ansible
+نصب Ansible
 برای نصب Ansible بر روی اوبونتو:
 
 ```bash
@@ -13,15 +12,15 @@ sudo apt install ansible
 
 برای نصب در سایر سیستم‌ها، به [مستندات رسمی](https://docs.ansible.com/ansible/latest/installation_guide/installation_distros.html) مراجعه کنید.
 
-### بررسی نسخه Ansible:
+بررسی نسخه Ansible:
 ```bash
 ansible --version
 ```
 
-### پیکربندی Ansible:
+**پیکربندی Ansible:**
 فایل پیکربندی پیش‌فرض `ansible.cfg` است.
 
-### فایل اینونتوری (Inventory)
+فایل اینونتوری (Inventory)  
 یک فایل ساده به نام `inventory.ini` برای مشخص کردن میزبان‌ها ایجاد می‌شود.
 
 ```ini
@@ -33,31 +32,35 @@ web2 ansible_host=192.168.1.2
 db1 ansible_host=192.168.1.3
 ```
 
-### اجرای دستور بر روی همه میزبان‌ها
+اجرای دستور بر روی همه میزبان‌ها
 ```bash
 ansible all -m ping -i inventory.ini
 ```
 
+<br/>
+
 ## 2. دستورات Ansible
 
-### اجرای Playbook
+اجرای Playbook
 ```bash
 ansible-playbook playbook.yml
 ```
 
-### اجرای دستور ساده با `ansible`
+اجرای دستور ساده با `ansible`
 ```bash
 ansible all -m command -a "uptime" -i inventory.ini
 ```
 
-### اجرای دستور از طریق `ansible ad-hoc`
+اجرای دستور از طریق `ansible ad-hoc`
 ```bash
 ansible all -m shell -a 'df -h' -i inventory.ini
 ```
 
-## 3. Playbook
+<br/>
 
-### ساختار یک Playbook
+## 3. پلی بوک (Playbook)
+
+ساختار یک Playbook
 ```yaml
 - name: Install Nginx
   hosts: webservers
@@ -69,14 +72,16 @@ ansible all -m shell -a 'df -h' -i inventory.ini
         state: present
 ```
 
-### اجرای Playbook:
+اجرای Playbook:
 ```bash
 ansible-playbook -i inventory.ini playbook.yml
 ```
 
+<br/>
+
 ## 4. مدیریت بسته‌ها
 
-### نصب بسته:
+نصب بسته:
 ```yaml
 - name: Install a package
   apt:
@@ -84,7 +89,7 @@ ansible-playbook -i inventory.ini playbook.yml
     state: present
 ```
 
-### حذف بسته:
+حذف بسته:
 ```yaml
 - name: Remove a package
   apt:
@@ -92,9 +97,11 @@ ansible-playbook -i inventory.ini playbook.yml
     state: absent
 ```
 
+<br/>
+
 ## 5. مدیریت کاربران و گروه‌ها
 
-### ایجاد کاربر:
+ایجاد کاربر:
 ```yaml
 - name: Create a user
   user:
@@ -103,7 +110,7 @@ ansible-playbook -i inventory.ini playbook.yml
     groups: sudo
 ```
 
-### حذف کاربر:
+حذف کاربر:
 ```yaml
 - name: Remove a user
   user:
@@ -111,7 +118,7 @@ ansible-playbook -i inventory.ini playbook.yml
     state: absent
 ```
 
-### اضافه کردن کاربر به گروه:
+اضافه کردن کاربر به گروه:
 ```yaml
 - name: Add user to a group
   user:
@@ -119,9 +126,11 @@ ansible-playbook -i inventory.ini playbook.yml
     group: sudo
 ```
 
+<br/>
+
 ## 6. مدیریت سرویس‌ها
 
-### شروع یک سرویس:
+شروع یک سرویس:
 ```yaml
 - name: Start nginx service
   service:
@@ -129,7 +138,7 @@ ansible-playbook -i inventory.ini playbook.yml
     state: started
 ```
 
-### توقف یک سرویس:
+توقف یک سرویس:
 ```yaml
 - name: Stop nginx service
   service:
@@ -137,7 +146,7 @@ ansible-playbook -i inventory.ini playbook.yml
     state: stopped
 ```
 
-### فعال کردن سرویس در بوت:
+فعال کردن سرویس در بوت:
 ```yaml
 - name: Enable nginx service to start on boot
   service:
@@ -145,9 +154,11 @@ ansible-playbook -i inventory.ini playbook.yml
     enabled: yes
 ```
 
+<br/>
+
 ## 7. متغیرها
 
-### تعریف متغیرها:
+تعریف متغیرها:
 ```yaml
 - name: Example playbook
   hosts: webservers
@@ -159,7 +170,7 @@ ansible-playbook -i inventory.ini playbook.yml
         msg: "The value is {{ my_variable }}"
 ```
 
-### استفاده از متغیرها از فایل‌ها:
+استفاده از متغیرها از فایل‌ها:
 ```yaml
 - name: Example playbook
   hosts: webservers
@@ -171,9 +182,11 @@ ansible-playbook -i inventory.ini playbook.yml
         msg: "The value is {{ my_variable }}"
 ```
 
+<br/>
+
 ## 8. شرایط و حلقه‌ها
 
-### استفاده از شرط‌ها:
+استفاده از شرط‌ها:
 ```yaml
 - name: Install nginx if not present
   apt:
@@ -182,7 +195,7 @@ ansible-playbook -i inventory.ini playbook.yml
   when: ansible_facts['os_family'] == 'Debian'
 ```
 
-### استفاده از حلقه:
+استفاده از حلقه:
 ```yaml
 - name: Install multiple packages
   apt:
@@ -194,9 +207,11 @@ ansible-playbook -i inventory.ini playbook.yml
     - curl
 ```
 
-## 9. Handlers
+<br/>
 
-### تعریف Handler:
+## 9. هندلرها (Handlers)
+
+تعریف Handler:
 ```yaml
 - name: Restart nginx if configuration changes
   service:
@@ -206,7 +221,7 @@ ansible-playbook -i inventory.ini playbook.yml
     - Restart nginx
 ```
 
-### تعریف و اجرای Handlers:
+تعریف و اجرای Handlers:
 ```yaml
 handlers:
   - name: Restart nginx
@@ -215,9 +230,11 @@ handlers:
       state: restarted
 ```
 
+<br/>
+
 ## 10. برچسب‌ها (Tags)
 
-### استفاده از Tags:
+استفاده از Tags:
 ```yaml
 - name: Install nginx
   hosts: webservers
@@ -236,23 +253,27 @@ handlers:
         - start
 ```
 
-### اجرای Playbook با Tags:
+اجرای Playbook با Tags:
 ```bash
 ansible-playbook -i inventory.ini playbook.yml --tags "install"
 ```
 
+<br/>
+
 ## 11. رول‌ها (Roles)
 
-### ساختار رول‌ها:
+ساختار رول‌ها:
 ```bash
 ansible-galaxy init myrole
 ```
 
 این دستور یک ساختار پایه برای رول ایجاد می‌کند.
 
-## 12. Template‌ها
+<br/>
 
-### استفاده از Template:
+## 12. تمپلیت ها (Template‌)
+
+استفاده از Template:
 ```yaml
 - name: Deploy configuration file
   template:
@@ -260,7 +281,7 @@ ansible-galaxy init myrole
     dest: /etc/nginx/nginx.conf
 ```
 
-### قالب Jinja2 در Template:
+قالب Jinja2 در Template:
 ```jinja
 server {
     listen 80;
@@ -269,24 +290,28 @@ server {
 }
 ```
 
+<br/>
+
 ## 13. فایل‌های شامل (Includes)
 
-### استفاده از Include:
+استفاده از Include:
 ```yaml
 - name: Include another playbook
   include: other_playbook.yml
 ```
 
+<br/>
+
 ## 14. اعتبارسنجی و لاگ‌ها
 
-### استفاده از `debug` برای چاپ اطلاعات:
+استفاده از `debug` برای چاپ اطلاعات:
 ```yaml
 - name: Debugging a variable
   debug:
     msg: "The variable value is {{ my_variable }}"
 ```
 
-### ثبت لاگ‌ها:
+ثبت لاگ‌ها:
 ```yaml
 - name: Log message to file
   lineinfile:
@@ -294,15 +319,19 @@ server {
     line: "Task completed successfully"
 ```
 
+<br/>
+
 ## 15. متغیرهای داخلی Ansible
 
 - `ansible_facts`: اطلاعات مربوط به سیستم هدف.
 - `inventory_hostname`: نام میزبان در فهرست موجودیت.
 - `ansible_user`: نام کاربری که به سیستم هدف وارد شده است.
 
+<br/>
+
 ## 16. گروه‌ها
 
-### تعریف گروه‌ها در Inventory:
+تعریف گروه‌ها در Inventory:
 ```ini
 [webservers]
 web1
@@ -313,7 +342,7 @@ db1
 db2
 ```
 
-### استفاده از گروه‌ها در Playbook:
+استفاده از گروه‌ها در Playbook:
 ```yaml
 - name: Playbook for web servers
   hosts: webservers
@@ -324,6 +353,3 @@ db2
         state: present
 ```
 
----
-
-این چیت شیت شامل دستورات، نکات و روش‌های معمول استفاده از Ansible است. امیدوارم برای شما مفید باشد.

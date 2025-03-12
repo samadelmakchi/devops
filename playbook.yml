@@ -350,6 +350,27 @@
         state: started
       when: customer_type in ["test", "VIP", "regular"]
 
+    # یافتن پایگاه داده‌ها برای هر مشتری و ذخیره در یک فایل متنی
+    - name: Extract database information for each customer
+      ansible.builtin.shell: |
+        # استخراج اطلاعات پایگاه داده‌ها از تنظیمات جدید Ansible
+        DB_TYPE="{{ portal_database_type }}"
+        DB_NAME="{{ portal_mysql_db_name }}"
+        DB_USER="{{ portal_mysql_user }}"
+        DB_PASSWORD="{{ portal_mysql_password }}"
+        DB_HOST="localhost"
+        echo "$DB_TYPE,$DB_NAME,$DB_USER,$DB_PASSWORD,$DB_HOST" >> "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
+
+        DB_TYPE="{{ gateway_database_type }}"
+        DB_NAME="{{ gateway_mysql_db_name }}"
+        DB_USER="{{ gateway_mysql_user }}"
+        DB_PASSWORD="{{ gateway_mysql_password }}"
+        DB_HOST="localhost"
+        echo "$DB_TYPE,$DB_NAME,$DB_USER,$DB_PASSWORD,$DB_HOST" >> "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
+      register: db_info_result
+      when: customer_type in ["test", "VIP", "regular"]
+      changed_when: false
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ تست ها
     # اجرای تست‌های یکپارچگی، مهاجرت، استفاده‌پذیری، بار و پایگاه داده برای همه مشتریان
     - name: Run integration, migration, usability, load, and database tests for all customers
@@ -393,26 +414,6 @@
       changed_when: true
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ بکاپ گرفتن
-    # یافتن پایگاه داده‌ها برای هر مشتری و ذخیره در یک فایل متنی
-    - name: Extract database information for each customer
-      ansible.builtin.shell: |
-        # استخراج اطلاعات پایگاه داده‌ها از تنظیمات جدید Ansible
-        DB_TYPE="{{ portal_database_type }}"
-        DB_NAME="{{ portal_mysql_db_name }}"
-        DB_USER="{{ portal_mysql_user }}"
-        DB_PASSWORD="{{ portal_mysql_password }}"
-        DB_HOST="localhost"
-        echo "$DB_TYPE,$DB_NAME,$DB_USER,$DB_PASSWORD,$DB_HOST" >> "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
-
-        DB_TYPE="{{ gateway_database_type }}"
-        DB_NAME="{{ gateway_mysql_db_name }}"
-        DB_USER="{{ gateway_mysql_user }}"
-        DB_PASSWORD="{{ gateway_mysql_password }}"
-        DB_HOST="localhost"
-        echo "$DB_TYPE,$DB_NAME,$DB_USER,$DB_PASSWORD,$DB_HOST" >> "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
-      register: db_info_result
-      when: customer_type in ["test", "VIP", "regular"]
-      changed_when: false
 
     # SMD : اگر فایل نباشد کپی بکند
 
