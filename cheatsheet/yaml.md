@@ -1,36 +1,31 @@
----
-title: Yaml
-category: Markup
-prism_languages: [yaml]
----
+# YAML
 
-### Dictionaries and lists
+### لغت نامه ها و فهرست ها
 
 ```yaml
-# comments start with "#"
-# dictionary are written like "key: value"
+# کامنت با "#" شروع می شود
+# فرهنگ لغت مانند "key: value" نوشته می شود
 name: Martin D'vloper
 languages:
   perl: Elite
   python: Elite
   pascal: Lame
 
-# list items beginn with a "- "
+# لیست موارد که با "-" شروع می شود
 foods:
   - Apple
   - Orange
   - Strawberry
   - Mango
 
-# booleans are lower case
+# بولی ها با حروف کوچک هستند
 employed: true
 ```
 
-
-### Multiline strings
+### رشته های چند خطی
 
 ```yaml
-# Literal Block Scalar
+# اسکالر بلاک تحت اللفظی
 Multiline: |
   exactly as you see
   will appear these three
@@ -38,14 +33,14 @@ Multiline: |
 ```
 
 ```yaml
-# Folded Block Scalar
+# بلوک اسکالر تا شده
 Multiline: <
   this is really a
   single line of text
   despite appearances
 ```
 
-### Inheritance
+### ارث بری
 
 ```yaml
 parent: &defaults
@@ -57,7 +52,7 @@ child:
   b: 4
 ```
 
-### Reference content
+### محتوای مرجع
 
 ```yaml
 values: &ref

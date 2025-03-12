@@ -1,5 +1,6 @@
-Markdown Cheatsheet<a name="TOP"></a>
-# Heading 1 #
+# Markdown <a name="TOP"></a>
+
+# سرفصل 1 #
 
     Markup :  # Heading 1 #
 
@@ -7,7 +8,7 @@ Markdown Cheatsheet<a name="TOP"></a>
 
     Markup :  ============= (below H1 text)
 
-## Heading 2 ##
+## سرفصل 2 ##
 
     Markup :  ## Heading 2 ##
 
@@ -15,83 +16,83 @@ Markdown Cheatsheet<a name="TOP"></a>
 
     Markup: --------------- (below H2 text)
 
-### Heading 3 ###
+### سرفصل 3 ###
 
     Markup :  ### Heading 3 ###
 
-#### Heading 4 ####
+#### سرفصل 4 ####
 
     Markup :  #### Heading 4 ####
 
 
-Common text
+متن مشترک
 
     Markup :  Common text
 
-_Emphasized text_
+_متن تاکید شده_
 
     Markup :  _Emphasized text_ or *Emphasized text*
 
-~~Strikethrough text~~
+~~متن خط خورده~~
 
     Markup :  ~~Strikethrough text~~
 
-__Strong text__
+__متن قوی__
 
     Markup :  __Strong text__ or **Strong text**
 
-___Strong emphasized text___
+___متن تاکیدی قوی___
 
     Markup :  ___Strong emphasized text___ or ***Strong emphasized text***
 
-[Named Link](http://www.google.fr/ "Named link title") and http://www.google.fr/ or <http://example.com/>
+[نام لینک](https://www.google.com/ "عنوان لینک نامگذاری شده") and https://www.google.com/ or <https://elmakchi.ir/>
 
     Markup :  [Named Link](http://www.google.fr/ "Named link title") and http://www.google.fr/ or <http://example.com/>
 
-[heading-1](#heading-1 "Goto heading-1")
+[عنوان-1](#heading-1 "رفتن به عنوان-1")
     
     Markup: [heading-1](#heading-1 "Goto heading-1")
 
-Table, like this one :
+جدول, شبیه این یکی :
 
-First Header  | Second Header
+سربرگ اول  |     سربرگ دوم
 ------------- | -------------
-Content Cell  | Content Cell
-Content Cell  | Content Cell
+محتوای سلول  |   محتوای سلول
+محتوای سلول  |   محتوای سلول
 
 ```
-First Header  | Second Header
+سربرگ اول  |     سربرگ دوم
 ------------- | -------------
-Content Cell  | Content Cell
-Content Cell  | Content Cell
+محتوای سلول  |   محتوای سلول
+محتوای سلول  |   محتوای سلول
 ```
 
-Adding a pipe `|` in a cell :
+افزودن یک لوله `|` در یک سلول:
 
-First Header  | Second Header
+سربرگ اول  |     سربرگ دوم
 ------------- | -------------
-Content Cell  | Content Cell
-Content Cell  | \|
+محتوای سلول  |   محتوای سلول
+محتوای سلول   | \|
 
 ```
-First Header  | Second Header
+سربرگ اول  |     سربرگ دوم
 ------------- | -------------
-Content Cell  | Content Cell
-Content Cell  |  \| 
+محتوای سلول  |   محتوای سلول
+محتوای سلول   |  \| 
 ```
 
-Left, right and center aligned table
+جدول تراز چپ، راست و وسط
 
-Left aligned Header | Right aligned Header | Center aligned Header
+سربرگ تراز چپ | سربرگ تراز راست | سربرگ تراز شده در مرکز
 | :--- | ---: | :---:
-Content Cell  | Content Cell | Content Cell
-Content Cell  | Content Cell | Content Cell
+محتوای سلول  | محتوای سلول | محتوای سلول
+محتوای سلول  | محتوای سلول | محتوای سلول
 
 ```
-Left aligned Header | Right aligned Header | Center aligned Header
+سربرگ تراز چپ | سربرگ تراز راست| سربرگ تراز شده در مرکز
 | :--- | ---: | :---:
-Content Cell  | Content Cell | Content Cell
-Content Cell  | Content Cell | Content Cell
+محتوای سلول  | محتوای سلول | محتوای سلول
+محتوای سلول  | محتوای سلول | محتوای سلول
 ```
 
 `code()`
@@ -165,32 +166,32 @@ Content Cell  | Content Cell | Content Cell
               - [ ] A subtask
 ~~~
 
-> Blockquote
->> Nested blockquote
+> بلوک نقل قول
+>> بلوک نقل قول تو در تو
 
     Markup :  > Blockquote
               >> Nested Blockquote
 
-_Horizontal line :_
+_خط افقی :_
 - - - -
 
     Markup :  - - - -
 
-_Image with alt :_
+_تصویر با متن جایگزین :_
 
-![picture alt](http://via.placeholder.com/200x150 "Title is optional")
+![متن جایگزین تصویر](https://avatars.githubusercontent.com/u/6169366?v=4 "عنوان اختیاری است")
 
-    Markup : ![picture alt](http://via.placeholder.com/200x150 "Title is optional")
+    Markup : ![picture alt](https://avatars.githubusercontent.com/u/6169366?v=4 "Title is optional")
 
-Foldable text:
+متن تاشو:
 
 <details>
-  <summary>Title 1</summary>
-  <p>Content 1 Content 1 Content 1 Content 1 Content 1</p>
+  <summary>عنوان 1</summary>
+  <p>محتوا 1 محتوا 1 محتوا 1 محتوا 1 محتوا 1</p>
 </details>
 <details>
-  <summary>Title 2</summary>
-  <p>Content 2 Content 2 Content 2 Content 2 Content 2</p>
+  <summary>عنوان 2</summary>
+  <p>محتوا 2 محتوا 2 محتوا 2 محتوا 2 محتوا 2</p>
 </details>
 
     Markup : <details>
@@ -203,14 +204,14 @@ Foldable text:
 <p> Some HTML code here </p>
 ```
 
-Link to a specific part of the page:
+پیوند به بخش خاصی از صفحه:
 
 [Go To TOP](#TOP)
    
     Markup : [text goes here](#section_name)
               section_title<a name="section_name"></a>    
 
-Hotkey:
+کلید فوری:
 
 <kbd>⌘F</kbd>
 
@@ -218,7 +219,7 @@ Hotkey:
 
     Markup : <kbd>⌘F</kbd>
 
-Hotkey list:
+لیست کلیدهای فوری:
 
 | Key | Symbol |
 | --- | --- |

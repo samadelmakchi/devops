@@ -1,30 +1,26 @@
 
-# Docker Compose Cheat Sheet
+# Docker Compose 
 
 Docker Compose ابزاری است برای تعریف و مدیریت چند کانتینر Docker که می‌توانند به صورت همزمان اجرا شوند. این ابزار به شما اجازه می‌دهد که با استفاده از یک فایل YAML، پیکربندی و تنظیمات کانتینرها، شبکه‌ها و ولوم‌ها را مدیریت کنید.
 
----
+### ۱. نصب Docker Compose
 
-## ۱. نصب Docker Compose
-
-### بررسی نسخه نصب شده:
+بررسی نسخه نصب شده:
 ```bash
 docker-compose --version
 ```
 
-### نصب Docker Compose (در سیستم‌های لینوکس):
+نصب Docker Compose (در سیستم‌های لینوکس):
 ```bash
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 
----
-
-## ۲. فایل `docker-compose.yml`
+### ۲. فایل `docker-compose.yml`
 
 در Docker Compose از فایل YAML برای پیکربندی استفاده می‌شود. این فایل می‌تواند شامل سرویس‌ها، شبکه‌ها و ولوم‌ها باشد.
 
-### ساختار یک فایل `docker-compose.yml`:
+ساختار یک فایل `docker-compose.yml`:
 
 ```yaml
 version: '3'
@@ -39,9 +35,7 @@ services:
       POSTGRES_PASSWORD: example
 ```
 
----
-
-## ۳. دستورات اصلی Docker Compose
+### ۳. دستورات اصلی Docker Compose
 
 | فرمان | توضیحات |
 |-------|---------|
@@ -60,31 +54,26 @@ services:
 | `docker-compose pull` | دریافت ایمیج‌ها از Docker Hub |
 | `docker-compose push` | ارسال ایمیج‌ها به Docker Registry |
 
-### مثال‌ها:
+مثال‌ها:
 
-#### راه‌اندازی سرویس‌ها در پس‌زمینه:
-
+راه‌اندازی سرویس‌ها در پس‌زمینه:
 ```bash
 docker-compose up -d
 ```
 
-#### مشاهده لاگ‌های یک سرویس:
-
+مشاهده لاگ‌های یک سرویس:
 ```bash
 docker-compose logs -f web
 ```
 
-#### متوقف کردن و حذف سرویس‌ها:
-
+متوقف کردن و حذف سرویس‌ها:
 ```bash
 docker-compose down
 ```
 
----
+### ۴. مدیریت سرویس‌ها و شبکه‌ها
 
-## ۴. مدیریت سرویس‌ها و شبکه‌ها
-
-### اضافه کردن یا حذف سرویس‌ها:
+اضافه کردن یا حذف سرویس‌ها:   
 برای افزودن سرویس جدید به فایل `docker-compose.yml` و سپس بازسازی و راه‌اندازی آن:
 
 ```bash
@@ -97,7 +86,7 @@ docker-compose up -d
 docker-compose down
 ```
 
-### پیکربندی شبکه‌ها:
+پیکربندی شبکه‌ها:
 در فایل `docker-compose.yml` می‌توانید شبکه‌ها را برای ارتباط میان سرویس‌ها تعریف کنید.
 
 ```yaml
@@ -116,9 +105,7 @@ networks:
   back-end:
 ```
 
----
-
-## ۵. Volume‌ها و ذخیره‌سازی داده‌ها
+### ۵. Volume‌ها و ذخیره‌سازی داده‌ها
 
 در Docker Compose می‌توانید از Volume‌ها برای ذخیره دائمی داده‌ها استفاده کنید.
 
@@ -139,13 +126,11 @@ volumes:
 docker-compose down -v
 ```
 
----
-
-## ۶. محیط‌های مختلف (Environments)
+### ۶. محیط‌های مختلف (Environments)
 
 می‌توانید متغیرهای محیطی (environment variables) را در فایل `docker-compose.yml` یا در فایل `.env` برای پیکربندی سرویس‌ها استفاده کنید.
 
-### استفاده از متغیرهای محیطی در فایل `docker-compose.yml`:
+استفاده از متغیرهای محیطی در فایل `docker-compose.yml`:
 
 ```yaml
 version: '3'
@@ -156,16 +141,14 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 ```
 
-### استفاده از فایل `.env`:
+استفاده از فایل `.env`:
 در فایل `.env` مقادیر متغیرهای محیطی را تعریف کنید:
 
 ```env
 POSTGRES_PASSWORD=mysecretpassword
 ```
 
----
-
-## ۷. Docker Compose و چندین محیط
+### ۷. Docker Compose و چندین محیط
 
 برای استفاده از چندین فایل Compose برای محیط‌های مختلف (مثلاً توسعه، تولید):
 
@@ -173,38 +156,34 @@ POSTGRES_PASSWORD=mysecretpassword
 docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
 ```
 
----
+### ۸. دستورات مفید دیگر
 
-## ۸. دستورات مفید دیگر
-
-### مشاهده وضعیت سرویس‌ها:
+مشاهده وضعیت سرویس‌ها:
 ```bash
 docker-compose ps
 ```
 
-### کپی کردن فایل‌ها به کانتینر:
+کپی کردن فایل‌ها به کانتینر:
 ```bash
 docker-compose exec <service> cp /path/to/file /path/in/container
 ```
 
-### وارد شدن به کانتینر یک سرویس:
+وارد شدن به کانتینر یک سرویس:
 ```bash
 docker-compose exec <service> /bin/bash
 ```
 
-### اجرای دستورات در کانتینر یک سرویس:
+اجرای دستورات در کانتینر یک سرویس:
 ```bash
 docker-compose exec <service> <command>
 ```
 
-### حذف کانتینرهای متوقف شده:
+حذف کانتینرهای متوقف شده:
 ```bash
 docker-compose rm
 ```
 
----
-
-## ۹. مثال کامل فایل `docker-compose.yml`
+### ۹. مثال کامل فایل `docker-compose.yml`
 
 ```yaml
 version: '3'
@@ -232,9 +211,7 @@ volumes:
   db-data:
 ```
 
----
-
-## ۱۰. راه‌اندازی چندین کانتینر با یک فرمان
+### ۱۰. راه‌اندازی چندین کانتینر با یک فرمان
 
 برای راه‌اندازی چندین سرویس به همراه شبکه‌ها و Volume‌ها در یک فایل Compose، فقط کافیست از دستور زیر استفاده کنید:
 

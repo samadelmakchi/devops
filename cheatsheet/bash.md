@@ -1,4 +1,4 @@
-## Bash
+# Bash
 
 ```bash
 #!/usr/bin/env bash
@@ -7,16 +7,16 @@ name="John"
 echo "Hello $name!"
 ```
 
-### Variables
+### متغیرها
 
 ```bash
 name="John"
-echo $name  # see below
+echo $name       # مشاهده پایین
 echo "$name"
 echo "${name}!"
 ```
 
-Generally quote your variables unless they contain wildcards to expand or command fragments.
+به طور کلی متغیرهای خود را محصور کنید مگر اینکه شامل wildcardها برای گسترش یا بخش‌های دستوری باشند.
 
 ```bash
 wildcard="*.txt"
@@ -24,7 +24,7 @@ options="iv"
 cp -$options $wildcard /tmp
 ```
 
-### String quotes
+### نقل قول‌های رشته‌ای
 
 ```bash
 name="John"
@@ -32,7 +32,7 @@ echo "Hi $name"  #=> Hi John
 echo 'Hi $name'  #=> Hi $name
 ```
 
-### Shell execution
+### اجرای شل
 
 ```bash
 echo "I'm in $(pwd)"
@@ -40,17 +40,14 @@ echo "I'm in `pwd`"  # obsolescent
 # Same
 ```
 
-See [Command substitution](https://web.archive.org/web/20230326081741/https://wiki.bash-hackers.org/syntax/expansion/cmdsubst)
-
-### Conditional execution
+### اجرای مشروط
 
 ```bash
 git commit && git push
 git commit || echo "Commit failed"
 ```
 
-### Functions
-{: id='functions-example'}
+### توابع
 
 ```bash
 get_name() {
@@ -60,10 +57,7 @@ get_name() {
 echo "You are $(get_name)"
 ```
 
-See: [Functions](#functions)
-
-### Conditionals
-{: id='conditionals-example'}
+### شرط ها
 
 ```bash
 if [[ -z "$string" ]]; then
@@ -73,18 +67,14 @@ elif [[ -n "$string" ]]; then
 fi
 ```
 
-See: [Conditionals](#conditionals)
-
-### Strict mode
+### حالت سختگیرانه
 
 ```bash
 set -euo pipefail
 IFS=$'\n\t'
 ```
 
-See: [Unofficial bash strict mode](http://redsymbol.net/articles/unofficial-bash-strict-mode/)
-
-### Brace expansion
+### انبساط بریس
 
 ```bash
 echo {A,B}.js
@@ -97,12 +87,11 @@ echo {A,B}.js
 | `{1..5}`               | Same as `1 2 3 4 5`   |
 | <code>&lcub;{1..3},{7..9}}</code> | Same as `1 2 3 7 8 9` |
 
-See: [Brace expansion](https://web.archive.org/web/20230207192110/https://wiki.bash-hackers.org/syntax/expansion/brace)
+---
 
-## Parameter expansions
-{: .-three-column}
+## پارامترها
 
-### Basics
+### مبانی
 
 ```bash
 name="John"
@@ -121,16 +110,14 @@ length=2
 echo "${name:0:length}"  #=> "Jo"
 ```
 
-See: [Parameter expansion](https://web.archive.org/web/20230408142504/https://wiki.bash-hackers.org/syntax/pe)
-
 ```bash
 str="/path/to/foo.cpp"
 echo "${str%.cpp}"    # /path/to/foo
 echo "${str%.cpp}.o"  # /path/to/foo.o
 echo "${str%/*}"      # /path/to
 
-echo "${str##*.}"     # cpp (extension)
-echo "${str##*/}"     # foo.cpp (basepath)
+echo "${str##*.}"     # cpp (پسوند)
+echo "${str##*/}"     # foo.cpp (مسیر پایه)
 
 echo "${str#*/}"      # path/to/foo.cpp
 echo "${str##*/}"     # foo.cpp
@@ -146,20 +133,20 @@ echo "${str: -5:5}"  # "world"
 
 ```bash
 src="/path/to/foo.cpp"
-base=${src##*/}   #=> "foo.cpp" (basepath)
-dir=${src%$base}  #=> "/path/to/" (dirpath)
+base=${src##*/}   #=> "foo.cpp" (مسیر پایه)
+dir=${src%$base}  #=> "/path/to/" (مسیر مستقیم)
 ```
 
-### Prefix name expansion
+### گسترش نام پیشوند
 
 ```bash
 prefix_a=one
 prefix_b=two
-echo ${!prefix_*}  # all variables names starting with `prefix_`
+echo ${!prefix_*}  # نام همه متغیرها که با "پیشوند_" شروع می شود
 prefix_a prefix_b
 ```
 
-### Indirection
+### غیر جهت
 
 ```bash
 name=joe
@@ -168,7 +155,7 @@ echo ${!pointer}
 joe
 ```
 
-### Substitution
+### تعویض
 
 | Code              | Description         |
 | ----------------- | ------------------- |
@@ -186,7 +173,7 @@ joe
 | `${foo/%from/to}` | Replace suffix      |
 | `${foo/#from/to}` | Replace prefix      |
 
-### Comments
+### کامنت ها
 
 ```bash
 # Single line comment
@@ -200,20 +187,20 @@ comment
 '
 ```
 
-### Substrings
+### رشته های فرعی
 
 | Expression      | Description                    |
 | --------------- | ------------------------------ |
 | `${foo:0:3}`    | Substring _(position, length)_ |
 | `${foo:(-3):3}` | Substring from the right       |
 
-### Length
+### طول
 
 | Expression | Description      |
 | ---------- | ---------------- |
 | `${#foo}`  | Length of `$foo` |
 
-### Manipulation
+### دستکاری
 
 ```bash
 str="HELLO WORLD!"
@@ -225,7 +212,7 @@ echo "${str^}"   #=> "Hello world!" (uppercase 1st letter)
 echo "${str^^}"  #=> "HELLO WORLD!" (all uppercase)
 ```
 
-### Default values
+### مقادیر پیش فرض
 
 | Expression        | Description                                              |
 | ----------------- | -------------------------------------------------------- |
@@ -234,12 +221,14 @@ echo "${str^^}"  #=> "HELLO WORLD!" (all uppercase)
 | `${foo:+val}`     | `val` if `$foo` is set (and not null)                    |
 | `${foo:?message}` | Show error message and exit if `$foo` is unset (or null) |
 
-Omitting the `:` removes the (non)nullity checks, e.g. `${foo-val}` expands to `val` if unset otherwise `$foo`.
+حذف `:`، بررسی های (غیر) بی اعتباری را حذف می کند، به عنوان مثال. `${foo-val}` اگر تنظیم نشود در غیر این صورت `$foo` به `val` گسترش می‌یابد.
 
-## Loops
+---
+
+## حلقه ها
 {: .-three-column}
 
-### Basic for loop
+### پایه برای حلقه
 
 ```bash
 for i in /etc/rc.*; do
@@ -247,7 +236,7 @@ for i in /etc/rc.*; do
 done
 ```
 
-### C-like for loop
+### حلقه هایشبیه زبان C
 
 ```bash
 for ((i = 0 ; i < 100 ; i++)); do
@@ -255,7 +244,7 @@ for ((i = 0 ; i < 100 ; i++)); do
 done
 ```
 
-### Ranges
+### محدوده ها
 
 ```bash
 for i in {1..5}; do
@@ -263,7 +252,7 @@ for i in {1..5}; do
 done
 ```
 
-#### With step size
+#### با اندازه پله
 
 ```bash
 for i in {5..50..5}; do
@@ -271,7 +260,7 @@ for i in {5..50..5}; do
 done
 ```
 
-### Reading lines
+### خواندن خطوط
 
 ```bash
 while read -r line; do
@@ -287,10 +276,11 @@ while true; do
 done
 ```
 
-## Functions
-{: .-three-column}
+---
 
-### Defining functions
+## توابع
+
+### تعریف توابع
 
 ```bash
 myfunc() {
@@ -299,7 +289,7 @@ myfunc() {
 ```
 
 ```bash
-# Same as above (alternate syntax)
+# مانند بالا ( نحو جایگزین)
 function myfunc {
     echo "hello $1"
 }
@@ -309,7 +299,7 @@ function myfunc {
 myfunc "John"
 ```
 
-### Returning values
+### برگرداندن مقادیر
 
 ```bash
 myfunc() {
@@ -322,7 +312,7 @@ myfunc() {
 result=$(myfunc)
 ```
 
-### Raising errors
+### بالا بردن خطاها
 
 ```bash
 myfunc() {
@@ -338,23 +328,25 @@ else
 fi
 ```
 
-### Arguments
+### آرگومان ها
 
-| Expression | Description                                    |
-| ---------- | ---------------------------------------------- |
-| `$#`       | Number of arguments                            |
-| `$*`       | All positional arguments (as a single word)    |
-| `$@`       | All positional arguments (as separate strings) |
-| `$1`       | First argument                                 |
-| `$_`       | Last argument of the previous command          |
+| بیان       | توضیحات                                             |
+| ---------- | --------------------------------------------------- |
+| `$#`       | تعداد آرگومان ها                                    |
+| `$*`       | همه آرگومان های موضعی (به عنوان یک کلمه)            |
+| `$@`       | همه آرگومان های موقعیتی (به عنوان رشته های جداگانه) |
+| `$1`       | آرگومان اول                                         |
+| `$_`       | آخرین آرگومان دستور قبلی                            |
 
-**Note**: `$@` and `$*` must be quoted in order to perform as described.
-Otherwise, they do exactly the same thing (arguments as separate strings).
+**توجه**: `$@` و `$*` باید نقل قول شوند تا مطابق شرح داده شوند.
+در غیر این صورت، آنها دقیقاً همان کار را انجام می دهند (استدلال ها به عنوان رشته های جداگانه).
 
-See [Special parameters](https://web.archive.org/web/20230318164746/https://wiki.bash-hackers.org/syntax/shellvars#special_parameters_and_shell_variables).
+ببینید [پارامترهای ویژه](https://web.archive.org/web/20230318164746/https://wiki.bash-hackers.org/syntax/shellvars#special_parameters_and_shell_variables).
 
-## Conditionals
-{: .-three-column}
+
+---
+
+## شرط ها
 
 ### Conditions
 
@@ -447,7 +439,9 @@ if [[ -e "file.txt" ]]; then
 fi
 ```
 
-## Arrays
+---
+
+## آرایه
 
 ### Defining arrays
 
@@ -540,7 +534,9 @@ for key in "${!sounds[@]}"; do
 done
 ```
 
-## Options
+---
+
+## آپشن ها
 
 ### Options
 
@@ -564,7 +560,9 @@ shopt -s globstar    # Allow ** for recursive matches ('lib/**/*.rb' => 'lib/a/b
 Set `GLOBIGNORE` as a colon-separated list of patterns to be removed from glob
 matches.
 
-## History
+---
+
+## تاریخچه
 
 ### Commands
 
@@ -607,7 +605,9 @@ matches.
 
 `!!` can be replaced with any valid expansion i.e. `!cat`, `!-2`, `!42`, etc.
 
-## Miscellaneous
+---
+
+## متفرقه
 
 ### Numeric calculations
 
@@ -816,12 +816,3 @@ if grep -q 'foo' ~/.bash_history; then
   echo "You appear to have typed 'foo' in the past"
 fi
 ```
-
-## Also see
-{: .-one-column}
-
-- [Bash-hackers wiki](https://web.archive.org/web/20230406205817/https://wiki.bash-hackers.org/) _(bash-hackers.org)_
-- [Shell vars](https://web.archive.org/web/20230318164746/https://wiki.bash-hackers.org/syntax/shellvars) _(bash-hackers.org)_
-- [Learn bash in y minutes](https://learnxinyminutes.com/docs/bash/) _(learnxinyminutes.com)_
-- [Bash Guide](http://mywiki.wooledge.org/BashGuide) _(mywiki.wooledge.org)_
-- [ShellCheck](https://www.shellcheck.net/) _(shellcheck.net)_
