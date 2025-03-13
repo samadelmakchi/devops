@@ -87,8 +87,6 @@ echo {A,B}.js
 | `{1..5}`               | Same as `1 2 3 4 5`   |
 | <code>&lcub;{1..3},{7..9}}</code> | Same as `1 2 3 7 8 9` |
 
----
-
 ## پارامترها
 
 ### مبانی
@@ -223,10 +221,7 @@ echo "${str^^}"  #=> "HELLO WORLD!" (all uppercase)
 
 حذف `:`، بررسی های (غیر) بی اعتباری را حذف می کند، به عنوان مثال. `${foo-val}` اگر تنظیم نشود در غیر این صورت `$foo` به `val` گسترش می‌یابد.
 
----
-
 ## حلقه ها
-{: .-three-column}
 
 ### پایه برای حلقه
 
@@ -268,15 +263,13 @@ while read -r line; do
 done <file.txt
 ```
 
-### Forever
+### برای همیشه
 
 ```bash
 while true; do
   ···
 done
 ```
-
----
 
 ## توابع
 
@@ -289,7 +282,6 @@ myfunc() {
 ```
 
 ```bash
-# مانند بالا ( نحو جایگزین)
 function myfunc {
     echo "hello $1"
 }
@@ -341,36 +333,31 @@ fi
 **توجه**: `$@` و `$*` باید نقل قول شوند تا مطابق شرح داده شوند.
 در غیر این صورت، آنها دقیقاً همان کار را انجام می دهند (استدلال ها به عنوان رشته های جداگانه).
 
-ببینید [پارامترهای ویژه](https://web.archive.org/web/20230318164746/https://wiki.bash-hackers.org/syntax/shellvars#special_parameters_and_shell_variables).
-
-
----
-
 ## شرط ها
 
-### Conditions
+### شرط ها
 
 Note that `[[` is actually a command/program that returns either `0` (true) or `1` (false). Any program that obeys the same logic (like all base utils, such as `grep(1)` or `ping(1)`) can be used as condition, see examples.
 
 | Condition                | Description           |
 | ------------------------ | --------------------- |
-| `[[ -z STRING ]]`        | Empty string          |
-| `[[ -n STRING ]]`        | Not empty string      |
-| `[[ STRING == STRING ]]` | Equal                 |
-| `[[ STRING != STRING ]]` | Not Equal             |
+| `[[ -z STRING ]]`        | رشته خالی            |
+| `[[ -n STRING ]]`        | رشته خالی نیست       |
+| `[[ STRING == STRING ]]` | برابر                |
+| `[[ STRING != STRING ]]` | برابر نیست           |
 | ---                      | ---                   |
-| `[[ NUM -eq NUM ]]`      | Equal                 |
-| `[[ NUM -ne NUM ]]`      | Not equal             |
-| `[[ NUM -lt NUM ]]`      | Less than             |
-| `[[ NUM -le NUM ]]`      | Less than or equal    |
-| `[[ NUM -gt NUM ]]`      | Greater than          |
-| `[[ NUM -ge NUM ]]`      | Greater than or equal |
+| `[[ NUM -eq NUM ]]`      | برابر                 |
+| `[[ NUM -ne NUM ]]`      | برابر نیست           |
+| `[[ NUM -lt NUM ]]`      | کمتر از              |
+| `[[ NUM -le NUM ]]`      | کمتر یا مساوی        |
+| `[[ NUM -gt NUM ]]`      | بزرگتر از            |
+| `[[ NUM -ge NUM ]]`      | بزرگتر یا مساوی      |
 | ---                      | ---                   |
-| `[[ STRING =~ STRING ]]` | Regexp                |
+| `[[ STRING =~ STRING ]]` | عبارت منظم           |
 | ---                      | ---                   |
-| `(( NUM < NUM ))`        | Numeric conditions    |
+| `(( NUM < NUM ))`        | شرط های عددی         |
 
-#### More conditions
+#### شرط های بیشتر
 
 | Condition            | Description              |
 | -------------------- | ------------------------ |
@@ -397,7 +384,7 @@ Note that `[[` is actually a command/program that returns either `0` (true) or `
 | `[[ FILE1 -ot FILE2 ]]` | 2 is more recent than 1 |
 | `[[ FILE1 -ef FILE2 ]]` | Same files              |
 
-### Example
+### مثال
 
 ```bash
 # String
@@ -443,7 +430,7 @@ fi
 
 ## آرایه
 
-### Defining arrays
+### تعریف آرایه ها
 
 ```bash
 Fruits=('Apple' 'Banana' 'Orange')
@@ -455,7 +442,7 @@ Fruits[1]="Banana"
 Fruits[2]="Orange"
 ```
 
-### Working with arrays
+### کار با آرایه ها
 
 ```bash
 echo "${Fruits[0]}"           # Element #0
@@ -468,7 +455,7 @@ echo "${Fruits[@]:3:2}"       # Range (from position 3, length 2)
 echo "${!Fruits[@]}"          # Keys of all elements, space-separated
 ```
 
-### Operations
+### عملیات
 
 ```bash
 Fruits=("${Fruits[@]}" "Watermelon")    # Push
@@ -480,7 +467,7 @@ Fruits=("${Fruits[@]}" "${Veggies[@]}") # Concatenate
 lines=(`cat "logfile"`)                 # Read from file
 ```
 
-### Iteration
+### تکرار
 
 ```bash
 for i in "${arrayName[@]}"; do
@@ -488,10 +475,9 @@ for i in "${arrayName[@]}"; do
 done
 ```
 
-## Dictionaries
-{: .-three-column}
+## دیکشنری ها
 
-### Defining
+### تعریف کردن
 
 ```bash
 declare -A sounds
@@ -504,9 +490,9 @@ sounds[bird]="tweet"
 sounds[wolf]="howl"
 ```
 
-Declares `sound` as a Dictionary object (aka associative array).
+`sound` را به عنوان یک شی دیکشنری (معروف به آرایه انجمنی) اعلام می کند.
 
-### Working with dictionaries
+### کار با دیکشنری ها
 
 ```bash
 echo "${sounds[dog]}" # Dog's sound
@@ -516,7 +502,7 @@ echo "${#sounds[@]}"  # Number of elements
 unset sounds[dog]     # Delete dog
 ```
 
-### Iteration
+### تکرار
 
 #### Iterate over values
 
@@ -526,7 +512,7 @@ for val in "${sounds[@]}"; do
 done
 ```
 
-#### Iterate over keys
+#### تکرار روی کلیدها
 
 ```bash
 for key in "${!sounds[@]}"; do
@@ -534,11 +520,9 @@ for key in "${!sounds[@]}"; do
 done
 ```
 
----
-
 ## آپشن ها
 
-### Options
+### آپشن ها
 
 ```bash
 set -o noclobber  # Avoid overlay files (echo "hi" > foo)
@@ -547,7 +531,7 @@ set -o pipefail   # Unveils hidden failures
 set -o nounset    # Exposes unset variables
 ```
 
-### Glob options
+### آپشن های عمومی
 
 ```bash
 shopt -s nullglob    # Non-matching globs are removed  ('*.foo' => '')
@@ -557,21 +541,18 @@ shopt -s dotglob     # Wildcards match dotfiles ("*.sh" => ".foo.sh")
 shopt -s globstar    # Allow ** for recursive matches ('lib/**/*.rb' => 'lib/a/b/c.rb')
 ```
 
-Set `GLOBIGNORE` as a colon-separated list of patterns to be removed from glob
-matches.
-
----
+`GLOBIGNORE` را به‌عنوان فهرستی از الگوهای جدا شده با دو نقطه تنظیم کنید تا از موارد مشابه حذف شوند.
 
 ## تاریخچه
 
-### Commands
+### دستورات
 
 | Command               | Description                               |
 | --------------------- | ----------------------------------------- |
 | `history`             | Show history                              |
 | `shopt -s histverify` | Don't execute expanded result immediately |
 
-### Expansions
+### بسط ها
 
 | Expression   | Description                                          |
 | ------------ | ---------------------------------------------------- |
@@ -581,7 +562,7 @@ matches.
 | `!n`         | Expand `n`th command in history                      |
 | `!<command>` | Expand most recent invocation of command `<command>` |
 
-### Operations
+### عملیات
 
 | Code                 | Description                                                           |
 | -------------------- | --------------------------------------------------------------------- |
@@ -593,7 +574,7 @@ matches.
 
 `!!` and `!$` can be replaced with any valid expansion.
 
-### Slices
+### برش ها
 
 | Code     | Description                                                                              |
 | -------- | ---------------------------------------------------------------------------------------- |
@@ -605,11 +586,9 @@ matches.
 
 `!!` can be replaced with any valid expansion i.e. `!cat`, `!-2`, `!42`, etc.
 
----
-
 ## متفرقه
 
-### Numeric calculations
+### محاسبات عددی
 
 ```bash
 $((a + 200))      # Add 200 to $a
@@ -624,14 +603,14 @@ declare -i count  # Declare as type integer
 count+=1          # Increment
 ```
 
-### Subshells
+### زیر پوسته ها
 
 ```bash
 (cd somedir; echo "I'm now in $PWD")
 pwd # still in first directory
 ```
 
-### Redirection
+### تغییر مسیر
 
 ```bash
 python hello.py > output.txt            # stdout to (file)
@@ -649,14 +628,14 @@ python hello.py < foo.txt      # feed foo.txt to stdin for python
 diff <(ls -r) <(ls)            # Compare two stdout without files
 ```
 
-### Inspecting commands
+### بازرسی دستورات
 
 ```bash
 command -V cd
 #=> "cd is a function/alias/whatever"
 ```
 
-### Trap errors
+### خطاها را تله کنید
 
 ```bash
 trap 'echo Error at about $LINENO' ERR
@@ -710,7 +689,7 @@ printf '%s\n' '#!/bin/bash' 'echo hello' >file
 printf '%i+%i=%i\n' 1 2 3  4 5 9
 ```
 
-### Transform strings
+### تبدیل رشته ها
 
 | Command option | Description                                         |
 | -------------- | --------------------------------------------------- |
@@ -725,20 +704,20 @@ printf '%i+%i=%i\n' 1 2 3  4 5 9
 | `[:alpha:]`    | All letters                                         |
 | `[:alnum:]`    | All letters and digits                              |
 
-#### Example
+#### مثال
 
 ```bash
 echo "Welcome To Devhints" | tr '[:lower:]' '[:upper:]'
 WELCOME TO DEVHINTS
 ```
 
-### Directory of script
+### دایرکتوری اسکریپت
 
 ```bash
 dir=${0%/*}
 ```
 
-### Getting options
+### دریافت آپشن ها
 
 ```bash
 while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do case $1 in
@@ -756,7 +735,7 @@ esac; shift; done
 if [[ "$1" == '--' ]]; then shift; fi
 ```
 
-### Heredoc
+### هردوک
 
 ```sh
 cat <<END
@@ -764,7 +743,7 @@ hello world
 END
 ```
 
-### Reading input
+### خواندن ورودی
 
 ```bash
 echo -n "Proceed? [y/n]: "
@@ -778,7 +757,7 @@ The `-r` option disables a peculiar legacy behavior with backslashes.
 read -n 1 ans    # Just one character
 ```
 
-### Special variables
+### متغیرهای خاص
 
 | Expression         | Description                            |
 | ------------------ | -------------------------------------- |
@@ -789,9 +768,7 @@ read -n 1 ans    # Just one character
 | `$_`               | Last argument of the previous command  |
 | `${PIPESTATUS[n]}` | return value of piped commands (array) |
 
-See [Special parameters](https://web.archive.org/web/20230318164746/https://wiki.bash-hackers.org/syntax/shellvars#special_parameters_and_shell_variables).
-
-### Go to previous directory
+### به دایرکتوری قبلی بروید
 
 ```bash
 pwd # /home/user/foo
@@ -801,7 +778,7 @@ cd -
 pwd # /home/user/foo
 ```
 
-### Check for command's result
+### نتیجه فرمان را بررسی کنید
 
 ```bash
 if ping -c 1 google.com; then
@@ -809,7 +786,7 @@ if ping -c 1 google.com; then
 fi
 ```
 
-### Grep check
+### گرپ چک
 
 ```bash
 if grep -q 'foo' ~/.bash_history; then
