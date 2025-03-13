@@ -38,15 +38,13 @@
 
   tasks:
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ایجاد پوشه‌ها و فایل‌ها
-
-    # SMD : چک کند اگر پوشه ها و فایل ها نباشد درست کند
-
     # ایجاد پوشه‌ها و فایل‌ها برای هر مشتری
     - name: Ensure main directories exist
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory
         mode: '0755'
+      poll: 1  # منتظر بمان تا عملیات کامل شود
       loop:
         - "{{ project_path }}"
         - "{{ backup_path }}"
@@ -59,6 +57,7 @@
         path: "{{ project_path }}/{{ inventory_hostname }}"
         state: directory
         mode: '0755'
+      poll: 1
       when: customer_type in ["test", "VIP", "regular"]
 
     # ایجاد پوشه مخصوص مشتری در مسیر پشتیبان‌ها
@@ -67,6 +66,7 @@
         path: "{{ backup_path }}/{{ inventory_hostname }}"
         state: directory
         mode: '0755'
+      poll: 1
       when: customer_type in ["test", "VIP", "regular"]
 
     # ایجاد پوشه‌های test و backup در log_path
@@ -75,6 +75,7 @@
         path: "{{ log_path }}/{{ item }}"
         state: directory
         mode: '0755'
+      poll: 1
       loop:
         - "test"
         - "backup"
@@ -85,6 +86,7 @@
         path: "{{ info_path }}/{{ item }}"
         state: directory
         mode: '0755'
+      poll: 1
       loop:
         - "volumes"
         - "databases"
@@ -95,6 +97,7 @@
         path: "{{ log_path }}/test/{{ inventory_hostname }}.txt"
         state: touch
         mode: '0644'
+      poll: 1
       when: customer_type in ["test", "VIP", "regular"]
 
     # برای هر مشتری یک فایل متنی در پوشه پشتیبان ایجاد کنید
@@ -103,6 +106,7 @@
         path: "{{ log_path }}/backup/{{ inventory_hostname }}.txt"
         state: touch
         mode: '0644'
+      poll: 1
       when: customer_type in ["test", "VIP", "regular"]
 
     # برای هر مشتری یک فایل متنی در پوشه volumes ایجاد کنید
@@ -111,6 +115,7 @@
         path: "{{ info_path }}/volumes/{{ inventory_hostname }}.txt"
         state: touch
         mode: '0644'
+      poll: 1
       when: customer_type in ["test", "VIP", "regular"]
 
     # برای هر مشتری یک فایل متنی در پوشه پایگاه داده ایجاد کنید
@@ -119,6 +124,7 @@
         path: "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
         state: touch
         mode: '0644'
+      poll: 1
       when: customer_type in ["test", "VIP", "regular"]
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ لاگین به گیت لب
@@ -131,6 +137,7 @@
         path: "/home/{{ ansible_user }}/.ssh"
         state: directory
         mode: '0700'
+      poll: 1
       become: true
 
     # کپی کردن کلید خصوصی SSH به سرور
@@ -139,6 +146,7 @@
         src: "~/.ssh/id_rsa"
         dest: "/home/{{ ansible_user }}/.ssh/id_rsa"
         mode: '0600'
+      poll: 1
       become: true
 
     # کپی کردن کلید عمومی SSH به سرور (اختیاری)
@@ -147,6 +155,7 @@
         src: "~/.ssh/id_rsa.pub"
         dest: "/home/{{ ansible_user }}/.ssh/authorized_keys"
         mode: '0600'
+      poll: 1
       become: true
 
     # تست اتصال SSH به GitLab
@@ -156,39 +165,48 @@
       register: ssh_test_result
       ignore_errors: true
       changed_when: false
+      poll: 1
 
     # نمایش نتیجه تست SSH
     - name: Print SSH test result
       ansible.builtin.debug:
         msg: "{{ ssh_test_result.stdout }}"
+      poll: 1
       when: ssh_test_result is defined
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ کلون و چک‌اوت کردن تگ
-
-    # SMD : برای کالیبری، پرتال و پرتال فرانت اند تگ و برنچ مستقل
-
     # تعریف پروژه‌ها و نام‌های پوشه‌ها
-    - name: Clone repositories and checkout tags for each project
+    - name: Define projects
       ansible.builtin.set_fact:
         projects:
           - name: "calibri"
             repo: "git@gitlab.com:nasser-man/calibri.git"
             folder: "calibri"
+            branch_var: "customer_gateway_git_branches"
+            tag_var: "customer_gateway_git_tags"
+            compose_file: "docker-compose-calibri.yml.j2"
           - name: "calibri-portal"
             repo: "git@gitlab.com:nasser-man/calibri-portal.git"
             folder: "calibri-portal"
+            branch_var: "customer_portal_git_branches"
+            tag_var: "customer_portal_git_tags"
+            compose_file: "docker-compose-portal.yml.j2"
           - name: "calibri-portal-frontend"
             repo: "git@gitlab.com:nasser-man/calibri-portal-frontend.git"
             folder: "calibri-portal-frontend"
+            branch_var: "customer_portal_frontend_git_branches"
+            tag_var: "customer_portal_frontend_git_tags"
+            compose_file: "docker-compose-portal-frontend.yml.j2"
 
     # کلون کردن پروژه از گیت برای هر مشتری
-    - name: Clone repository from GitLab
+    - name: Clone repositories from GitLab
       ansible.builtin.git:
         repo: "{{ item.repo }}"
         dest: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
-        version: "{{ customer_git_branches[inventory_hostname] }}"
+        version: "{{ vars[item.branch_var][inventory_hostname] }}"
         update: true
         clone: true
+      poll: 1
       loop: "{{ projects }}"
       when: customer_type in ["test", "VIP", "regular"]
 
@@ -196,15 +214,23 @@
     - name: Checkout the specific tag for each project
       ansible.builtin.shell: |
         cd "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
-        git checkout {{ customer_git_tags[inventory_hostname] }}
+        git checkout {{ vars[item.tag_var][inventory_hostname] }}
+      poll: 1
       loop: "{{ projects }}"
       when: customer_type in ["test", "VIP", "regular"]
       changed_when: false
 
+    # کپی کردن فایل‌های docker-compose به پوشه پروژه‌ها
+    - name: Copy docker-compose files to the project folder
+      ansible.builtin.copy:
+        src: "{{ item.compose_file }}"
+        dest: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}/docker/docker-compose.yml"
+        mode: '0644'
+      poll: 1
+      loop: "{{ projects }}"
+      when: customer_type in ["test", "VIP", "regular"]
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ کپی فایل ها
-
-    # SMD : کپی فایل داکر کامپوز برای هر مشتری
-
     # ایجاد فایل bashUrl.js برای calibri-portal-frontend
     - name: Create file for calibri-portal-frontend project
       ansible.builtin.copy:
@@ -213,11 +239,10 @@
           const baseUrl = 'http://localhost:{{ customer_portal_ports[inventory_hostname] }}';
           export default baseUrl;
         mode: '0644'
+      poll: 1
       when: customer_type in ['test', 'VIP', 'regular']
       changed_when: false
       become: true
-
-    # SMD : چک کند اگر فایل ها نباشند ایجاد بکند
 
     # ایجاد فایل .env.local برای calibri-portal
     - name: Set variables for .env.local content
@@ -227,6 +252,7 @@
           {{ container_name }}-portal-db/{{ portal_mysql_db_name }}?
           serverVersion=10.11.2-MariaDB&charset=utf8mb4
         base_url: "http://localhost:{{ customer_gateway_ports[inventory_hostname] }}"
+      poll: 1
 
     - name: Create file for calibri-portal project
       ansible.builtin.copy:
@@ -237,6 +263,7 @@
         mode: '0644'
       when: customer_type in ['test', 'VIP', 'regular']
       changed_when: false
+      poll: 1
       become: true
 
     # ایجاد فایل my_database.php برای calibri
@@ -271,44 +298,106 @@
         mode: '0644'
       when: customer_type in ['test', 'VIP', 'regular']
       changed_when: false
+      poll: 1
       become: true
 
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر و میگریشن ها
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ بکاپ قبل از اجرا و ساخت شبکه
+    # چک کردن وجود فایل backup_volumes.sh
+    - name: Check if backup_volumes.sh exists
+      ansible.builtin.stat:
+        path: "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
+      register: backup_script
+      poll: 1
 
-    # SMD : قبل از اجرای داکر کامپز یک بکاپ از همه پایگاه داده های ان مشتری بگیرد
-
-    # SMD : چک کند اگر شبکه نباشد درست کند
+    # اجرای اسکریپت بکاپ برای دیتابیس‌ها و ولوم‌ها تنها در صورتی که فایل موجود باشد
+    - name: Run backup script for volumes and databases
+      ansible.builtin.shell: |
+        bash "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
+      register: backup_result
+      async: 1800  # حداکثر زمان برای اجرای اسکریپت (۳۰ دقیقه)
+      poll: 1
+      when: backup_script.stat.exists and customer_type in ["test", "VIP", "regular"]
+      changed_when: true  # باید به انسیبل بگویید که در صورتی که فرمان اجرا شد، تغییر ایجاد شده است.
 
     # ساخت شبکه مخصوص به هر مشتری
     - name: Create Docker network for each customer
       community.docker.docker_network:
         name: "{{ customer_network_names[inventory_hostname] }}"
         state: present
+      poll: 1
       when: customer_type in ["test", "VIP", "regular"]
 
-    # SMD : اگر کامپوز ها اپ باشد این اجرا بشود : قبل از اجرای داکر کامپوز docker compose -o inventory_hostname down
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر
+    # چک کردن وضعیت و اجرای docker-compose برای calibri
+    - name: Check if Docker containers for calibri are running
+      ansible.builtin.shell: |
+        docker ps --filter "name={{ container_name }}-gateway" --filter "name={{ container_name }}-gateway-db" -q
+      poll: 1
+      register: docker_running_calibri
+      changed_when: false
+      failed_when: false
 
-    # اجرای داکر کامپوز کالیبری برای هر مشتری
-    - name: Run Docker Compose for calibri project
+    - name: Stop running Docker containers for calibri
       ansible.builtin.command:
-        cmd: "docker compose -p {{ inventory_hostname }} -f {{ project_path }}/{{ inventory_hostname }}/docker-compose-calibri.yml.j2 up -d"
+        cmd: docker compose -f "{{ project_path }}/{{ inventory_hostname }}/calibri/docker/docker-compose.yml" down
+      poll: 1
+      when: docker_running_calibri.stdout != ""
+      changed_when: true
+
+    - name: Run docker-compose for calibri
+      ansible.builtin.command:
+        cmd: docker compose -f "{{ project_path }}/{{ inventory_hostname }}/calibri/docker/docker-compose.yml" up -d
+      poll: 1
       when: customer_type in ["test", "VIP", "regular"]
       changed_when: false
 
-    # اجرای داکر کامپوز کالیبری برای هر مشتری
-    - name: Run Docker Compose for portal project
+    # چک کردن وضعیت و اجرای docker-compose برای calibri-portal
+    - name: Check if Docker containers for calibri-portal are running
+      ansible.builtin.shell: |
+        docker ps --filter "name={{ container_name }}-portal" --filter "name={{ container_name }}-portal-db" -q
+      poll: 1
+      register: docker_running_calibri_portal
+      changed_when: false
+      failed_when: false
+
+    - name: Stop running Docker containers for calibri-portal
       ansible.builtin.command:
-        cmd: "docker compose -p {{ inventory_hostname }} -f {{ project_path }}/{{ inventory_hostname }}/docker-compose-portal.yml.j2 up -d"
+        cmd: docker compose -f "{{ project_path }}/{{ inventory_hostname }}/calibri-portal/docker/docker-compose.yml" down
+      poll: 1
+      when: docker_running_calibri_portal.stdout != ""
+      changed_when: true
+
+    - name: Run docker-compose for calibri-portal
+      ansible.builtin.command:
+        cmd: docker compose -f "{{ project_path }}/{{ inventory_hostname }}/calibri-portal/docker/docker-compose.yml" up -d
+      poll: 1
       when: customer_type in ["test", "VIP", "regular"]
       changed_when: false
 
-    # اجرای داکر کامپوز پرتال برای هر مشتری
-    - name: Run Docker Compose for portal frontend project
+    # چک کردن وضعیت و اجرای docker-compose برای calibri-portal-frontend
+    - name: Check if Docker containers for calibri-portal-frontend are running
+      ansible.builtin.shell: |
+        docker ps --filter "name={{ container_name }}-portal-frontend" -q
+      poll: 1
+      register: docker_running_calibri_portal_frontend
+      changed_when: false
+      failed_when: false
+
+    - name: Stop running Docker containers for calibri-portal-frontend
       ansible.builtin.command:
-        cmd: "docker compose -p {{ inventory_hostname }} -f {{ project_path }}/{{ inventory_hostname }}/docker-compose-portal-frontend.yml.j2 up -d"
+        cmd: docker compose -f "{{ project_path }}/{{ inventory_hostname }}/calibri-portal-frontend/docker/docker-compose.yml" down
+      poll: 1
+      when: docker_running_calibri_portal_frontend.stdout != ""
+      changed_when: true
+
+    - name: Run docker-compose for calibri-portal-frontend
+      ansible.builtin.command:
+        cmd: docker compose -f "{{ project_path }}/{{ inventory_hostname }}/calibri-portal-frontend/docker/docker-compose.yml" up -d
+      poll: 1
       when: customer_type in ["test", "VIP", "regular"]
       changed_when: false
 
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای میگریشن ها
     # یافتن پوشه های ولوم از فایل داکر کامپوز
     - name: Extract volume names from docker-compose.yml
       ansible.builtin.shell: |
@@ -316,6 +405,7 @@
         volumes=$(grep -oP '^\s*-\s*(\S+):' {{ project_path }}/docker-compose.yml | sed 's/^- //')
         echo "$volumes" > "{{ info_path }}/volumes/{{ inventory_hostname }}.txt"
       register: volumes_result
+      poll: 1
       when: customer_type in ["test", "VIP", "regular"]
       changed_when: false
 
@@ -325,14 +415,23 @@
         path: "/var/lib/docker/volumes/{{ item }}/_data"
         state: directory
         mode: '0777'
+      poll: 1
       loop: "{{ lookup('file', '{{ info_path }}/volumes/{{ inventory_hostname }}.txt').splitlines() }}"
       become: true
       when: customer_type in ["test", "VIP", "regular"]
 
-    # SMD : میگریشن در کانتینر پرتال و نصب کامپوزر
-    # docker exec -it {{ container_name }}-portal bash
-    # composer install
-    # php bin/console doctrine:migration:migrate
+    # میگریشن در کانتینر پرتال و نصب کامپوزر
+    - name: Migration for portal
+      community.docker.docker_container:
+        name: "{{ container_name }}-portal"
+        command: |
+          bash -c "
+            composer install &&
+            php bin/console doctrine:migrations:migrate --no-interaction
+          "
+        state: started
+      poll: 1
+      when: customer_type in ["test", "VIP", "regular"]
 
     # اعطای دسترسی نوشتن به پوشه‌ها در کانتینر کالیبری
     - name: Grant write permissions to folders in the container
@@ -340,6 +439,7 @@
         name: "{{ container_name }}-gateway"
         command: "chmod -R 777 uploads captcha_images"
         state: started
+      poll: 1
       when: customer_type in ["test", "VIP", "regular"]
 
     # میگریشن در کانتینر کالیبری
@@ -348,6 +448,7 @@
         name: "{{ container_name }}-gateway"
         command: "php index.php migrate index false"
         state: started
+      poll: 1
       when: customer_type in ["test", "VIP", "regular"]
 
     # یافتن پایگاه داده‌ها برای هر مشتری و ذخیره در یک فایل متنی
@@ -359,15 +460,16 @@
         DB_USER="{{ portal_mysql_user }}"
         DB_PASSWORD="{{ portal_mysql_password }}"
         DB_HOST="localhost"
-        echo "$DB_TYPE,$DB_NAME,$DB_USER,$DB_PASSWORD,$DB_HOST" >> "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
+        echo "$DB_TYPE,$DB_NAME,$DB_USER,$DB_PASSWORD,$DB_HOST" > "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
 
         DB_TYPE="{{ gateway_database_type }}"
         DB_NAME="{{ gateway_mysql_db_name }}"
         DB_USER="{{ gateway_mysql_user }}"
         DB_PASSWORD="{{ gateway_mysql_password }}"
         DB_HOST="localhost"
-        echo "$DB_TYPE,$DB_NAME,$DB_USER,$DB_PASSWORD,$DB_HOST" >> "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
+        echo "$DB_TYPE,$DB_NAME,$DB_USER,$DB_PASSWORD,$DB_HOST" > "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
       register: db_info_result
+      poll: 1
       when: customer_type in ["test", "VIP", "regular"]
       changed_when: false
 
@@ -376,29 +478,31 @@
     - name: Run integration, migration, usability, load, and database tests for all customers
       ansible.builtin.shell: |
         cd "{{ project_path }}/test" && \
-        python3 integration_test.py && \     # تست‌های یکپارچگی برای بررسی تعامل بخش‌های مختلف سیستم
-        python3 migration_test.py && \       # تست‌های مهاجرت برای بررسی صحت فرآیند انتقال داده‌ها
+        python3 test_integration.py && \     # تست‌های یکپارچگی برای بررسی تعامل بخش‌های مختلف سیستم
+        python3 test_migration.py && \       # تست‌های مهاجرت برای بررسی صحت فرآیند انتقال داده‌ها
         python3 usability_test.py && \       # تست‌های استفاده‌پذیری برای ارزیابی تجربه کاربری
-        python3 load_test.py && \            # تست‌های بار برای بررسی رفتار سیستم تحت بار زیاد
+        python3 test_load.py && \            # تست‌های بار برای بررسی رفتار سیستم تحت بار زیاد
         python3 database_test.py             # تست‌های پایگاه داده برای بررسی صحت داده‌ها و عملیات پایگاه داده
       when: customer_type in ["test", "VIP", "regular"]
+      poll: 1
       changed_when: true                     # به منظور شناسایی تغییر در هر بار اجرای این تسک
 
     # اجرای تست‌های CI/CD برای مشتریان تست
     - name: Run additional tests for customer test
       ansible.builtin.shell: |
         cd "{{ project_path }}/test"
-        python3 api_test.py                # تست‌هایی برای بررسی عملکرد و صحت API‌ها
-        python3 performance_test.py        # تست‌های عملکردی برای ارزیابی سرعت و پاسخ‌دهی سیستم
-        python3 security_test.py           # تست‌های امنیتی برای شناسایی آسیب‌پذیری‌ها و تهدیدات
-        python3 smoke_test.py              # تست‌های دود برای اطمینان از اینکه سیستم به درستی راه‌اندازی شده است
-        python3 acceptance_test.py         # تست‌های پذیرش برای بررسی اینکه سیستم نیازهای کاربر را برآورده می‌کند
-        python3 reliability_test.py        # تست‌های قابلیت اطمینان برای ارزیابی پایداری و عملکرد سیستم
-        python3 stress_test.py             # تست‌های استرس برای بررسی عملکرد سیستم تحت بارهای شدید
-        python3 ui_test.py                 # تست‌های رابط کاربری برای بررسی تعامل کاربر با سیستم
-        python3 system_test.py             # تست‌های سیستم برای ارزیابی یکپارچگی کل سیستم
-        python3 regression_test.py         # تست‌های رگرسیون برای اطمینان از اینکه تغییرات جدید باعث اختلال در عملکردهای قبلی نمی‌شود
+        python3 test_api.py                # تست‌هایی برای بررسی عملکرد و صحت API‌ها
+        python3 test_performance.py        # تست‌های عملکردی برای ارزیابی سرعت و پاسخ‌دهی سیستم
+        python3 test_security.py           # تست‌های امنیتی برای شناسایی آسیب‌پذیری‌ها و تهدیدات
+        python3 test_smoke.py              # تست‌های دود برای اطمینان از اینکه سیستم به درستی راه‌اندازی شده است
+        python3 test_acceptance.py         # تست‌های پذیرش برای بررسی اینکه سیستم نیازهای کاربر را برآورده می‌کند
+        python3 test_reliability.py        # تست‌های قابلیت اطمینان برای ارزیابی پایداری و عملکرد سیستم
+        python3 test_stress.py             # تست‌های استرس برای بررسی عملکرد سیستم تحت بارهای شدید
+        python3 test_ui.py                 # تست‌های رابط کاربری برای بررسی تعامل کاربر با سیستم
+        python3 test_system.py             # تست‌های سیستم برای ارزیابی یکپارچگی کل سیستم
+        python3 test_regression.py         # تست‌های رگرسیون برای اطمینان از اینکه تغییرات جدید باعث اختلال در عملکردهای قبلی نمی‌شود
       when: customer_type == "test"
+      poll: 1
       changed_when: true
 
     # اجرای اسکن SonarQube
@@ -411,12 +515,10 @@
           -Dsonar.host.url={{ sonar_url }} \
           -Dsonar.login={{ sonar_token }}
       when: customer_type == "test"
+      poll: 1
       changed_when: true
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ بکاپ گرفتن
-
-    # SMD : اگر فایل نباشد کپی بکند
-
     # کپی کردن اسکریپت بکاپ به سرور
     - name: Copy backup script to the server
       ansible.builtin.copy:
@@ -479,6 +581,7 @@
 
         dest: "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
         mode: '0755'  # اعطای دسترسی اجرایی به اسکریپت
+      poll: 1
 
     # تنظیم Cron job برای بکاپ
     - name: Set up cron job for backup
@@ -489,3 +592,4 @@
         job: "/bin/bash {{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
         user: root
         state: present  # این باعث می‌شود فقط اگر کرون جاب وجود نداشته باشد، تعریف شود
+      poll: 1

@@ -36,18 +36,43 @@ customer_name="شرکت پردازش افزا"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # اطلاعات نرم افزار مشتریان
-customer_git_branches:
+customer_gateway_git_branches:
     customer1: "main"
     customer2: "main"
     customer3: "dev"
     customer4: "dev"
     customer5: "main"
-customer_git_tags:
+customer_gateway_git_tags:
     customer1: "last01"
     customer2: "last02"
     customer3: "last03"
     customer4: "last01"
     customer5: "last02"
+customer_portal_git_branches:
+    customer1: "main"
+    customer2: "main"
+    customer3: "dev"
+    customer4: "dev"
+    customer5: "main"
+customer_portal_git_tags:
+    customer1: "last01"
+    customer2: "last02"
+    customer3: "last03"
+    customer4: "last01"
+    customer5: "last02"
+customer_portal_frontend_git_branches:
+    customer1: "main"
+    customer2: "main"
+    customer3: "dev"
+    customer4: "dev"
+    customer5: "main"
+customer_portal_frontend_git_tags:
+    customer1: "last01"
+    customer2: "last02"
+    customer3: "last03"
+    customer4: "last01"
+    customer5: "last02"
+
 customer_gateway_ports:
     customer1: 8001
     customer2: 8002
@@ -78,12 +103,3 @@ customer_containers:
     customer3: "simnad"
     customer4: "test_beta"
     customer5: "pardazesh"
-
-customer_database_ports:
-    customer1: 3308
-    customer2: 3307
-    customer3: 3306
-customer_database_password:
-    customer1: 1234
-    customer2: 1234
-    customer3: 1234
