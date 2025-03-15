@@ -1,0 +1,91 @@
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ لاگین به گیت لب
+    # ایجاد دایرکتوری .ssh در سرور مقصد
+    - name: Ensure .ssh directory exists
+      ansible.builtin.file:
+        path: "/home/{{ ansible_user }}/.ssh"
+        state: directory
+        mode: '0700'
+      poll: 1
+      become: true
+
+    # کپی کردن کلید خصوصی SSH به سرور
+    - name: Copy SSH private key to the server
+      ansible.builtin.copy:
+        src: "{{ ansible_playbook_dir }}/id_rsa"  # استفاده از مسیر دایرکتوری پلی‌بوک
+        dest: "/home/{{ ansible_user }}/.ssh/id_rsa"
+        mode: '0600'
+      poll: 1
+      become: true
+
+    # کپی کردن کلید عمومی SSH به سرور (اختیاری)
+    - name: Copy SSH public key to the server
+      ansible.builtin.copy:
+        src: "{{ ansible_playbook_dir }}/id_rsa.pub"  # استفاده از مسیر دایرکتوری پلی‌بوک
+        dest: "/home/{{ ansible_user }}/.ssh/authorized_keys"
+        mode: '0600'
+      poll: 1
+      become: true
+
+    # تست اتصال SSH به GitLab
+    - name: Test SSH connection to GitLab
+      ansible.builtin.command:
+        cmd: "ssh -T git@gitlab.com"
+      register: ssh_test_result
+      ignore_errors: true
+      changed_when: false
+      poll: 1
+      become: true
+
+    # نمایش نتیجه تست SSH
+    - name: Print SSH test result
+      ansible.builtin.debug:
+        msg: "{{ ssh_test_result.stdout }}"
+      when: ssh_test_result is defined
+      poll: 1
+      become: true
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ کلون و چک‌اوت کردن تگ
+    # تعریف پروژه‌ها و نام‌های پوشه‌ها
+    - name: Define projects
+      ansible.builtin.set_fact:
+        projects:
+          - name: "calibri"
+            repo: "https://gitlab.com/nasser-man/calibri.git"
+            folder: "calibri"
+            branch_var: "customer_gateway_git_branches"
+            tag_var: "customer_gateway_git_tags"
+            compose_file: "docker-compose-calibri.yml.j2"
+          - name: "calibri-portal"
+            repo: "https://gitlab.com/nasser-man/calibri-portal.git"
+            folder: "calibri-portal"
+            branch_var: "customer_portal_git_branches"
+            tag_var: "customer_portal_git_tags"
+            compose_file: "docker-compose-portal.yml.j2"
+          - name: "calibri-portal-frontend"
+            repo: "https://gitlab.com/nasser-man/calibri-portal-frontend.git"
+            folder: "calibri-portal-frontend"
+            branch_var: "customer_portal_frontend_git_branches"
+            tag_var: "customer_portal_frontend_git_tags"
+            compose_file: "docker-compose-portal-frontend.yml.j2"
+
+    # کلون کردن پروژه از گیت برای هر مشتری
+    - name: Clone repositories from GitLab
+      ansible.builtin.git:
+        repo: "{{ item.repo }}"
+        dest: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
+        version: "{{ vars[item.branch_var] | default('master') }}"  # مقدار پیش‌فرض در صورت عدم وجود متغیر
+        update: true
+        clone: true
+      poll: 1
+      loop: "{{ projects }}"
+      when: customer_type in ["test", "VIP", "regular"]
+
+    # چک‌اوت کردن تگ خاص برای هر مشتری
+    - name: Checkout the specific tag for each project
+      ansible.builtin.shell: |
+        cd "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
+        git checkout {{ vars[item.tag_var][inventory_hostname] | default('v1.0.0') }}  # مقدار پیش‌فرض در صورت عدم وجود متغیر
+      poll: 1
+      loop: "{{ projects }}"
+      when: customer_type in ["test", "VIP", "regular"]
+      changed_when: false

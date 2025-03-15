@@ -5,10 +5,11 @@
 
   vars:
     # مسیرهای پروژه
-    project_path: "/opt/project"   # مسیر پروژه
-    backup_path: "/opt/backup"     # مسیر بکاپ
-    info_path: "/opt/info"         # مسیر اطلاعات
-    log_path: "/opt/log"           # مسیر لاگ ها
+    ansible_playbook_dir: "/home/smd/Downloads/ansible"        # مسیر پوشه انسیبل
+    project_path: "/home/smd/Downloads/test_ansible"           # مسیر پروژه
+    backup_path: "/home/smd/Downloads/test_ansible/backup"     # مسیر بکاپ
+    info_path: "/home/smd/Downloads/test_ansible/info"         # مسیر اطلاعات
+    log_path: "/home/smd/Downloads/test_ansible/log"           # مسیر لاگ ها
 
     # اطلاعات SonarQube
     sonar_url: "http://your-sonarqube-server"  # URL سرور SonarQube
@@ -127,98 +128,73 @@
       poll: 1
       when: customer_type in ["test", "VIP", "regular"]
 
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ لاگین به گیت لب
-
-    # SMD : فقط یکبار لاگین کند و ناقص است
-
-    # ایجاد دایرکتوری .ssh در سرور مقصد
-    - name: Ensure .ssh directory exists
-      ansible.builtin.file:
-        path: "/home/{{ ansible_user }}/.ssh"
-        state: directory
-        mode: '0700'
-      poll: 1
-      become: true
-
-    # کپی کردن کلید خصوصی SSH به سرور
-    - name: Copy SSH private key to the server
-      ansible.builtin.copy:
-        src: "~/.ssh/id_rsa"
-        dest: "/home/{{ ansible_user }}/.ssh/id_rsa"
-        mode: '0600'
-      poll: 1
-      become: true
-
-    # کپی کردن کلید عمومی SSH به سرور (اختیاری)
-    - name: Copy SSH public key to the server
-      ansible.builtin.copy:
-        src: "~/.ssh/id_rsa.pub"
-        dest: "/home/{{ ansible_user }}/.ssh/authorized_keys"
-        mode: '0600'
-      poll: 1
-      become: true
-
-    # تست اتصال SSH به GitLab
-    - name: Test SSH connection to GitLab
-      ansible.builtin.command:
-        cmd: "ssh -T git@gitlab.com"
-      register: ssh_test_result
-      ignore_errors: true
-      changed_when: false
-      poll: 1
-
-    # نمایش نتیجه تست SSH
-    - name: Print SSH test result
-      ansible.builtin.debug:
-        msg: "{{ ssh_test_result.stdout }}"
-      poll: 1
-      when: ssh_test_result is defined
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ کلون و چک‌اوت کردن تگ
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ گیت لب
     # تعریف پروژه‌ها و نام‌های پوشه‌ها
-    - name: Define projects
+    - name: Define project repositories
       ansible.builtin.set_fact:
         projects:
           - name: "calibri"
-            repo: "git@gitlab.com:nasser-man/calibri.git"
+            # repo: "https://oauth2:{{ gitlab_token }}@gitlab.com/nasser-man/calibri.git"
             folder: "calibri"
             branch_var: "customer_gateway_git_branches"
             tag_var: "customer_gateway_git_tags"
             compose_file: "docker-compose-calibri.yml.j2"
           - name: "calibri-portal"
-            repo: "git@gitlab.com:nasser-man/calibri-portal.git"
+            # repo: "https://oauth2:{{ gitlab_token }}@gitlab.com/nasser-man/calibri-portal.git"
             folder: "calibri-portal"
             branch_var: "customer_portal_git_branches"
             tag_var: "customer_portal_git_tags"
             compose_file: "docker-compose-portal.yml.j2"
           - name: "calibri-portal-frontend"
-            repo: "git@gitlab.com:nasser-man/calibri-portal-frontend.git"
+            # repo: "https://oauth2:{{ gitlab_token }}@gitlab.com/nasser-man/calibri-portal-frontend.git"
             folder: "calibri-portal-frontend"
             branch_var: "customer_portal_frontend_git_branches"
             tag_var: "customer_portal_frontend_git_tags"
             compose_file: "docker-compose-portal-frontend.yml.j2"
 
-    # کلون کردن پروژه از گیت برای هر مشتری
-    - name: Clone repositories from GitLab
-      ansible.builtin.git:
-        repo: "{{ item.repo }}"
-        dest: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
-        version: "{{ vars[item.branch_var][inventory_hostname] }}"
-        update: true
-        clone: true
-      poll: 1
-      loop: "{{ projects }}"
-      when: customer_type in ["test", "VIP", "regular"]
+    # # کلون کردن پروژه‌ها از گیتلب با استفاده از HTTPS و GitLab Token
+    # - name: Clone repositories from GitLab with token authentication
+    #   ansible.builtin.git:
+    #     repo: "{{ item.repo }}"
+    #     dest: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
+    #     version: "{{ vars[item.branch_var] | default('master') }}"
+    #     update: true
+    #     clone: true
+    #   loop: "{{ projects }}"
+    #   poll: 1
+    #   when: customer_type in ["test", "VIP", "regular"]
 
-    # چک‌اوت کردن تگ خاص برای هر مشتری
-    - name: Checkout the specific tag for each project
-      ansible.builtin.shell: |
-        cd "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
-        git checkout {{ vars[item.tag_var][inventory_hostname] }}
+    # # چک‌اوت کردن تگ خاص برای هر مشتری
+    # - name: Checkout the specific tag for each project
+    #   ansible.builtin.shell: |
+    #     cd "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
+    #     git checkout {{ vars[item.tag_var][inventory_hostname] }}
+    #   loop: "{{ projects }}"
+    #   poll: 1
+    #   when: customer_type in ["test", "VIP", "regular"]
+    #   changed_when: false
+
+    - name: Make dir projects
+      ansible.builtin.file:
+        path: "{{ project_path }}/{{ inventory_hostname }}/{{ item }}"
+        state: directory
+        mode: '0755'
       poll: 1
-      loop: "{{ projects }}"
-      when: customer_type in ["test", "VIP", "regular"]
-      changed_when: false
+      loop:
+        - "calibri"
+        - "calibri-portal"
+        - "calibri-portal-frontend"
+
+    - name: Make dir projects
+      ansible.builtin.file:
+        path: "{{ project_path }}/{{ inventory_hostname }}/{{ item }}/docker"
+        state: directory
+        mode: '0755'
+      poll: 1
+      loop:
+        - "calibri"
+        - "calibri-portal"
+        - "calibri-portal-frontend"
 
     # کپی کردن فایل‌های docker-compose به پوشه پروژه‌ها
     - name: Copy docker-compose files to the project folder
@@ -236,7 +212,7 @@
       ansible.builtin.copy:
         dest: "{{ project_path }}/{{ inventory_hostname }}/calibri-portal-frontend/bashUrl.js"
         content: |
-          const baseUrl = 'http://localhost:{{ customer_portal_ports[inventory_hostname] }}';
+          const baseUrl = 'http://localhost:{{ customer_portal_ports }}';
           export default baseUrl;
         mode: '0644'
       poll: 1
@@ -249,18 +225,19 @@
       ansible.builtin.set_fact:
         database_url: |
           mysql://{{ portal_mysql_user }}:{{ portal_mysql_password }}@
-          {{ container_name }}-portal-db/{{ portal_mysql_db_name }}?
+          {{ customer_containers }}-portal-db/{{ portal_mysql_db_name }}?
           serverVersion=10.11.2-MariaDB&charset=utf8mb4
-        base_url: "http://localhost:{{ customer_gateway_ports[inventory_hostname] }}"
+        base_url: "http://localhost:{{ customer_gateway_ports }}"
       poll: 1
 
+    # ایجاد فایل .env.local برای calibri-portal
     - name: Create file for calibri-portal project
       ansible.builtin.copy:
         dest: "{{ project_path }}/{{ inventory_hostname }}/calibri-portal-frontend/.env.local"
         content: |
           DATABASE_URL="{{ database_url }}"
           BASE_URL="{{ base_url }}"
-        mode: '0644'
+        mode: '0644'  # سطح دسترسی مناسب برای فایل
       when: customer_type in ['test', 'VIP', 'regular']
       changed_when: false
       poll: 1
@@ -276,7 +253,7 @@
           $query_builder = TRUE;
           $db['default'] = array(
               'dsn'  => '',
-              'hostname' => '{{ container_name }}-gateway-db',
+              'hostname' => '{{ customer_containers[inventory_hostname] }}-gateway-db',  # اصلاح نام متغیر
               'username' => '{{ gateway_mysql_user }}',
               'password' => '{{ gateway_mysql_password }}',
               'database' => '{{ gateway_mysql_db_name }}',
