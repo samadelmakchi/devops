@@ -21,4 +21,4 @@ all:
   vars:
     ansible_ssh_private_key_file: id_rsa  # فقط در صورت نیاز به SSH برای ماشین‌های دیگر
     ansible_user: your_ssh_user           # فقط در صورت نیاز به SSH برای ماشین‌های دیگر
-    gitlab_token: ""
+    gitlab_token: "glpat-WVEYpXFz1ShsTsma9bzU"
