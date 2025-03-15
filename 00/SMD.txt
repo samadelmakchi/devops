@@ -23,4 +23,3 @@ docker compose -p project_name up -d
 # to down the compose project
 docker compose -o project_name down
 
-glpat-WVEYpXFz1ShsTsma9bzU
