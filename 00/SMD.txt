@@ -23,3 +23,51 @@ docker compose -p project_name up -d
 # to down the compose project
 docker compose -o project_name down
 
+glpat-WVEYpXFz1ShsTsma9bzU
+
+
+
+    # تعریف پروژه‌ها و نام‌های پوشه‌ها
+    - name: Define project repositories
+      ansible.builtin.set_fact:
+        projects:
+          - name: "calibri"
+            # repo: "https://oauth2:{{ gitlab_token }}@gitlab.com/nasser-man/calibri.git"
+            folder: "calibri"
+            branch_var: "customer_gateway_git_branches"
+            tag_var: "customer_gateway_git_tags"
+            compose_file: "docker-compose-calibri.yml.j2"
+          - name: "calibri-portal"
+            # repo: "https://oauth2:{{ gitlab_token }}@gitlab.com/nasser-man/calibri-portal.git"
+            folder: "calibri-portal"
+            branch_var: "customer_portal_git_branches"
+            tag_var: "customer_portal_git_tags"
+            compose_file: "docker-compose-portal.yml.j2"
+          - name: "calibri-portal-frontend"
+            # repo: "https://oauth2:{{ gitlab_token }}@gitlab.com/nasser-man/calibri-portal-frontend.git"
+            folder: "calibri-portal-frontend"
+            branch_var: "customer_portal_frontend_git_branches"
+            tag_var: "customer_portal_frontend_git_tags"
+            compose_file: "docker-compose-portal-frontend.yml.j2"
+
+    # # کلون کردن پروژه‌ها از گیتلب با استفاده از HTTPS و GitLab Token
+    # - name: Clone repositories from GitLab with token authentication
+    #   ansible.builtin.git:
+    #     repo: "{{ item.repo }}"
+    #     dest: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
+    #     version: "{{ vars[item.branch_var] | default('master') }}"
+    #     update: true
+    #     clone: true
+    #   loop: "{{ projects }}"
+    #   poll: 1
+    #   when: customer_type in ["test", "VIP", "regular"]
+
+    # # چک‌اوت کردن تگ خاص برای هر مشتری
+    # - name: Checkout the specific tag for each project
+    #   ansible.builtin.shell: |
+    #     cd "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
+    #     git checkout {{ vars[item.tag_var][inventory_hostname] }}
+    #   loop: "{{ projects }}"
+    #   poll: 1
+    #   when: customer_type in ["test", "VIP", "regular"]
+    #   changed_when: false
