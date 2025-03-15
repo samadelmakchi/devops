@@ -224,8 +224,7 @@
     - name: Set variables for .env.local content
       ansible.builtin.set_fact:
         database_url: |
-          mysql://{{ portal_mysql_user }}:{{ portal_mysql_password }}@
-          {{ customer_containers }}-portal-db/{{ portal_mysql_db_name }}?
+          mysql://{{ portal_mysql_user }}:{{ portal_mysql_password }}@{{ customer_containers }}-portal-db/{{ portal_mysql_db_name }}?
           serverVersion=10.11.2-MariaDB&charset=utf8mb4
         base_url: "http://localhost:{{ customer_gateway_ports }}"
       poll: 1
