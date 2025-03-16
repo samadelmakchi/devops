@@ -1,29 +1,25 @@
-فاز 1 :
+- تقسیم فایل پلی بوک به چند فایل
+
 کلون و چک اوت
 - مشتری جدید : کلون
 - مشتری قبلی : اگر تگ یا برنچ تغییر کرده داون و سپس آپ و در غیر اینصورت بیخیال شدن
 
-
-فاز 2 :
-- تست کلی روی سیستم خودم
-
-
-فاز توسعه : 
-- فقط یکبار لاگین کند و ناقص است
 - کد همه تست ها مانده است
+
 - همه فایل های لاگ را در fluentd هم ذخیره بکنه
+
 - اضافه کردن مونگو و سایر پایگاه داده ها
-- تقسیم فایل پلی بوک به چند فایل
+
 
 
 
 # to up the compose project
-docker compose -p project_name up -d
+docker compose -p {{ inventory_hostname }}-{{ item.folder }} up -d
 
 # to down the compose project
 docker compose -o project_name down
 
 
-
+docker ps --filter "name=localhost-portal" --filter "name=localhost-portal-db" -q
 
 

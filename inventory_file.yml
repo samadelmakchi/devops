@@ -16,7 +16,39 @@ all:
           customer_portal_ports: 3001
           customer_portal_frontend_ports: 4001
           customer_network_names: "test_alfa_network"
-          customer_containers: "test_alfa"
+          customer_containers: "test_alfa_container"
+
+        # nikan:
+        #   ansible_connection: local  # بدون نیاز به SSH
+        #   customer_type: "regular"
+        #   customer_name: "نیکان"
+        #   customer_gateway_git_branches: "dev"
+        #   customer_gateway_git_tags: "02.69-dev"
+        #   customer_portal_git_branches: "dev"
+        #   customer_portal_git_tags: "01-dev"
+        #   customer_portal_frontend_git_branches: "dev"
+        #   customer_portal_frontend_git_tags: "01-dev"
+        #   customer_gateway_ports: 8002
+        #   customer_portal_ports: 3002
+        #   customer_portal_frontend_ports: 4002
+        #   customer_network_names: "nikan_network"
+        #   customer_containers: "nikan_container"
+
+        # simnad:
+        #   ansible_connection: local  # بدون نیاز به SSH
+        #   customer_type: "VIP"
+        #   customer_name: "سیمناد"
+        #   customer_gateway_git_branches: "dev"
+        #   customer_gateway_git_tags: "02.69-dev"
+        #   customer_portal_git_branches: "dev"
+        #   customer_portal_git_tags: "01-dev"
+        #   customer_portal_frontend_git_branches: "dev"
+        #   customer_portal_frontend_git_tags: "01-dev"
+        #   customer_gateway_ports: 8003
+        #   customer_portal_ports: 3003
+        #   customer_portal_frontend_ports: 4003
+        #   customer_network_names: "simnad_network"
+        #   customer_containers: "simnad_container"
 
   vars:
     ansible_ssh_private_key_file: id_rsa  # فقط در صورت نیاز به SSH برای ماشین‌های دیگر

@@ -1,34 +1,34 @@
 services:
-  {{ container_name }}-portal:
-    container_name: {{ container_name }}-portal
+  {{ customer_containers }}-portal:
+    container_name: {{ customer_containers }}-portal
     build:
       context: .
     volumes:
       - ..:/var/www
     depends_on:
-      - {{ container_name }}-portal-db
+      - {{ customer_containers }}-portal-db
     ports:
-      - {{ portal_port }}:80
+      - {{ customer_portal_ports }}:80
     networks:
-      - {{ network_name }}
+      - {{ customer_network_names }}
 
-  {{ container_name }}-portal-db:
+  {{ customer_containers }}-portal-db:
     image: mariadb:10.6.20-focal
-    container_name: {{ container_name }}-portal-db
+    container_name: {{ customer_containers }}-portal-db
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
       MYSQL_ROOT_PASSWORD: {{ portal_mysql_root_password }}
       MYSQL_DATABASE: {{ portal_mysql_db_name }}
       MYSQL_USER: {{ portal_mysql_user }}
       MYSQL_PASSWORD: {{ portal_mysql_password }}
-      INSTANCE_NAME:{{ container_name }}
+      INSTANCE_NAME: {{ customer_containers }}
     volumes:
       - ./init/:/docker-entrypoint-initdb.d/
     networks:
-      - {{ network_name }}
+      - {{ customer_network_names }}
 
 networks:
-  {{ network_name }}:
-    name: {{ network_name }}
+  {{ customer_network_names }}:
+    name: {{ customer_network_names }}
     driver: bridge
     external: true

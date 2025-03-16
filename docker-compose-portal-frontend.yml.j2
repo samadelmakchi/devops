@@ -1,21 +1,21 @@
 services:
-  {{ container_name }}-portal-frontend:
-    container_name: {{ container_name }}-portal-frontend
+  {{ customer_containers }}-portal-frontend:
+    container_name: {{ customer_containers }}-portal-frontend
     image: node:22
     working_dir: /app
     volumes:
       - ../:/app
     command: bash -c "npm install && npm run dev"
     ports:
-      - {{ portal_frontend_port }}:5173
+      - {{ customer_portal_frontend_ports }}:5173
     networks:
-      - {{ network_name }}
+      - {{ customer_network_names }}
     environment:
-      INSTANCE_NAME:{{ container_name }}
+      INSTANCE_NAME: {{ customer_containers }}
 
 networks:
-  {{ network_name }}:
-    name: {{ network_name }}
+  {{ customer_network_names }}:
+    name: {{ customer_network_names }}
     driver: bridge
     external: true
 

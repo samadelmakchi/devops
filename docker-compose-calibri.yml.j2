@@ -1,19 +1,21 @@
 services:
-  {{ container_name }}-gateway:
-    container_name: {{ container_name }}-gateway
+  {{ customer_containers }}-gateway:
+    container_name: {{ customer_containers }}-gateway
     build: .
     volumes:
       - ../admin:/var/www/html
       - ../admin/captcha_images:/var/www/html/captcha_images
       - ../admin/uploads:/var/www/html/uploads
     ports:
-      - {{ gateway_port }}:80
+      - "{{ customer_gateway_ports }}:80"
     networks:
-      - {{ network_name }}
+      - "{{ customer_network_names }}"
+    environment:
+      INSTANCE_NAME: {{ customer_containers }}
 
-  {{ container_name }}-gateway-db:
+  {{ customer_containers }}-gateway-db:
     image: mariadb:10.6.20-focal
-    container_name: {{ container_name }}-gateway-db
+    container_name: {{ customer_containers }}-gateway-db
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     volumes:
       - ./init/:/docker-entrypoint-initdb.d/
@@ -23,12 +25,12 @@ services:
       MYSQL_DATABASE: {{ gateway_mysql_db_name }}
       MYSQL_USER: {{ gateway_mysql_user }}
       MYSQL_PASSWORD: {{ gateway_mysql_password }}
-      INSTANCE_NAME:{{ container_name }}
+      INSTANCE_NAME: {{ customer_containers }}
     networks:
-      - {{ network_name }}
+      - {{ customer_network_names }}
 
 networks:
-  {{ network_name }}:
-    name: {{ network_name }}
+  {{ customer_network_names }}:
+    name: {{ customer_network_names }}
     driver: bridge
     external: true
