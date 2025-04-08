@@ -34,42 +34,15 @@ sudo apt-get install -y cron || sudo apt-get install cron
 
 ---
 
-### مراحل تنظیم SSH Key برای اتصال به GitLab
+### ساخت Token برای اتصال به GitLab
 
-**ایجاد SSH Key**
-
-```bash
-ssh-keygen -t rsa -b 4096 -C "samad.elmakchi@gmail.com"
-```
-این دستور یک جفت کلید SSH (یک کلید خصوصی و یک کلید عمومی) ایجاد می‌کند. برای ذخیره‌سازی، می‌توانید مکان پیش‌فرض `(~/.ssh/id_rsa)` را بپذیرید.
-
-**اضافه کردن کلید عمومی به GitLab**
-
-```bash
-cat ~/.ssh/id_rsa.pub
-```
-به GitLab بروید، به تنظیمات کاربری خود (User Settings) بروید و به بخش SSH Keys بروید.
-
-کلید عمومی را در بخش Add SSH Key قرار دهید و سپس کلید را اضافه کنید.
-
-**بررسی اتصال SSH به GitLab**
-
-برای بررسی صحت اتصال به GitLab با استفاده از SSH، می‌توانید از دستور زیر استفاده کنید:
-
-```bash
-ssh -T git@gitlab.com
-```
-اگر اتصال به درستی انجام شود، پیامی مشابه به این دریافت خواهید کرد:
-
-```bash
-Welcome to GitLab, @your_username!
-```
+GitLab >> Preferences >> Access tokens >> Add new token
 
 ---
 
 ### اجرای پلی بوک آنسیبل
 ```bash
-ansible-playbook -i inventory_file playbook.yml
+sudo ansible-playbook -i inventory_file.yml playbook.yml
 ```
 ---
 

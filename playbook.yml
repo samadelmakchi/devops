@@ -23,6 +23,8 @@
     portal_mysql_password: "1234"
     portal_mysql_user: "calibri_portal"
     portal_mysql_db_name: "calibri_portal"
+    pu: "calibri_portal"
+    pp: "1234"
 
     gateway_database_type: "mysql"
     gateway_mysql_root_password: "1234"
@@ -200,9 +202,7 @@
     # ایجاد فایل .env.local برای calibri-portal
     - name: Set variables for .env.local content
       ansible.builtin.set_fact:
-        database_url: |
-          mysql://{{ portal_mysql_user }}:{{ portal_mysql_password }}@{{ customer_containers }}-portal-db/{{ portal_mysql_db_name }}?
-          serverVersion=10.11.2-MariaDB&charset=utf8mb4
+        database_url: "mysql://{{ pu }}:{{ pp }}@{{ customer_containers }}-portal-db/{{ portal_database_type }}?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
         base_url: "http://localhost:{{ customer_gateway_ports }}"
       poll: 1
 
