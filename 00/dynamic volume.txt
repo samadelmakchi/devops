@@ -1,0 +1,26 @@
+- name: Extract volume names from all docker-compose.yml files
+      ansible.builtin.shell: |
+        /bin/bash -c "
+          set -o pipefail
+          if [ -f '{{ item }}' ]; then
+            grep -oP '^\s*-\s*(\S+):' '{{ item }}' | sed 's/^\s*-\s*\(\S\+\):/\1/'
+          fi
+        "
+      args:
+        executable: /bin/bash
+      loop:
+        - "{{ project_path }}/{{ inventory_hostname }}/portal-frontend/docker/docker-compose.yml"
+        - "{{ project_path }}/{{ inventory_hostname }}/portal/docker/docker-compose.yml"
+        - "{{ project_path }}/{{ inventory_hostname }}/gateway/docker/docker-compose.yml"
+      register: volume_results
+      when: customer_type in ["test", "VIP", "regular"]
+      changed_when: false
+      poll: 1
+
+    - name: Save all extracted volume names to a file
+      ansible.builtin.copy:
+        content: "{{ volume_results.results | map(attribute='stdout_lines') | list | flatten | unique | join('\n') }}"
+        dest: "{{ info_path }}/volumes/{{ inventory_hostname }}.txt"
+        mode: '0644'
+      when: customer_type in ["test", "VIP", "regular"]
+      poll: 1

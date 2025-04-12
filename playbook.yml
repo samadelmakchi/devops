@@ -21,15 +21,16 @@
     portal_database_type: "mysql"
     portal_mysql_root_password: "1234"
     portal_mysql_password: "1234"
-    portal_mysql_user: "calibri_portal"
+    portal_mysql_user: "portal"
     portal_mysql_db_name: "calibri_portal"
-    pu: "calibri_portal"
+    pu: "portal"
     pp: "1234"
+    pd: "calibri_portal"
 
     gateway_database_type: "mysql"
     gateway_mysql_root_password: "1234"
     gateway_mysql_password: "1234"
-    gateway_mysql_user: "calibri_gateway"
+    gateway_mysql_user: "gateway"
     gateway_mysql_db_name: "calibri_gateway"
 
   tasks:
@@ -128,21 +129,21 @@
     - name: Define project repositories
       ansible.builtin.set_fact:
         projects:
-          - name: "calibri"
+          - name: "gateway"
             repo: "https://oauth2:{{ gitlab_token }}@gitlab.com/nasser-man/calibri.git"
-            folder: "calibri"
+            folder: "gateway"
             branch_var: "customer_gateway_git_branches"
             tag_var: "customer_gateway_git_tags"
-            compose_file: "docker-compose-calibri.yml.j2"
-          - name: "calibri-portal"
+            compose_file: "docker-compose-gateway.yml.j2"
+          - name: "portal"
             repo: "https://oauth2:{{ gitlab_token }}@gitlab.com/nasser-man/calibri-portal.git"
-            folder: "calibri-portal"
+            folder: "portal"
             branch_var: "customer_portal_git_branches"
             tag_var: "customer_portal_git_tags"
             compose_file: "docker-compose-portal.yml.j2"
-          - name: "calibri-portal-frontend"
+          - name: "portal-frontend"
             repo: "https://oauth2:{{ gitlab_token }}@gitlab.com/nasser-man/calibri-portal-frontend.git"
-            folder: "calibri-portal-frontend"
+            folder: "portal-frontend"
             branch_var: "customer_portal_frontend_git_branches"
             tag_var: "customer_portal_frontend_git_tags"
             compose_file: "docker-compose-portal-frontend.yml.j2"
@@ -186,10 +187,10 @@
       when: customer_type in ["test", "VIP", "regular"]
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ کپی فایل ها
-    # ایجاد فایل bashUrl.js برای calibri-portal-frontend
-    - name: Create file for calibri-portal-frontend project
+    # ایجاد فایل bashUrl.js برای portal-frontend
+    - name: Create file for portal-frontend project
       ansible.builtin.copy:
-        dest: "{{ project_path }}/{{ inventory_hostname }}/calibri-portal-frontend/bashUrl.js"
+        dest: "{{ project_path }}/{{ inventory_hostname }}/portal-frontend/bashUrl.js"
         content: |
           const baseUrl = 'http://localhost:{{ customer_portal_ports }}';
           export default baseUrl;
@@ -199,17 +200,17 @@
       changed_when: false
       become: true
 
-    # ایجاد فایل .env.local برای calibri-portal
+    # ایجاد فایل .env.local برای portal
     - name: Set variables for .env.local content
       ansible.builtin.set_fact:
-        database_url: "mysql://{{ pu }}:{{ pp }}@{{ customer_containers }}-portal-db/{{ portal_database_type }}?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
+        database_url: "mysql://{{ pu }}:{{ pp }}@{{ customer_containers }}-portal-db:3306//{{ pd }}?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
         base_url: "http://localhost:{{ customer_gateway_ports }}"
       poll: 1
 
-    # ایجاد فایل .env.local برای calibri-portal
-    - name: Create file for calibri-portal project
+    # ایجاد فایل .env.local برای portal
+    - name: Create file for portal project
       ansible.builtin.copy:
-        dest: "{{ project_path }}/{{ inventory_hostname }}/calibri-portal-frontend/.env.local"
+        dest: "{{ project_path }}/{{ inventory_hostname }}/portal-frontend/.env.local"
         content: |
           DATABASE_URL="{{ database_url }}"
           BASE_URL="{{ base_url }}"
@@ -219,10 +220,10 @@
       poll: 1
       become: true
 
-    # ایجاد فایل my_database.php برای calibri
-    - name: Create my_database.php for calibri
+    # ایجاد فایل my_database.php برای gateway
+    - name: Create my_database.php for gateway
       ansible.builtin.copy:
-        dest: "{{ project_path }}/{{ inventory_hostname }}/calibri/admin/application/config/my_database.php"
+        dest: "{{ project_path }}/{{ inventory_hostname }}/gateway/admin/application/config/my_database.php"
         content: |
           <?php defined('BASEPATH') OR exit('No direct script access allowed');
           $active_group = 'default';
@@ -280,106 +281,165 @@
       poll: 1
       when: customer_type in ["test", "VIP", "regular"]
 
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر
-    # چک کردن وضعیت و اجرای docker-compose برای calibri
-    - name: Check if Docker containers for calibri are running
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر gateway
+    # چک کردن وضعیت و اجرای docker-compose برای gateway
+    - name: Find all matching containers for gateway
       ansible.builtin.shell: |
-        docker ps --filter "name={{ customer_containers }}-gateway" --filter "name={{ customer_containers }}-gateway-db" -q
+        docker ps -a --filter "name={{ customer_containers }}-gateway" --filter "name={{ customer_containers }}-gateway-db" -q
+      register: matching_containers_gateway
       poll: 1
-      register: docker_running_calibri
       changed_when: false
       failed_when: false
 
-    # - name: Debug the output of docker_running_calibri
-    #   ansible.builtin.debug:
-    #     var: docker_running_calibri.stdout
+    - name: Debug the output of matching_containers_gateway for gateway
+      ansible.builtin.debug:
+        var: matching_containers_gateway.stdout
 
-    - name: Stop running Docker containers for calibri
-      ansible.builtin.command:
-        cmd: docker compose -p {{ inventory_hostname }}-gateway -f "{{ project_path }}/{{ inventory_hostname }}/calibri/docker/docker-compose.yml" down
+    - name: Stop matching containers for gateway
+      ansible.builtin.shell: |
+        docker stop {{ matching_containers_gateway.stdout_lines | join(' ') }}
+      when: matching_containers_gateway.stdout != ""
+      register: stop_result
       poll: 1
-      when: docker_running_calibri.stdout != ""
-      changed_when: true
+      failed_when: stop_result.rc != 0 and '"No such container"' not in stop_result.stderr
+      changed_when: stop_result.stdout != ""
 
-    - name: Run docker-compose for calibri
-      ansible.builtin.command:
-        cmd: docker compose -p {{ inventory_hostname }}-gateway -f "{{ project_path }}/{{ inventory_hostname }}/calibri/docker/docker-compose.yml" up -d
+    - name: Kill matching containers (if not already stopped) for gateway
+      ansible.builtin.shell: |
+        docker kill {{ matching_containers_gateway.stdout_lines | join(' ') }} || true
+      when: matching_containers_gateway.stdout != ""
+      register: kill_result
       poll: 1
+      failed_when: false
+      changed_when: "'is not running' not in kill_result.stderr and kill_result.stdout != ''"
+
+    - name: Remove matching containers for gateway
+      ansible.builtin.shell: |
+        docker rm {{ matching_containers_gateway.stdout_lines | join(' ') }}
+      when: matching_containers_gateway.stdout != ""
+      register: rm_result
+      failed_when: rm_result.rc != 0 and '"No such container"' not in rm_result.stderr
+      changed_when: rm_result.stdout != ""
+      poll: 1
+
+    - name: Run docker-compose for gateway
+      ansible.builtin.command:
+        cmd: docker compose -p {{ customer_containers }}-gateway -f "{{ project_path }}/{{ inventory_hostname }}/gateway/docker/docker-compose.yml" up -d
       when: customer_type in ["test", "VIP", "regular"]
+      poll: 1
       changed_when: false
 
-    # چک کردن وضعیت و اجرای docker-compose برای calibri-portal
-    - name: Check if Docker containers for calibri-portal are running
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر portal
+    # چک کردن وضعیت و اجرای docker-compose برای portal
+    - name: Find all matching containers for portal
       ansible.builtin.shell: |
-        docker ps --filter "name={{ customer_containers }}-portal" --filter "name={{ customer_containers }}-portal-db" -q
+        docker ps -a --filter "name={{ customer_containers }}-portal" --filter "name={{ customer_containers }}-portal-db" -q
+      register: matching_containers_portal
       poll: 1
-      register: docker_running_calibri_portal
       changed_when: false
       failed_when: false
 
-    - name: Stop running Docker containers for calibri-portal
-      ansible.builtin.command:
-        cmd: >
-          docker compose -p {{ inventory_hostname }}-calibri-portal
-          -f "{{ project_path }}/{{ inventory_hostname }}/calibri-portal/docker/docker-compose.yml"
-          down
-      poll: 1
-      when: docker_running_calibri_portal.stdout != ""
-      changed_when: true
+    - name: Debug the output of matching_containers_portal for portal
+      ansible.builtin.debug:
+        var: matching_containers_portal.stdout
 
-    - name: Run docker-compose for calibri-portal
+    - name: Stop matching containers for portal
+      ansible.builtin.shell: |
+        docker stop {{ matching_containers_portal.stdout_lines | join(' ') }}
+      when: matching_containers_portal.stdout != ""
+      register: stop_result
+      poll: 1
+      failed_when: stop_result.rc != 0 and '"No such container"' not in stop_result.stderr
+      changed_when: stop_result.stdout != ""
+
+    - name: Kill matching containers (if not already stopped) for portal
+      ansible.builtin.shell: |
+        docker kill {{ matching_containers_portal.stdout_lines | join(' ') }} || true
+      when: matching_containers_portal.stdout != ""
+      register: kill_result
+      poll: 1
+      failed_when: false
+      changed_when: "'is not running' not in kill_result.stderr and kill_result.stdout != ''"
+
+    - name: Remove matching containers for portal
+      ansible.builtin.shell: |
+        docker rm {{ matching_containers_portal.stdout_lines | join(' ') }}
+      when: matching_containers_portal.stdout != ""
+      register: rm_result
+      failed_when: rm_result.rc != 0 and '"No such container"' not in rm_result.stderr
+      changed_when: rm_result.stdout != ""
+      poll: 1
+
+    - name: Run docker-compose for portal
+      ansible.builtin.command:
+        cmd: docker compose -p {{ customer_containers }}-portal -f "{{ project_path }}/{{ inventory_hostname }}/portal/docker/docker-compose.yml" up -d
+      when: customer_type in ["test", "VIP", "regular"]
+      poll: 1
+      changed_when: false
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر portal-frontend
+    # چک کردن وضعیت و اجرای docker-compose برای portal-frontend
+    - name: Find all matching containers for portal-frontend
+      ansible.builtin.shell: |
+        docker ps -a --filter "name={{ customer_containers }}-portal-frontend" -q
+      register: matching_containers_portal_frontend
+      poll: 1
+      changed_when: false
+      failed_when: false
+
+    - name: Debug the output of matching_containers_portal_frontend for portal-frontend
+      ansible.builtin.debug:
+        var: matching_containers_portal_frontend.stdout
+
+    - name: Stop matching containers for portal-frontend
+      ansible.builtin.shell: |
+        docker stop {{ matching_containers_portal_frontend.stdout_lines | join(' ') }}
+      when: matching_containers_portal_frontend.stdout != ""
+      register: stop_result
+      poll: 1
+      failed_when: stop_result.rc != 0 and '"No such container"' not in stop_result.stderr
+      changed_when: stop_result.stdout != ""
+
+    - name: Kill matching containers (if not already stopped) for portal-frontend
+      ansible.builtin.shell: |
+        docker kill {{ matching_containers_portal_frontend.stdout_lines | join(' ') }} || true
+      when: matching_containers_portal_frontend.stdout != ""
+      register: kill_result
+      poll: 1
+      failed_when: false
+      changed_when: "'is not running' not in kill_result.stderr and kill_result.stdout != ''"
+
+    - name: Remove matching containers for portal-frontend
+      ansible.builtin.shell: |
+        docker rm {{ matching_containers_portal_frontend.stdout_lines | join(' ') }}
+      when: matching_containers_portal_frontend.stdout != ""
+      register: rm_result
+      failed_when: rm_result.rc != 0 and '"No such container"' not in rm_result.stderr
+      changed_when: rm_result.stdout != ""
+      poll: 1
+
+    - name: Run docker-compose for portal-frontend
       ansible.builtin.command:
         cmd: >
-          docker compose -p {{ inventory_hostname }}-calibri-portal
-          -f "{{ project_path }}/{{ inventory_hostname }}/calibri-portal/docker/docker-compose.yml"
+          docker compose -p {{ inventory_hostname }}-portal-frontend
+          -f "{{ project_path }}/{{ inventory_hostname }}/portal-frontend/docker/docker-compose.yml"
           up -d
-      poll: 1
       when: customer_type in ["test", "VIP", "regular"]
-      changed_when: false
-
-    # چک کردن وضعیت و اجرای docker-compose برای calibri-portal-frontend
-    - name: Check if Docker containers for calibri-portal-frontend are running
-      ansible.builtin.shell: |
-        docker ps --filter "name={{ customer_containers }}-portal-frontend" -q
       poll: 1
-      register: docker_running_calibri_portal_frontend
-      changed_when: false
-      failed_when: false
-
-    - name: Stop running Docker containers for calibri-portal-frontend
-      ansible.builtin.command:
-        cmd: >
-          docker compose -p {{ inventory_hostname }}-calibri-portal-frontend
-          -f "{{ project_path }}/{{ inventory_hostname }}/calibri-portal-frontend/docker/docker-compose.yml"
-          down
-      poll: 1
-      when: docker_running_calibri_portal_frontend.stdout != ""
-      changed_when: true
-
-    - name: Run docker-compose for calibri-portal-frontend
-      ansible.builtin.command:
-        cmd: >
-          docker compose -p {{ inventory_hostname }}-calibri-portal-frontend
-          -f "{{ project_path }}/{{ inventory_hostname }}/calibri-portal-frontend/docker/docker-compose.yml"
-          up -d
-      poll: 1
-      when: customer_type in ["test", "VIP", "regular"]
       changed_when: false
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای میگریشن ها
     # یافتن پوشه های ولوم از فایل داکر کامپوز
-    - name: Extract volume names from docker-compose.yml using bash
-      ansible.builtin.command:
-        cmd: >
-          /bin/bash -c "
-            set -o pipefail;
-            volumes=$(grep -oP '^\s*-\s*(\S+):' {{ project_path }}/docker-compose.yml | sed 's/^\s*-\s*\(\S\+\):/\1/');
-            echo \"$volumes\" > {{ info_path }}/volumes/{{ inventory_hostname }}.txt"
-      register: volumes_result
-      poll: 1
-      when: customer_type in ["test", "VIP", "regular"]
-      changed_when: false
-
+    - name: Write static volume list to file
+      ansible.builtin.copy:
+        content: |
+          gateway/admin/uploads
+          gateway/admin/captcha_images
+          gateway/admin
+          portal
+          portal-frontend
+        dest: "{{ info_path }}/volumes/{{ inventory_hostname }}.txt"
+        mode: '0644'
 
     # اعطای دسترسی به پوشه‌های ولوم بر اساس فایل ولوم‌های هر مشتری
     - name: Grant write permissions to Docker volume directories on the host
@@ -398,6 +458,10 @@
         name: "{{ customer_containers }}-portal"
         command: |
           bash -c "
+            # بررسی اینکه پایگاه داده قبلاً وجود دارد یا نه
+            if ! php bin/console doctrine:database:exists --env=prod; then
+              php bin/console doctrine:database:create --env=prod;
+            fi &&
             composer install &&
             php bin/console doctrine:migrations:migrate --no-interaction
           "
@@ -415,7 +479,7 @@
       when: customer_type in ["test", "VIP", "regular"]
 
     # میگریشن در کانتینر کالیبری
-    - name: Migration for calibri
+    - name: Migration for gateway
       community.docker.docker_container:
         name: "{{ customer_containers }}-gateway"
         command: "php index.php migrate index false"
@@ -501,7 +565,7 @@
           #!/bin/bash
 
           # مسیر بکاپ
-          BACKUP_DIR="{{ backup_path }}/{{ inventory_hostname }}/$(date +'%Y-%m-%d')"
+          BACKUP_DIR="{{ backup_path }}/{{ inventory_hostname }}/$(date +'%Y-%m-%d-%H-%M-%S')"
           mkdir -p $BACKUP_DIR  # ایجاد پوشه برای بکاپ
 
           # فایل گزارش
@@ -509,14 +573,17 @@
           echo "Backup started at $(date)" >> $BACKUP_LOG
 
           # گرفتن لیست از ولوم‌ها از فایل مخصوص هر مشتری
-          VOLUMES=$(cat {{ info_path }}/volumes/{{ inventory_hostname }}.txt)
+          VOLUMES=$(head -n 1 {{ info_path }}/volumes/{{ inventory_hostname }}.txt)
 
-          # بکاپ از هر ولوم
-          for VOLUME in $VOLUMES; do
-            docker run --rm -v $VOLUME:/volume -v $BACKUP_DIR:/backup alpine \
-              tar czf /backup/$VOLUME.tar.gz -C /volume .  # فشرده‌سازی و ذخیره بکاپ
-            echo "Backup for volume $VOLUME completed at $(date)" >> $BACKUP_LOG
-          done
+          # خوندن هر خط از فایل و بکاپ گرفتن از هر ولوم
+          while IFS= read -r VOLUME; do
+            # اگه مسیر وجود نداشت، ادامه نده
+            [ -d "$VOLUME" ] || continue
+
+            ARCHIVE_NAME=$(basename "$VOLUME")
+            tar czf "$BACKUP_DIR/$ARCHIVE_NAME.tar.gz" -C "$VOLUME" .
+            echo "Backup for $VOLUME completed at $(date)" >> "$BACKUP_LOG"
+          done < "$VOLUMES"
 
           # گرفتن لیست از دیتابیس‌ها از فایل مخصوص هر مشتری
           DATABASES="{{ info_path }}/databases/{{ inventory_hostname }}.txt"
@@ -539,18 +606,20 @@
           done < "$DATABASES"
 
           # ارسال فایل بکاپ به تلگرام
-          TELEGRAM_TOKEN="YOUR_BOT_TOKEN"
-          CHAT_ID="YOUR_CHAT_ID"
-          BACKUP_FILE_PATH="$BACKUP_DIR/*.tar.gz"
+          echo "send backup to Telegram " >> $BACKUP_LOG
+          TELEGRAM_TOKEN="8104111863:AAG1Lic90mVzbFKbfOonWjh4oBZtEmCBQmY"
+          CHAT_ID="-1002529041410"
+          BACKUP_FILE_PATH="$BACKUP_DIR/*.gz"
           curl -X POST "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument" \
             -F document=@"$BACKUP_FILE_PATH" \
             -F chat_id="$CHAT_ID"
 
           # ارسال فایل به FTP
-          FTP_SERVER="ftp.server.com"
-          FTP_USER="ftp_user"
-          FTP_PASSWORD="ftp_password"
-          curl -T $BACKUP_FILE_PATH ftp://$FTP_SERVER/path/ --user $FTP_USER:$FTP_PASSWORD
+          # echo "send backup to FTP server" >> $BACKUP_LOG
+          # FTP_SERVER="ftp.server.com"
+          # FTP_USER="ftp_user"
+          # FTP_PASSWORD="ftp_password"
+          # curl -T $BACKUP_FILE_PATH ftp://$FTP_SERVER/path/ --user $FTP_USER:$FTP_PASSWORD
 
           echo "Backup completed at $(date)" >> $BACKUP_LOG
 

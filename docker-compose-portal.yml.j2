@@ -24,6 +24,7 @@ services:
       INSTANCE_NAME: {{ customer_containers }}
     volumes:
       - ./init/:/docker-entrypoint-initdb.d/
+      - ./db:/var/lib/mysql
     networks:
       - {{ customer_network_names }}
 
