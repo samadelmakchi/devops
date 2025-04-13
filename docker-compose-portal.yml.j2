@@ -11,6 +11,13 @@ services:
       - {{ customer_portal_ports }}:80
     networks:
       - {{ customer_network_names }}
+      - traefik_reverse_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.{{ inventory_hostname }}-portal.rule=Host(`{{ inventory_hostname }}.portal`)"
+      - "traefik.http.routers.{{ inventory_hostname }}-portal.entrypoints=websecure"
+      - "traefik.http.routers.{{ inventory_hostname }}-portal.tls.certresolver=myresolver"
+      - "traefik.http.services.{{ inventory_hostname }}-portal.loadbalancer.server.port=80"
 
   {{ customer_containers }}-portal-db:
     image: mariadb:10.6.20-focal
@@ -27,9 +34,12 @@ services:
       - ./db:/var/lib/mysql
     networks:
       - {{ customer_network_names }}
+      - traefik_reverse_proxy
 
 networks:
   {{ customer_network_names }}:
     name: {{ customer_network_names }}
     driver: bridge
+    external: true
+  traefik_reverse_proxy:
     external: true

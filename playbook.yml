@@ -21,16 +21,16 @@
     portal_database_type: "mysql"
     portal_mysql_root_password: "1234"
     portal_mysql_password: "1234"
-    portal_mysql_user: "portal"
+    portal_mysql_user: "root"
     portal_mysql_db_name: "calibri_portal"
-    pu: "portal"
+    pu: "root"
     pp: "1234"
     pd: "calibri_portal"
 
     gateway_database_type: "mysql"
     gateway_mysql_root_password: "1234"
     gateway_mysql_password: "1234"
-    gateway_mysql_user: "gateway"
+    gateway_mysql_user: "calibri_gateway"
     gateway_mysql_db_name: "calibri_gateway"
 
   tasks:
@@ -190,9 +190,9 @@
     # ایجاد فایل bashUrl.js برای portal-frontend
     - name: Create file for portal-frontend project
       ansible.builtin.copy:
-        dest: "{{ project_path }}/{{ inventory_hostname }}/portal-frontend/bashUrl.js"
+        dest: "{{ project_path }}/{{ inventory_hostname }}/portal-frontend/baseUrl.js"
         content: |
-          const baseUrl = 'http://localhost:{{ customer_portal_ports }}';
+          const baseUrl = 'http://{{ inventory_hostname }}:{{ customer_portal_ports }}';
           export default baseUrl;
         mode: '0644'
       poll: 1
@@ -203,14 +203,14 @@
     # ایجاد فایل .env.local برای portal
     - name: Set variables for .env.local content
       ansible.builtin.set_fact:
-        database_url: "mysql://{{ pu }}:{{ pp }}@{{ customer_containers }}-portal-db:3306//{{ pd }}?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
-        base_url: "http://localhost:{{ customer_gateway_ports }}"
+        database_url: "mysql://{{ pu }}:{{ pp }}@{{ customer_containers }}-portal-db:3306/{{ pd }}?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
+        base_url: "http://{{ inventory_hostname }}:{{ customer_gateway_ports }}"
       poll: 1
 
     # ایجاد فایل .env.local برای portal
     - name: Create file for portal project
       ansible.builtin.copy:
-        dest: "{{ project_path }}/{{ inventory_hostname }}/portal-frontend/.env.local"
+        dest: "{{ project_path }}/{{ inventory_hostname }}/portal/.env.local"
         content: |
           DATABASE_URL="{{ database_url }}"
           BASE_URL="{{ base_url }}"
@@ -249,6 +249,19 @@
               'failover' => array(),
               'save_queries' => TRUE
           );
+        mode: '0644'
+      when: customer_type in ['test', 'VIP', 'regular']
+      changed_when: false
+      poll: 1
+      become: true
+
+    # ایجاد فایل my_database.php برای gateway
+    - name: Create my_database.php for gateway
+      ansible.builtin.copy:
+        dest: "{{ project_path }}/{{ inventory_hostname }}/gateway/admin/application/config/my_config.php"
+        content: |
+          <?php defined('BASEPATH') OR exit('No direct script access allowed');
+          $config['base_url'] = "http://{{ inventory_hostname }}:{{ customer_gateway_ports }}";
         mode: '0644'
       when: customer_type in ['test', 'VIP', 'regular']
       changed_when: false
@@ -441,51 +454,55 @@
         dest: "{{ info_path }}/volumes/{{ inventory_hostname }}.txt"
         mode: '0644'
 
-    # اعطای دسترسی به پوشه‌های ولوم بر اساس فایل ولوم‌های هر مشتری
-    - name: Grant write permissions to Docker volume directories on the host
-      ansible.builtin.file:
-        path: "/var/lib/docker/volumes/{{ item }}/_data"
-        state: directory
-        mode: '0777'
-      poll: 1
-      loop: "{{ lookup('file', '{{ info_path }}/volumes/{{ inventory_hostname }}.txt').splitlines() }}"
-      become: true
+    # میگریشن در کانتینر پرتال و نصب کامپوزر
+    - name: Run composer install inside the container
+      community.docker.docker_container_exec:
+        container: "{{ customer_containers }}-portal"
+        command: composer install
+      register: composer_output
+
+    - name: Show composer install output
+      ansible.builtin.debug:
+        msg: |
+          STDOUT:
+          {{ composer_output.stdout }}
+          STDERR:
+          {{ composer_output.stderr }}
+
+    - name: Try to create database if it does not exist
+      community.docker.docker_container_exec:
+        container: "{{ customer_containers }}-portal"
+        command: php bin/console doctrine:database:create --env=prod --if-not-exists
+      register: db_create_result
+      ignore_errors: true
       when: customer_type in ["test", "VIP", "regular"]
 
-    # میگریشن در کانتینر پرتال و نصب کامپوزر
-    - name: Migration for portal
-      community.docker.docker_container:
-        name: "{{ customer_containers }}-portal"
-        command: |
-          bash -c "
-            # بررسی اینکه پایگاه داده قبلاً وجود دارد یا نه
-            if ! php bin/console doctrine:database:exists --env=prod; then
-              php bin/console doctrine:database:create --env=prod;
-            fi &&
-            composer install &&
-            php bin/console doctrine:migrations:migrate --no-interaction
-          "
-        state: started
-      poll: 1
-      when: customer_type in ["test", "VIP", "regular"]
+    # - name: Run migrations if database creation succeeded or was skipped
+    #   community.docker.docker_container_exec:
+    #     container: "{{ customer_containers }}-portal"
+    #     command: php bin/console doctrine:migrations:migrate --no-interaction --env=prod
 
     # اعطای دسترسی نوشتن به پوشه‌ها در کانتینر کالیبری
-    - name: Grant write permissions to folders in the container
+    - name: Ensure container is running
       community.docker.docker_container:
         name: "{{ customer_containers }}-gateway"
-        command: "chmod -R 777 uploads captcha_images"
         state: started
       poll: 1
+
+    - name: Grant write permissions to folders in the container
+      community.docker.docker_container_exec:
+        container: "{{ customer_containers }}-gateway"
+        command: "chmod -R 777 uploads captcha_images"
       when: customer_type in ["test", "VIP", "regular"]
+      poll: 1
 
     # میگریشن در کانتینر کالیبری
     - name: Migration for gateway
-      community.docker.docker_container:
-        name: "{{ customer_containers }}-gateway"
+      community.docker.docker_container_exec:
+        container: "{{ customer_containers }}-gateway"
         command: "php index.php migrate index false"
-        state: started
-      poll: 1
       when: customer_type in ["test", "VIP", "regular"]
+      poll: 1
 
     # یافتن پایگاه داده‌ها برای هر مشتری و ذخیره در یک فایل متنی
     - name: Extract database information for each customer

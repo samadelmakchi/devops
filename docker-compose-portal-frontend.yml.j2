@@ -10,12 +10,21 @@ services:
       - {{ customer_portal_frontend_ports }}:5173
     networks:
       - {{ customer_network_names }}
+      - traefik_reverse_proxy
     environment:
       INSTANCE_NAME: {{ customer_containers }}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.{{ inventory_hostname }}-portal-frontend.rule=Host(`{{ inventory_hostname }}.portal.frontend`)"
+      - "traefik.http.routers.{{ inventory_hostname }}-portal-frontend.entrypoints=websecure"
+      - "traefik.http.routers.{{ inventory_hostname }}-portal-frontend.tls.certresolver=myresolver"
+      - "traefik.http.services.{{ inventory_hostname }}-portal-frontend.loadbalancer.server.port=5173"
 
 networks:
   {{ customer_network_names }}:
     name: {{ customer_network_names }}
     driver: bridge
+    external: true
+  traefik_reverse_proxy:
     external: true
 

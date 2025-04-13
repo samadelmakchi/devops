@@ -10,8 +10,15 @@ services:
       - "{{ customer_gateway_ports }}:80"
     networks:
       - "{{ customer_network_names }}"
+      - traefik_reverse_proxy
     environment:
       INSTANCE_NAME: {{ customer_containers }}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.{{ inventory_hostname }}-gateway.rule=Host(`{{ inventory_hostname }}.gateway`)"
+      - "traefik.http.routers.{{ inventory_hostname }}-gateway.entrypoints=websecure"
+      - "traefik.http.routers.{{ inventory_hostname }}-gateway.tls.certresolver=myresolver"
+      - "traefik.http.services.{{ inventory_hostname }}-gateway.loadbalancer.server.port=80"
 
   {{ customer_containers }}-gateway-db:
     image: mariadb:10.6.20-focal
@@ -28,9 +35,14 @@ services:
       INSTANCE_NAME: {{ customer_containers }}
     networks:
       - {{ customer_network_names }}
+      - traefik_reverse_proxy
+    ports:
+      - "9001:3306"
 
 networks:
   {{ customer_network_names }}:
     name: {{ customer_network_names }}
     driver: bridge
+    external: true
+  traefik_reverse_proxy:
     external: true
