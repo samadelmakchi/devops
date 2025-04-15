@@ -441,20 +441,7 @@
       poll: 1
       changed_when: false
 
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای میگریشن ها
-    # یافتن پوشه های ولوم از فایل داکر کامپوز
-    - name: Write static volume list to file
-      ansible.builtin.copy:
-        content: |
-          gateway/admin/uploads
-          gateway/admin/captcha_images
-          gateway/admin
-          portal
-          portal-frontend
-        dest: "{{ info_path }}/volumes/{{ inventory_hostname }}.txt"
-        mode: '0644'
-
-    # میگریشن در کانتینر پرتال و نصب کامپوزر
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ میگریشن در کانتینر پرتال و نصب کامپوزر
     - name: Run composer install inside the container
       community.docker.docker_container_exec:
         container: "{{ customer_containers }}-portal"
@@ -469,6 +456,17 @@
           STDERR:
           {{ composer_output.stderr }}
 
+    - name: Check if DB container is running
+      community.docker.docker_container_info:
+        name: "{{ customer_containers }}-portal-db"
+      register: db_container_info
+
+    - name: Start the DB container if it's not running
+      community.docker.docker_container:
+        name: "{{ customer_containers }}-portal-db"
+        state: started
+      when: not db_container_info.container.State.Running | default(false)
+
     - name: Try to create database if it does not exist
       community.docker.docker_container_exec:
         container: "{{ customer_containers }}-portal"
@@ -477,10 +475,26 @@
       ignore_errors: true
       when: customer_type in ["test", "VIP", "regular"]
 
-    # - name: Run migrations if database creation succeeded or was skipped
-    #   community.docker.docker_container_exec:
-    #     container: "{{ customer_containers }}-portal"
-    #     command: php bin/console doctrine:migrations:migrate --no-interaction --env=prod
+    - name: Run migrations if database creation succeeded or was skipped
+      community.docker.docker_container_exec:
+        container: "{{ customer_containers }}-portal"
+        command: php bin/console doctrine:migrations:migrate --no-interaction --env=prod
+      when:
+        - customer_type in ["test", "VIP", "regular"]
+        - db_create_result is not failed
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ سایر
+    # یافتن پوشه های ولوم از فایل داکر کامپوز
+    - name: Write static volume list to file
+      ansible.builtin.copy:
+        content: |
+          gateway/admin/uploads
+          gateway/admin/captcha_images
+          gateway/admin
+          portal
+          portal-frontend
+        dest: "{{ info_path }}/volumes/{{ inventory_hostname }}.txt"
+        mode: '0644'
 
     # اعطای دسترسی نوشتن به پوشه‌ها در کانتینر کالیبری
     - name: Ensure container is running

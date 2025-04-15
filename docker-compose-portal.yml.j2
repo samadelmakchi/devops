@@ -14,13 +14,13 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.{{ inventory_hostname }}-portal.rule=Host(`{{ inventory_hostname }}.portal`)"
-      - "traefik.http.routers.{{ inventory_hostname }}-portal.entrypoints=websecure"
-      - "traefik.http.routers.{{ inventory_hostname }}-portal.tls.certresolver=myresolver"
-      - "traefik.http.services.{{ inventory_hostname }}-portal.loadbalancer.server.port=80"
+      - "traefik.http.routers.portal-{{ inventory_hostname }}.rule=Host(`portal.{{ inventory_hostname }}`)"
+      - "traefik.http.routers.portal-{{ inventory_hostname }}.entrypoints=websecure"
+      - "traefik.http.routers.portal-{{ inventory_hostname }}.tls.certresolver=myresolver"
+      - "traefik.http.services.portal-{{ inventory_hostname }}.loadbalancer.server.port=80"
 
   {{ customer_containers }}-portal-db:
-    image: mariadb:10.6.20-focal
+    image: mariadb:10.11
     container_name: {{ customer_containers }}-portal-db
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
