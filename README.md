@@ -40,10 +40,9 @@ sudo apt-get install -y cron || sudo apt-get install cron
 برای نصب Traefik در صورت نیاز از دستور زیر استفاده کنید
 ```bash
 cd traefik
+sudo docker compose up -d
 
-docker-compose up -d
-
-docker network create traefik_reverse_proxy
+sudo docker network create traefik_reverse_proxy
 ```
 
 ---
@@ -54,6 +53,18 @@ docker network create traefik_reverse_proxy
 GitLab >> Preferences >> Access tokens >> Add new token
 ```
 و توکن بدست امده را در فایل inventory_file.yml و در متغیر gitlab_token بنویسید
+
+---
+
+### 🛠️ نصب ابزارهای مورد نیاز
+```bash
+sudo apt update
+sudo apt install mysql-client
+sudo apt install postgresql-client
+sudo apt install gzip
+sudo apt install tar
+sudo apt install curl
+```
 
 ---
 

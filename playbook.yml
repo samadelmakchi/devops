@@ -40,7 +40,7 @@
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory
-        mode: '0755'
+        mode: '0777'
       poll: 1  # منتظر بمان تا عملیات کامل شود
       loop:
         - "{{ project_path }}"
@@ -53,7 +53,7 @@
       ansible.builtin.file:
         path: "{{ project_path }}/{{ inventory_hostname }}"
         state: directory
-        mode: '0755'
+        mode: '0777'
       poll: 1
       when: customer_type in ["test", "VIP", "regular"]
 
@@ -62,7 +62,7 @@
       ansible.builtin.file:
         path: "{{ backup_path }}/{{ inventory_hostname }}"
         state: directory
-        mode: '0755'
+        mode: '0777'
       poll: 1
       when: customer_type in ["test", "VIP", "regular"]
 
@@ -71,7 +71,7 @@
       ansible.builtin.file:
         path: "{{ log_path }}/{{ item }}"
         state: directory
-        mode: '0755'
+        mode: '0777'
       poll: 1
       loop:
         - "test"
@@ -82,7 +82,7 @@
       ansible.builtin.file:
         path: "{{ info_path }}/{{ item }}"
         state: directory
-        mode: '0755'
+        mode: '0777'
       poll: 1
       loop:
         - "volumes"
@@ -93,7 +93,7 @@
       ansible.builtin.file:
         path: "{{ log_path }}/test/{{ inventory_hostname }}.txt"
         state: touch
-        mode: '0644'
+        mode: '0777'
       poll: 1
       when: customer_type in ["test", "VIP", "regular"]
 
@@ -102,7 +102,7 @@
       ansible.builtin.file:
         path: "{{ log_path }}/backup/{{ inventory_hostname }}.txt"
         state: touch
-        mode: '0644'
+        mode: '0777'
       poll: 1
       when: customer_type in ["test", "VIP", "regular"]
 
@@ -111,7 +111,7 @@
       ansible.builtin.file:
         path: "{{ info_path }}/volumes/{{ inventory_hostname }}.txt"
         state: touch
-        mode: '0644'
+        mode: '0777'
       poll: 1
       when: customer_type in ["test", "VIP", "regular"]
 
@@ -120,7 +120,7 @@
       ansible.builtin.file:
         path: "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
         state: touch
-        mode: '0644'
+        mode: '0777'
       poll: 1
       when: customer_type in ["test", "VIP", "regular"]
 
@@ -166,6 +166,15 @@
         GIT_PROXY_COMMAND: "nc -X 5 -x 127.0.0.1:2334 %h %p"
         GIT_SSL_NO_VERIFY: "true"
 
+    # تنظیم پرمیشن 0777 برای پوشه کلون شده
+    - name: Set permissions to 0777 for cloned repositories
+      ansible.builtin.file:
+        path: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
+        state: directory
+        mode: '0777'
+      loop: "{{ projects }}"
+      when: customer_type in ["test", "VIP", "regular"]
+
     # چک‌اوت کردن تگ خاص برای هر مشتری
     - name: Checkout the specific tag for each project
       ansible.builtin.shell: |
@@ -181,7 +190,7 @@
       ansible.builtin.template:
         src: "{{ item.compose_file }}"
         dest: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}/docker/docker-compose.yml"
-        mode: '0644'
+        mode: '0777'
       poll: 1
       loop: "{{ projects }}"
       when: customer_type in ["test", "VIP", "regular"]
@@ -194,7 +203,7 @@
         content: |
           const baseUrl = 'http://{{ inventory_hostname }}:{{ customer_portal_ports }}';
           export default baseUrl;
-        mode: '0644'
+        mode: '0777'
       poll: 1
       when: customer_type in ['test', 'VIP', 'regular']
       changed_when: false
@@ -214,7 +223,7 @@
         content: |
           DATABASE_URL="{{ database_url }}"
           BASE_URL="{{ base_url }}"
-        mode: '0644'  # سطح دسترسی مناسب برای فایل
+        mode: '0777'  # سطح دسترسی مناسب برای فایل
       when: customer_type in ['test', 'VIP', 'regular']
       changed_when: false
       poll: 1
@@ -249,7 +258,7 @@
               'failover' => array(),
               'save_queries' => TRUE
           );
-        mode: '0644'
+        mode: '0777'
       when: customer_type in ['test', 'VIP', 'regular']
       changed_when: false
       poll: 1
@@ -262,7 +271,7 @@
         content: |
           <?php defined('BASEPATH') OR exit('No direct script access allowed');
           $config['base_url'] = "http://{{ inventory_hostname }}:{{ customer_gateway_ports }}";
-        mode: '0644'
+        mode: '0777'
       when: customer_type in ['test', 'VIP', 'regular']
       changed_when: false
       poll: 1
@@ -494,7 +503,7 @@
           portal
           portal-frontend
         dest: "{{ info_path }}/volumes/{{ inventory_hostname }}.txt"
-        mode: '0644'
+        mode: '0777'
 
     # اعطای دسترسی نوشتن به پوشه‌ها در کانتینر کالیبری
     - name: Ensure container is running
@@ -529,14 +538,14 @@
         DB_NAME="{{ portal_mysql_db_name }}"
         DB_USER="{{ portal_mysql_user }}"
         DB_PASSWORD="{{ portal_mysql_password }}"
-        DB_HOST="localhost"
+        DB_HOST="{{ customer_containers }}-portal-db"
         echo "$DB_TYPE,$DB_NAME,$DB_USER,$DB_PASSWORD,$DB_HOST" > "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
 
         DB_TYPE="{{ gateway_database_type }}"
         DB_NAME="{{ gateway_mysql_db_name }}"
         DB_USER="{{ gateway_mysql_user }}"
         DB_PASSWORD="{{ gateway_mysql_password }}"
-        DB_HOST="localhost"
+        DB_HOST="{{ customer_containers }}-gateway-db"
         echo "$DB_TYPE,$DB_NAME,$DB_USER,$DB_PASSWORD,$DB_HOST" >> "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
       register: db_info_result
       poll: 1
@@ -595,67 +604,141 @@
         content: |
           #!/bin/bash
 
+          # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           # مسیر بکاپ
           BACKUP_DIR="{{ backup_path }}/{{ inventory_hostname }}/$(date +'%Y-%m-%d-%H-%M-%S')"
-          mkdir -p $BACKUP_DIR  # ایجاد پوشه برای بکاپ
+          mkdir -p $BACKUP_DIR
+          chmod 777 "$BACKUP_DIR"
 
           # فایل گزارش
           BACKUP_LOG="{{ log_path }}/backup/{{ inventory_hostname }}.txt"
-          echo "Backup started at $(date)" >> $BACKUP_LOG
+          echo "🚀 Backup started at $(date)" | tee -a "$BACKUP_LOG"
 
+          # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          # بررسی فضای دیسک
+          REQUIRED_SPACE_MB=100
+          AVAILABLE_SPACE_MB=$(df "$BACKUP_DIR" | awk 'NR==2 {print int($4/1024)}')
+          if (( AVAILABLE_SPACE_MB < REQUIRED_SPACE_MB )); then
+            echo "🖴❌ Not enough disk space. Required: ${REQUIRED_SPACE_MB}MB, Available: ${AVAILABLE_SPACE_MB}MB" | tee -a "$BACKUP_LOG"
+            exit 1
+          fi
+
+          # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           # گرفتن لیست از ولوم‌ها از فایل مخصوص هر مشتری
           VOLUMES=$(head -n 1 {{ info_path }}/volumes/{{ inventory_hostname }}.txt)
 
-          # خوندن هر خط از فایل و بکاپ گرفتن از هر ولوم
-          while IFS= read -r VOLUME; do
-            # اگه مسیر وجود نداشت، ادامه نده
-            [ -d "$VOLUME" ] || continue
+          # مسیر پایه برای ولوم‌ها
+          VOLUME_BASE="{{ project_path }}/{{ inventory_hostname }}"
 
-            ARCHIVE_NAME=$(basename "$VOLUME")
-            tar czf "$BACKUP_DIR/$ARCHIVE_NAME.tar.gz" -C "$VOLUME" .
-            echo "Backup for $VOLUME completed at $(date)" >> "$BACKUP_LOG"
-          done < "$VOLUMES"
+          # پردازش هر مسیر در اون یک خط
+          for VOLUME in $VOLUMES; do
+            # اضافه کردن مسیر پایه
+            FULL_VOLUME_PATH="$VOLUME_BASE/$VOLUME"
 
+            # اطمینان از وجود پوشه
+            if [ ! -d "$FULL_VOLUME_PATH" ]; then
+              echo "📁❌ Volume $FULL_VOLUME_PATH does not exist!" | tee -a "$BACKUP_LOG"
+              continue
+            fi
+
+            ARCHIVE_NAME=$(basename "$FULL_VOLUME_PATH")
+            BACKUP_FILE="$BACKUP_DIR/$ARCHIVE_NAME.tar.gz"
+
+            # بررسی دوباره وجود فایل بکاپ
+            if [ -f "$BACKUP_FILE" ]; then
+              echo "📁❌ Backup file $BACKUP_FILE already exists. Skipping." | tee -a "$BACKUP_LOG"
+              continue
+            fi
+
+            # گرفتن بکاپ از پوشه با دستور tar
+            echo "📁 Starting backup for volume $FULL_VOLUME_PATH..." | tee -a "$BACKUP_LOG"
+            tar czf "$BACKUP_FILE" -C "$FULL_VOLUME_PATH" .
+
+            # بررسی موفقیت آمیز بودن عملیات tar
+            if [ $? -eq 0 ]; then
+              echo "📁✅ Backup for volume $FULL_VOLUME_PATH completed successfully at $(date)" | tee -a "$BACKUP_LOG"
+            else
+              echo "📁❌ Error during backup of volume $FULL_VOLUME_PATH" | tee -a "$BACKUP_LOG"
+            fi
+          done
+
+          # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           # گرفتن لیست از دیتابیس‌ها از فایل مخصوص هر مشتری
           DATABASES="{{ info_path }}/databases/{{ inventory_hostname }}.txt"
 
-          while IFS=',' read -r DB_TYPE DB_NAME DB_USER DB_PASSWORD DB_HOST; do
+          while IFS=',' read -r DB_TYPE DB_NAME DB_USER DB_PASSWORD DB_CONTAINER; do
             if [[ "$DB_TYPE" == "mysql" ]]; then
-              # گرفتن بکاپ از دیتابیس MySQL
-              BACKUP_FILE="$BACKUP_DIR/$DB_NAME-mysql.sql.gz"
-              echo "Backing up MySQL database $DB_NAME..." >> $BACKUP_LOG
-              mysqldump -u $DB_USER -p$DB_PASSWORD -h $DB_HOST $DB_NAME | gzip > $BACKUP_FILE
-              echo "Backup for MySQL database $DB_NAME completed at $(date)" >> $BACKUP_LOG
+              BACKUP_FILE="$BACKUP_DIR/${DB_NAME}-mysql.sql.gz"
+              echo "🛢️ Backing up MySQL database $DB_NAME..." | tee -a "$BACKUP_LOG"
+
+              # استفاده از docker exec برای انجام عملیات در داخل کانتینر MySQL
+              docker exec $DB_CONTAINER mysqldump -u "$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" 2>>"$BACKUP_LOG" | gzip > "$BACKUP_FILE"
+
+              if [[ $? -eq 0 ]]; then
+                chmod 0777 "$BACKUP_FILE"
+                echo "🛢️✅ MySQL backup for $DB_NAME completed at $(date)" | tee -a "$BACKUP_LOG"
+              else
+                echo "🛢️❌ Error backing up MySQL database $DB_NAME" | tee -a "$BACKUP_LOG"
+              fi
 
             elif [[ "$DB_TYPE" == "postgresql" ]]; then
-              # گرفتن بکاپ از دیتابیس PostgreSQL
-              BACKUP_FILE="$BACKUP_DIR/$DB_NAME-postgresql.sql.gz"
-              echo "Backing up PostgreSQL database $DB_NAME..." >> $BACKUP_LOG
-              pg_dump -U $DB_USER -h $DB_HOST -d $DB_NAME | gzip > $BACKUP_FILE
-              echo "Backup for PostgreSQL database $DB_NAME completed at $(date)" >> $BACKUP_LOG
+              BACKUP_FILE="$BACKUP_DIR/${DB_NAME}-postgresql.sql.gz"
+              echo "🐘 Backing up PostgreSQL database $DB_NAME..." | tee -a "$BACKUP_LOG"
+
+              # استفاده از docker exec برای انجام عملیات در داخل کانتینر PostgreSQL
+              docker exec $DB_CONTAINER pg_dump -U "$DB_USER" -h "$DB_HOST" -d "$DB_NAME" 2>>"$BACKUP_LOG" | gzip > "$BACKUP_FILE"
+
+              if [[ $? -eq 0 ]]; then
+                chmod 0777 "$BACKUP_FILE"
+                echo "🐘✅ PostgreSQL backup for $DB_NAME completed at $(date)" | tee -a "$BACKUP_LOG"
+              else
+                echo "🐘❌ Error backing up PostgreSQL database $DB_NAME" | tee -a "$BACKUP_LOG"
+              fi
             fi
           done < "$DATABASES"
 
+          # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           # ارسال فایل بکاپ به تلگرام
-          echo "send backup to Telegram " >> $BACKUP_LOG
-          TELEGRAM_TOKEN="8104111863:AAG1Lic90mVzbFKbfOonWjh4oBZtEmCBQmY"
-          CHAT_ID="-1002529041410"
-          BACKUP_FILE_PATH="$BACKUP_DIR/*.gz"
-          curl -X POST "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument" \
-            -F document=@"$BACKUP_FILE_PATH" \
-            -F chat_id="$CHAT_ID"
+          # echo "📤 Sending backup files to Telegram..." | tee -a "$BACKUP_LOG"
+          # TELEGRAM_TOKEN="8104111863:AAG1Lic90mVzbFKbfOonWjh4oBZtEmCBQmY"
+          # CHAT_ID="-1002529041410"
+          # for FILE in "$BACKUP_DIR"/*.gz; do
+          #   if [ -f "$FILE" ]; then
+          #     RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument" \
+          #       -F document=@"$FILE" \
+          #       -F chat_id="$CHAT_ID")
+          #     if [[ "$RESPONSE" == *'"ok":true'* ]]; then
+          #       echo "📤✅ Sent $FILE to Telegram" | tee -a "$BACKUP_LOG"
+          #     else
+          #       echo "📤❌ Failed to send $FILE to Telegram" | tee -a "$BACKUP_LOG"
+          #     fi
+          #   fi
+          # done
 
+          # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           # ارسال فایل به FTP
-          # echo "send backup to FTP server" >> $BACKUP_LOG
-          # FTP_SERVER="ftp.server.com"
-          # FTP_USER="ftp_user"
+          # echo "🌐 Sending backup files to FTP..." | tee -a "$BACKUP_LOG"
+          # FTP_SERVER="ftp.example.com"
+          # FTP_USER="ftp_username"
           # FTP_PASSWORD="ftp_password"
-          # curl -T $BACKUP_FILE_PATH ftp://$FTP_SERVER/path/ --user $FTP_USER:$FTP_PASSWORD
+          # FTP_PATH="/backups/localhost"
+          # for FILE in "$BACKUP_DIR"/*.gz; do
+          #   if [ -f "$FILE" ]; then
+          #     curl -s -T "$FILE" ftp://$FTP_SERVER$FTP_PATH/ --user "$FTP_USER:$FTP_PASSWORD"
+          #     if [[ $? -eq 0 ]]; then
+          #       echo "🌐✅ Sent $FILE to FTP at $(date)" | tee -a "$BACKUP_LOG"
+          #     else
+          #       echo "🌐❌ Error sending $FILE to FTP" | tee -a "$BACKUP_LOG"
+          #     fi
+          #   fi
+          # done
 
-          echo "Backup completed at $(date)" >> $BACKUP_LOG
+          # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          echo "🏁 Backup completed at $(date)" | tee -a "$BACKUP_LOG"
+          echo "----------------------------------------------------------------------------------" | tee -a "$BACKUP_LOG"
 
         dest: "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
-        mode: '0755'  # اعطای دسترسی اجرایی به اسکریپت
+        mode: '0777'  # اعطای دسترسی اجرایی به اسکریپت
       poll: 1
 
     # تنظیم Cron job برای بکاپ
