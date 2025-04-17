@@ -17,9 +17,10 @@ all:
           customer_portal_frontend_ports: 4001
           customer_network_names: "test_alfa_network"
           customer_containers: "test_alfa_container"
+          customer_state: "update"
 
         nikan:
-          ansible_connection: local  # بدون نیاز به SSH
+          ansible_connection: local
           customer_type: "regular"
           customer_name: "نیکان"
           customer_gateway_git_branches: "dev"
@@ -33,9 +34,10 @@ all:
           customer_portal_frontend_ports: 4002
           customer_network_names: "nikan_network"
           customer_containers: "nikan_container"
+          customer_state: "no_update"
 
         simnad:
-          ansible_connection: local  # بدون نیاز به SSH
+          ansible_connection: local
           customer_type: "VIP"
           customer_name: "سیمناد"
           customer_gateway_git_branches: "dev"
@@ -49,8 +51,12 @@ all:
           customer_portal_frontend_ports: 4003
           customer_network_names: "simnad_network"
           customer_containers: "simnad_container"
+          customer_state: "down"
 
   vars:
     ansible_ssh_private_key_file: id_rsa  # فقط در صورت نیاز به SSH برای ماشین‌های دیگر
     ansible_user: your_ssh_user           # فقط در صورت نیاز به SSH برای ماشین‌های دیگر
     gitlab_token: "glpat-utu8r9Nq4TLvy5-3BUzx"
+
+# customer_type  : test - regular - VIP
+# customer_state : update - no_update - down

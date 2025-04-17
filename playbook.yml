@@ -42,6 +42,7 @@
         state: directory
         mode: '0777'
       poll: 1  # منتظر بمان تا عملیات کامل شود
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
       loop:
         - "{{ project_path }}"
         - "{{ backup_path }}"
@@ -55,7 +56,7 @@
         state: directory
         mode: '0777'
       poll: 1
-      when: customer_type in ["test", "VIP", "regular"]
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
 
     # ایجاد پوشه مخصوص مشتری در مسیر پشتیبان‌ها
     - name: Ensure customer directories in backup_path exist
@@ -64,7 +65,7 @@
         state: directory
         mode: '0777'
       poll: 1
-      when: customer_type in ["test", "VIP", "regular"]
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
 
     # ایجاد پوشه‌های test و backup در log_path
     - name: Ensure directories for test and backup in log_path exist
@@ -73,6 +74,7 @@
         state: directory
         mode: '0777'
       poll: 1
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
       loop:
         - "test"
         - "backup"
@@ -84,6 +86,7 @@
         state: directory
         mode: '0777'
       poll: 1
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
       loop:
         - "volumes"
         - "databases"
@@ -95,7 +98,7 @@
         state: touch
         mode: '0777'
       poll: 1
-      when: customer_type in ["test", "VIP", "regular"]
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
 
     # برای هر مشتری یک فایل متنی در پوشه پشتیبان ایجاد کنید
     - name: Create a text file in backup folder for each customer
@@ -104,7 +107,7 @@
         state: touch
         mode: '0777'
       poll: 1
-      when: customer_type in ["test", "VIP", "regular"]
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
 
     # برای هر مشتری یک فایل متنی در پوشه volumes ایجاد کنید
     - name: Create a text file in volumes folder for each customer
@@ -113,7 +116,7 @@
         state: touch
         mode: '0777'
       poll: 1
-      when: customer_type in ["test", "VIP", "regular"]
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
 
     # برای هر مشتری یک فایل متنی در پوشه پایگاه داده ایجاد کنید
     - name: Create a text file in databases folder for each customer
@@ -122,7 +125,7 @@
         state: touch
         mode: '0777'
       poll: 1
-      when: customer_type in ["test", "VIP", "regular"]
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ گیت لب
     # تعریف پروژه‌ها و نام‌های پوشه‌ها
@@ -159,7 +162,7 @@
         force: true
       loop: "{{ projects }}"
       poll: 1
-      when: customer_type in ["test", "VIP", "regular"]
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
       environment:
         HTTP_PROXY: "http://127.0.0.1:2334"
         HTTPS_PROXY: "http://127.0.0.1:2334"
@@ -173,7 +176,7 @@
         state: directory
         mode: '0777'
       loop: "{{ projects }}"
-      when: customer_type in ["test", "VIP", "regular"]
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
 
     # چک‌اوت کردن تگ خاص برای هر مشتری
     - name: Checkout the specific tag for each project
@@ -182,7 +185,7 @@
         git checkout "{{ vars[item.tag_var] }}"
       loop: "{{ projects }}"
       poll: 1
-      when: customer_type in ["test", "VIP", "regular"]
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
       changed_when: false
 
     # کپی کردن فایل‌های docker-compose به پوشه پروژه‌ها
@@ -193,7 +196,7 @@
         mode: '0777'
       poll: 1
       loop: "{{ projects }}"
-      when: customer_type in ["test", "VIP", "regular"]
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ کپی فایل ها
     # ایجاد فایل bashUrl.js برای portal-frontend
@@ -205,7 +208,7 @@
           export default baseUrl;
         mode: '0777'
       poll: 1
-      when: customer_type in ['test', 'VIP', 'regular']
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
       changed_when: false
       become: true
 
@@ -215,6 +218,7 @@
         database_url: "mysql://{{ pu }}:{{ pp }}@{{ customer_containers }}-portal-db:3306/{{ pd }}?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
         base_url: "http://{{ inventory_hostname }}:{{ customer_gateway_ports }}"
       poll: 1
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
 
     # ایجاد فایل .env.local برای portal
     - name: Create file for portal project
@@ -224,7 +228,7 @@
           DATABASE_URL="{{ database_url }}"
           BASE_URL="{{ base_url }}"
         mode: '0777'  # سطح دسترسی مناسب برای فایل
-      when: customer_type in ['test', 'VIP', 'regular']
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
       changed_when: false
       poll: 1
       become: true
@@ -259,7 +263,7 @@
               'save_queries' => TRUE
           );
         mode: '0777'
-      when: customer_type in ['test', 'VIP', 'regular']
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
       changed_when: false
       poll: 1
       become: true
@@ -272,7 +276,7 @@
           <?php defined('BASEPATH') OR exit('No direct script access allowed');
           $config['base_url'] = "http://{{ inventory_hostname }}:{{ customer_gateway_ports }}";
         mode: '0777'
-      when: customer_type in ['test', 'VIP', 'regular']
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
       changed_when: false
       poll: 1
       become: true
@@ -283,6 +287,7 @@
       ansible.builtin.stat:
         path: "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
       register: backup_script
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
       poll: 1
 
     # اجرای اسکریپت بکاپ برای دیتابیس‌ها و ولوم‌ها تنها در صورتی که فایل موجود باشد
@@ -292,7 +297,7 @@
       register: backup_result
       async: 1800  # حداکثر زمان برای اجرای اسکریپت (۳۰ دقیقه)
       poll: 1
-      when: backup_script.stat.exists and customer_type in ["test", "VIP", "regular"]
+      when: backup_script.stat.exists and customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
       changed_when: true
 
     # ساخت شبکه مخصوص به هر مشتری
@@ -301,7 +306,7 @@
         name: "{{ customer_network_names }}"
         state: present
       poll: 1
-      when: customer_type in ["test", "VIP", "regular"]
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر gateway
     # چک کردن وضعیت و اجرای docker-compose برای gateway
@@ -312,15 +317,17 @@
       poll: 1
       changed_when: false
       failed_when: false
+      when: customer_type in ['test', 'VIP', 'regular']
 
     - name: Debug the output of matching_containers_gateway for gateway
       ansible.builtin.debug:
         var: matching_containers_gateway.stdout
+      when: customer_type in ['test', 'VIP', 'regular']
 
     - name: Stop matching containers for gateway
       ansible.builtin.shell: |
         docker stop {{ matching_containers_gateway.stdout_lines | join(' ') }}
-      when: matching_containers_gateway.stdout != ""
+      when: matching_containers_gateway.stdout != "" and customer_type in ['test', 'VIP', 'regular']
       register: stop_result
       poll: 1
       failed_when: stop_result.rc != 0 and '"No such container"' not in stop_result.stderr
@@ -329,7 +336,7 @@
     - name: Kill matching containers (if not already stopped) for gateway
       ansible.builtin.shell: |
         docker kill {{ matching_containers_gateway.stdout_lines | join(' ') }} || true
-      when: matching_containers_gateway.stdout != ""
+      when: matching_containers_gateway.stdout != "" and customer_type in ['test', 'VIP', 'regular']
       register: kill_result
       poll: 1
       failed_when: false
@@ -338,7 +345,7 @@
     - name: Remove matching containers for gateway
       ansible.builtin.shell: |
         docker rm {{ matching_containers_gateway.stdout_lines | join(' ') }}
-      when: matching_containers_gateway.stdout != ""
+      when: matching_containers_gateway.stdout != "" and customer_type in ['test', 'VIP', 'regular']
       register: rm_result
       failed_when: rm_result.rc != 0 and '"No such container"' not in rm_result.stderr
       changed_when: rm_result.stdout != ""
@@ -347,7 +354,7 @@
     - name: Run docker-compose for gateway
       ansible.builtin.command:
         cmd: docker compose -p {{ customer_containers }}-gateway -f "{{ project_path }}/{{ inventory_hostname }}/gateway/docker/docker-compose.yml" up -d
-      when: customer_type in ["test", "VIP", "regular"]
+      when: customer_type in ['test', 'VIP', 'regular']
       poll: 1
       changed_when: false
 
@@ -360,15 +367,17 @@
       poll: 1
       changed_when: false
       failed_when: false
+      when: customer_type in ['test', 'VIP', 'regular']
 
     - name: Debug the output of matching_containers_portal for portal
       ansible.builtin.debug:
         var: matching_containers_portal.stdout
+      when: customer_type in ['test', 'VIP', 'regular']
 
     - name: Stop matching containers for portal
       ansible.builtin.shell: |
         docker stop {{ matching_containers_portal.stdout_lines | join(' ') }}
-      when: matching_containers_portal.stdout != ""
+      when: matching_containers_portal.stdout != "" and customer_type in ['test', 'VIP', 'regular']
       register: stop_result
       poll: 1
       failed_when: stop_result.rc != 0 and '"No such container"' not in stop_result.stderr
@@ -377,7 +386,7 @@
     - name: Kill matching containers (if not already stopped) for portal
       ansible.builtin.shell: |
         docker kill {{ matching_containers_portal.stdout_lines | join(' ') }} || true
-      when: matching_containers_portal.stdout != ""
+      when: matching_containers_portal.stdout != "" and customer_type in ['test', 'VIP', 'regular']
       register: kill_result
       poll: 1
       failed_when: false
@@ -386,7 +395,7 @@
     - name: Remove matching containers for portal
       ansible.builtin.shell: |
         docker rm {{ matching_containers_portal.stdout_lines | join(' ') }}
-      when: matching_containers_portal.stdout != ""
+      when: matching_containers_portal.stdout != "" and customer_type in ['test', 'VIP', 'regular']
       register: rm_result
       failed_when: rm_result.rc != 0 and '"No such container"' not in rm_result.stderr
       changed_when: rm_result.stdout != ""
@@ -395,7 +404,7 @@
     - name: Run docker-compose for portal
       ansible.builtin.command:
         cmd: docker compose -p {{ customer_containers }}-portal -f "{{ project_path }}/{{ inventory_hostname }}/portal/docker/docker-compose.yml" up -d
-      when: customer_type in ["test", "VIP", "regular"]
+      when: customer_type in ['test', 'VIP', 'regular']
       poll: 1
       changed_when: false
 
@@ -408,15 +417,17 @@
       poll: 1
       changed_when: false
       failed_when: false
+      when: customer_type in ['test', 'VIP', 'regular']
 
     - name: Debug the output of matching_containers_portal_frontend for portal-frontend
       ansible.builtin.debug:
         var: matching_containers_portal_frontend.stdout
+      when: customer_type in ['test', 'VIP', 'regular']
 
     - name: Stop matching containers for portal-frontend
       ansible.builtin.shell: |
         docker stop {{ matching_containers_portal_frontend.stdout_lines | join(' ') }}
-      when: matching_containers_portal_frontend.stdout != ""
+      when: matching_containers_portal_frontend.stdout != "" and customer_type in ['test', 'VIP', 'regular']
       register: stop_result
       poll: 1
       failed_when: stop_result.rc != 0 and '"No such container"' not in stop_result.stderr
@@ -425,7 +436,7 @@
     - name: Kill matching containers (if not already stopped) for portal-frontend
       ansible.builtin.shell: |
         docker kill {{ matching_containers_portal_frontend.stdout_lines | join(' ') }} || true
-      when: matching_containers_portal_frontend.stdout != ""
+      when: matching_containers_portal_frontend.stdout != "" and customer_type in ['test', 'VIP', 'regular']
       register: kill_result
       poll: 1
       failed_when: false
@@ -434,7 +445,7 @@
     - name: Remove matching containers for portal-frontend
       ansible.builtin.shell: |
         docker rm {{ matching_containers_portal_frontend.stdout_lines | join(' ') }}
-      when: matching_containers_portal_frontend.stdout != ""
+      when: matching_containers_portal_frontend.stdout != "" and customer_type in ['test', 'VIP', 'regular']
       register: rm_result
       failed_when: rm_result.rc != 0 and '"No such container"' not in rm_result.stderr
       changed_when: rm_result.stdout != ""
@@ -446,7 +457,7 @@
           docker compose -p {{ inventory_hostname }}-portal-frontend
           -f "{{ project_path }}/{{ inventory_hostname }}/portal-frontend/docker/docker-compose.yml"
           up -d
-      when: customer_type in ["test", "VIP", "regular"]
+      when: customer_type in ['test', 'VIP', 'regular']
       poll: 1
       changed_when: false
 
@@ -456,6 +467,7 @@
         container: "{{ customer_containers }}-portal"
         command: composer install
       register: composer_output
+      when: customer_type in ['test', 'VIP', 'regular']
 
     - name: Show composer install output
       ansible.builtin.debug:
@@ -464,17 +476,19 @@
           {{ composer_output.stdout }}
           STDERR:
           {{ composer_output.stderr }}
+      when: customer_type in ['test', 'VIP', 'regular']
 
     - name: Check if DB container is running
       community.docker.docker_container_info:
         name: "{{ customer_containers }}-portal-db"
       register: db_container_info
+      when: customer_type in ['test', 'VIP', 'regular']
 
     - name: Start the DB container if it's not running
       community.docker.docker_container:
         name: "{{ customer_containers }}-portal-db"
         state: started
-      when: not db_container_info.container.State.Running | default(false)
+      when: not db_container_info.container.State.Running | default(false) and customer_type in ['test', 'VIP', 'regular']
 
     - name: Try to create database if it does not exist
       community.docker.docker_container_exec:
@@ -482,14 +496,14 @@
         command: php bin/console doctrine:database:create --env=prod --if-not-exists
       register: db_create_result
       ignore_errors: true
-      when: customer_type in ["test", "VIP", "regular"]
+      when: customer_type in ['test', 'VIP', 'regular']
 
     - name: Run migrations if database creation succeeded or was skipped
       community.docker.docker_container_exec:
         container: "{{ customer_containers }}-portal"
         command: php bin/console doctrine:migrations:migrate --no-interaction --env=prod
       when:
-        - customer_type in ["test", "VIP", "regular"]
+        - customer_type in ['test', 'VIP', 'regular']
         - db_create_result is not failed
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ سایر
@@ -504,6 +518,7 @@
           portal-frontend
         dest: "{{ info_path }}/volumes/{{ inventory_hostname }}.txt"
         mode: '0777'
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
 
     # اعطای دسترسی نوشتن به پوشه‌ها در کانتینر کالیبری
     - name: Ensure container is running
@@ -511,12 +526,13 @@
         name: "{{ customer_containers }}-gateway"
         state: started
       poll: 1
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
 
     - name: Grant write permissions to folders in the container
       community.docker.docker_container_exec:
         container: "{{ customer_containers }}-gateway"
         command: "chmod -R 777 uploads captcha_images"
-      when: customer_type in ["test", "VIP", "regular"]
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
       poll: 1
 
     # میگریشن در کانتینر کالیبری
@@ -524,7 +540,7 @@
       community.docker.docker_container_exec:
         container: "{{ customer_containers }}-gateway"
         command: "php index.php migrate index false"
-      when: customer_type in ["test", "VIP", "regular"]
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
       poll: 1
 
     # یافتن پایگاه داده‌ها برای هر مشتری و ذخیره در یک فایل متنی
@@ -549,7 +565,7 @@
         echo "$DB_TYPE,$DB_NAME,$DB_USER,$DB_PASSWORD,$DB_HOST" >> "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
       register: db_info_result
       poll: 1
-      when: customer_type in ["test", "VIP", "regular"]
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
       changed_when: false
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ تست ها
@@ -562,7 +578,7 @@
     #     python3 usability_test.py && \       # تست‌های استفاده‌پذیری برای ارزیابی تجربه کاربری
     #     python3 test_load.py && \            # تست‌های بار برای بررسی رفتار سیستم تحت بار زیاد
     #     python3 database_test.py             # تست‌های پایگاه داده برای بررسی صحت داده‌ها و عملیات پایگاه داده
-    #   when: customer_type in ["test", "VIP", "regular"]
+    #   when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
     #   poll: 1
     #   changed_when: true                     # به منظور شناسایی تغییر در هر بار اجرای این تسک
 
@@ -580,7 +596,7 @@
     #     python3 test_ui.py                 # تست‌های رابط کاربری برای بررسی تعامل کاربر با سیستم
     #     python3 test_system.py             # تست‌های سیستم برای ارزیابی یکپارچگی کل سیستم
     #     python3 test_regression.py         # تست‌های رگرسیون برای اطمینان از اینکه تغییرات جدید باعث اختلال در عملکردهای قبلی نمی‌شود
-    #   when: customer_type == "test"
+    #   when: customer_type == "test" and customer_state == 'update'
     #   poll: 1
     #   changed_when: true
 
@@ -593,7 +609,7 @@
     #       -Dsonar.projectName="{{ sonar_project_name }}" \
     #       -Dsonar.host.url={{ sonar_url }} \
     #       -Dsonar.login={{ sonar_token }}
-    #   when: customer_type == "test"
+    #   when: customer_type == "test" and customer_state == 'update'
     #   poll: 1
     #   changed_when: true
 
@@ -740,6 +756,7 @@
         dest: "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
         mode: '0777'  # اعطای دسترسی اجرایی به اسکریپت
       poll: 1
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
 
     # تنظیم Cron job برای بکاپ
     - name: Set up cron job for backup
@@ -751,3 +768,4 @@
         user: root
         state: present  # این باعث می‌شود فقط اگر کرون جاب وجود نداشته باشد، تعریف شود
       poll: 1
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
