@@ -1,3 +1,5 @@
+تکمیل customer_state
+
 >> Traefik
 حل مشکل http و https ترافیک و وصل کردن به ساب دومین ها
 حل مشکل ip در سرور
