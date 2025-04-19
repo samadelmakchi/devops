@@ -13,6 +13,25 @@
 
 ---------------------------------------
 
+>> Readme
+- اشاره کردن به داکر کامپوز
+- تست نویسی و ابزارها
+- نصب برخی کامپزهای مهم
+▫️Dozzle
+▫️Portainer
+- محتوا برای CICD
+- مانیتور کردن و ابزارها
+▫️Uptime Kuma
+▫️Netdata
+
+یافتن کامپوز های مهم
+
+افزودن Logstash به داکر کامپوز
+
+حل مشکل phpmyadmin
+
+---------------------------------------
+
 >> Traefik
 حل مشکل http و https ترافیک و وصل کردن به ساب دومین ها
 حل مشکل ip در سرور
@@ -39,16 +58,6 @@
 ---------------------------------------
 
 >> Log
-▫️Fluentd       ➡️ aggregator/log processor برای ورودی‌ها (از Podها، اپلیکیشن‌ها، یا حتی Beats)
-▫️Elasticsearch ➡️ ذخیره و جستجو لاگ‌ها
-▫️Kibana        ➡️ نمایش، فیلتر و مانیتورینگ لاگ‌ها
-▫️Beats
-   ▫️Filebeat   ➡️ جمع‌آوری لاگ‌های nginx، PHP (Apache/nginx logs، PHP error logs)
-   ▫️Metricbeat ➡️ جمع‌آوری متریک‌های سیستم و MySQL (CPU، RAM، query load و...)
-   ▫️Packetbeat ➡️ ضبط و تحلیل ترافیک لایه شبکه و اپلیکیشن (HTTP, MySQL, DNS, ... )
-   ▫️Heartbeat  ➡️ Ping و بررسی وضعیت سلامت سرویس‌ها (uptime monitoring)
-   ▫️Auditbeat  ➡️ بررسی امنیتی سیستم: تغییرات فایل، یوزرها، دسترسی‌ها
-▫️Logstash      ❌ وقتی پردازش سنگین‌تری لازمه
 
 ---------------------------------------
 
@@ -92,12 +101,8 @@
 ▫️Bash
 ▫️Traefik
 ▫️Nginx
-▫️Dozzle
-▫️Uptime Kuma
-▫️Portainer
 ▫️Ansible
 ▫️Docker
 ▫️Docker Compose
-▫️Netdata
 
 ---------------------------------------
