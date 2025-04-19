@@ -16,7 +16,8 @@ services:
       - "traefik.http.routers.fluent.tls.certresolver=myresolver"
       - "traefik.http.services.fluent.loadbalancer.server.port=80"
     ports:
-      - "24224:24224"
+      - "9880:9880"            # 👈 برای in_http
+      - "24224:24224"          # 👈 برای in_forward
       - "24224:24224/udp"
    
 networks:
