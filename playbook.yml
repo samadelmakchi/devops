@@ -757,14 +757,13 @@
           log_to_fluentd() {
             local message="$1"
             local tag="${2:-backup.log}"  # تگ Fluentd (پیش‌فرض: backup.log)
-            local fluentd_url="${3:-http://localhost:9880/$tag}"
+            local fluentd_url="${3:-http://fluentd:9880/$tag}"
 
             echo "$message" | tee -a "$BACKUP_LOG" | logger -t backup_script
 
             # ارسال به fluentd از طریق in_http
-            curl -s -X POST -H "Content-Type: application/json" \
-                -d "{\"log\": \"$message\"}" \
-                "$fluentd_url" > /dev/null
+            log_json=$(jq -n --arg msg "$message" '{log: $msg}')
+            curl -s -X POST -H "Content-Type: application/json" -d "$log_json" "$fluentd_url" > /dev/null
           }
 
 

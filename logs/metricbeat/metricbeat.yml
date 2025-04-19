@@ -1,0 +1,26 @@
+metricbeat.modules:
+  - module: system
+    metricsets:
+      - cpu
+      - memory
+      - network
+      - diskio
+      - load
+    enabled: true
+    period: 10s
+
+  - module: mysql
+    metricsets: ["status"]
+    enabled: true
+    period: 10s
+    hosts: ["tcp(mysql:3306)"]
+    username: root
+    password: your_mysql_password
+
+output.logstash:
+  hosts: ["fluentd:24224"]
+
+# output.elasticsearch:
+#   hosts: ["http://elasticsearch:9200"]
+#   # username: "elastic"
+#   # password: "yourpassword"

@@ -1,0 +1,19 @@
+packetbeat.interfaces.device: any
+
+packetbeat.protocols:
+  - type: http
+    ports: [80, 8080, 8000, 5000, 8002]
+
+  - type: mysql
+    ports: [3306]
+
+  - type: dns
+    ports: [53]
+
+output.logstash:
+  hosts: ["fluentd:24224"]
+
+# output.elasticsearch:
+#   hosts: ["http://elasticsearch:9200"]
+#   # username: "elastic"
+#   # password: "yourpassword"
