@@ -84,6 +84,7 @@
 ▫️Python
 ▫️Trello
 ▫️Jira
+▫️Agile
 ▫️Scrum
 ▫️Git
 ▫️Gitlab
