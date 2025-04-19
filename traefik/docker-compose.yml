@@ -23,10 +23,10 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(`traefik`)"                    # تنظیم مسیر برای داشبورد    # traefik.elmakchi.ir
-      - "traefik.http.routers.traefik.entrypoints=websecure"                   # دسترسی از طریق HTTPS
-      - "traefik.http.routers.traefik.tls.certresolver=myresolver"             # استفاده از SSL
-      - "traefik.http.routers.traefik.service=api@internal"                    # اتصال به داشبورد Traefik
+      - "traefik.http.routers.traefik.rule=Host(`traefik.elmakchi.ir`)"               # تنظیم مسیر برای داشبورد
+      - "traefik.http.routers.traefik.entrypoints=websecure"                          # دسترسی از طریق HTTPS
+      - "traefik.http.routers.traefik.tls.certresolver=myresolver"                    # استفاده از SSL
+      - "traefik.http.routers.traefik.service=api@internal"                           # اتصال به داشبورد Traefik
       - "traefik.http.routers.traefik.middlewares=auth"
       - "traefik.http.middlewares.auth.basicauth.users=admin:$$apr1$$ZjqNihhn$$W/jOU6F1QXZt4YRATR86O0"
 

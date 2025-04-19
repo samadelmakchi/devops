@@ -1,7 +1,0 @@
-# حذف پوشه‌ها قبل از کلون کردن
-    - name: Remove existing project directories
-      ansible.builtin.file:
-        path: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
-        state: absent
-      loop: "{{ projects }}"
-      when: customer_type in ["test", "VIP", "regular"]

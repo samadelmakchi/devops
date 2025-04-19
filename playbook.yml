@@ -317,17 +317,17 @@
       poll: 1
       changed_when: false
       failed_when: false
-      when: customer_type in ['test', 'VIP', 'regular']
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state in ['update', 'down']
 
     - name: Debug the output of matching_containers_gateway for gateway
       ansible.builtin.debug:
         var: matching_containers_gateway.stdout
-      when: customer_type in ['test', 'VIP', 'regular']
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state in ['update', 'down']
 
     - name: Stop matching containers for gateway
       ansible.builtin.shell: |
         docker stop {{ matching_containers_gateway.stdout_lines | join(' ') }}
-      when: matching_containers_gateway.stdout != "" and customer_type in ['test', 'VIP', 'regular']
+      when: matching_containers_gateway.stdout != "" and customer_type in ['test', 'VIP', 'regular'] and customer_state in ['update', 'down']
       register: stop_result
       poll: 1
       failed_when: stop_result.rc != 0 and '"No such container"' not in stop_result.stderr
@@ -336,7 +336,7 @@
     - name: Kill matching containers (if not already stopped) for gateway
       ansible.builtin.shell: |
         docker kill {{ matching_containers_gateway.stdout_lines | join(' ') }} || true
-      when: matching_containers_gateway.stdout != "" and customer_type in ['test', 'VIP', 'regular']
+      when: matching_containers_gateway.stdout != "" and customer_type in ['test', 'VIP', 'regular'] and customer_state in ['update', 'down']
       register: kill_result
       poll: 1
       failed_when: false
@@ -345,7 +345,7 @@
     - name: Remove matching containers for gateway
       ansible.builtin.shell: |
         docker rm {{ matching_containers_gateway.stdout_lines | join(' ') }}
-      when: matching_containers_gateway.stdout != "" and customer_type in ['test', 'VIP', 'regular']
+      when: matching_containers_gateway.stdout != "" and customer_type in ['test', 'VIP', 'regular'] and customer_state in ['update', 'down']
       register: rm_result
       failed_when: rm_result.rc != 0 and '"No such container"' not in rm_result.stderr
       changed_when: rm_result.stdout != ""
@@ -354,7 +354,7 @@
     - name: Run docker-compose for gateway
       ansible.builtin.command:
         cmd: docker compose -p {{ customer_containers }}-gateway -f "{{ project_path }}/{{ inventory_hostname }}/gateway/docker/docker-compose.yml" up -d
-      when: customer_type in ['test', 'VIP', 'regular']
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
       poll: 1
       changed_when: false
 
@@ -367,17 +367,17 @@
       poll: 1
       changed_when: false
       failed_when: false
-      when: customer_type in ['test', 'VIP', 'regular']
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state in ['update', 'down']
 
     - name: Debug the output of matching_containers_portal for portal
       ansible.builtin.debug:
         var: matching_containers_portal.stdout
-      when: customer_type in ['test', 'VIP', 'regular']
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state in ['update', 'down']
 
     - name: Stop matching containers for portal
       ansible.builtin.shell: |
         docker stop {{ matching_containers_portal.stdout_lines | join(' ') }}
-      when: matching_containers_portal.stdout != "" and customer_type in ['test', 'VIP', 'regular']
+      when: matching_containers_portal.stdout != "" and customer_type in ['test', 'VIP', 'regular'] and customer_state in ['update', 'down']
       register: stop_result
       poll: 1
       failed_when: stop_result.rc != 0 and '"No such container"' not in stop_result.stderr
@@ -386,7 +386,7 @@
     - name: Kill matching containers (if not already stopped) for portal
       ansible.builtin.shell: |
         docker kill {{ matching_containers_portal.stdout_lines | join(' ') }} || true
-      when: matching_containers_portal.stdout != "" and customer_type in ['test', 'VIP', 'regular']
+      when: matching_containers_portal.stdout != "" and customer_type in ['test', 'VIP', 'regular'] and customer_state in ['update', 'down']
       register: kill_result
       poll: 1
       failed_when: false
@@ -395,7 +395,7 @@
     - name: Remove matching containers for portal
       ansible.builtin.shell: |
         docker rm {{ matching_containers_portal.stdout_lines | join(' ') }}
-      when: matching_containers_portal.stdout != "" and customer_type in ['test', 'VIP', 'regular']
+      when: matching_containers_portal.stdout != "" and customer_type in ['test', 'VIP', 'regular'] and customer_state in ['update', 'down']
       register: rm_result
       failed_when: rm_result.rc != 0 and '"No such container"' not in rm_result.stderr
       changed_when: rm_result.stdout != ""
@@ -404,7 +404,7 @@
     - name: Run docker-compose for portal
       ansible.builtin.command:
         cmd: docker compose -p {{ customer_containers }}-portal -f "{{ project_path }}/{{ inventory_hostname }}/portal/docker/docker-compose.yml" up -d
-      when: customer_type in ['test', 'VIP', 'regular']
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
       poll: 1
       changed_when: false
 
@@ -417,17 +417,17 @@
       poll: 1
       changed_when: false
       failed_when: false
-      when: customer_type in ['test', 'VIP', 'regular']
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state in ['update', 'down']
 
     - name: Debug the output of matching_containers_portal_frontend for portal-frontend
       ansible.builtin.debug:
         var: matching_containers_portal_frontend.stdout
-      when: customer_type in ['test', 'VIP', 'regular']
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state in ['update', 'down']
 
     - name: Stop matching containers for portal-frontend
       ansible.builtin.shell: |
         docker stop {{ matching_containers_portal_frontend.stdout_lines | join(' ') }}
-      when: matching_containers_portal_frontend.stdout != "" and customer_type in ['test', 'VIP', 'regular']
+      when: matching_containers_portal_frontend.stdout != "" and customer_type in ['test', 'VIP', 'regular'] and customer_state in ['update', 'down']
       register: stop_result
       poll: 1
       failed_when: stop_result.rc != 0 and '"No such container"' not in stop_result.stderr
@@ -436,7 +436,7 @@
     - name: Kill matching containers (if not already stopped) for portal-frontend
       ansible.builtin.shell: |
         docker kill {{ matching_containers_portal_frontend.stdout_lines | join(' ') }} || true
-      when: matching_containers_portal_frontend.stdout != "" and customer_type in ['test', 'VIP', 'regular']
+      when: matching_containers_portal_frontend.stdout != "" and customer_type in ['test', 'VIP', 'regular'] and customer_state in ['update', 'down']
       register: kill_result
       poll: 1
       failed_when: false
@@ -445,7 +445,7 @@
     - name: Remove matching containers for portal-frontend
       ansible.builtin.shell: |
         docker rm {{ matching_containers_portal_frontend.stdout_lines | join(' ') }}
-      when: matching_containers_portal_frontend.stdout != "" and customer_type in ['test', 'VIP', 'regular']
+      when: matching_containers_portal_frontend.stdout != "" and customer_type in ['test', 'VIP', 'regular'] and customer_state in ['update', 'down']
       register: rm_result
       failed_when: rm_result.rc != 0 and '"No such container"' not in rm_result.stderr
       changed_when: rm_result.stdout != ""
@@ -457,7 +457,7 @@
           docker compose -p {{ inventory_hostname }}-portal-frontend
           -f "{{ project_path }}/{{ inventory_hostname }}/portal-frontend/docker/docker-compose.yml"
           up -d
-      when: customer_type in ['test', 'VIP', 'regular']
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
       poll: 1
       changed_when: false
 
@@ -628,14 +628,14 @@
 
           # فایل گزارش
           BACKUP_LOG="{{ log_path }}/backup/{{ inventory_hostname }}.txt"
-          echo "🚀 Backup started at $(date)" | tee -a "$BACKUP_LOG"
+          log_to_fluentd "🚀 Backup started at $(date)"
 
           # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           # بررسی فضای دیسک
           REQUIRED_SPACE_MB=100
           AVAILABLE_SPACE_MB=$(df "$BACKUP_DIR" | awk 'NR==2 {print int($4/1024)}')
           if (( AVAILABLE_SPACE_MB < REQUIRED_SPACE_MB )); then
-            echo "🖴❌ Not enough disk space. Required: ${REQUIRED_SPACE_MB}MB, Available: ${AVAILABLE_SPACE_MB}MB" | tee -a "$BACKUP_LOG"
+            log_to_fluentd "🖴❌ Not enough disk space. Required: ${REQUIRED_SPACE_MB}MB, Available: ${AVAILABLE_SPACE_MB}MB"
             exit 1
           fi
 
@@ -653,7 +653,7 @@
 
             # اطمینان از وجود پوشه
             if [ ! -d "$FULL_VOLUME_PATH" ]; then
-              echo "📁❌ Volume $FULL_VOLUME_PATH does not exist!" | tee -a "$BACKUP_LOG"
+              log_to_fluentd "📁❌ Volume $FULL_VOLUME_PATH does not exist!"
               continue
             fi
 
@@ -662,19 +662,19 @@
 
             # بررسی دوباره وجود فایل بکاپ
             if [ -f "$BACKUP_FILE" ]; then
-              echo "📁❌ Backup file $BACKUP_FILE already exists. Skipping." | tee -a "$BACKUP_LOG"
+              log_to_fluentd "📁❌ Backup file $BACKUP_FILE already exists. Skipping."
               continue
             fi
 
             # گرفتن بکاپ از پوشه با دستور tar
-            echo "📁 Starting backup for volume $FULL_VOLUME_PATH..." | tee -a "$BACKUP_LOG"
+            log_to_fluentd "📁 Starting backup for volume $FULL_VOLUME_PATH..."
             tar czf "$BACKUP_FILE" -C "$FULL_VOLUME_PATH" .
 
             # بررسی موفقیت آمیز بودن عملیات tar
             if [ $? -eq 0 ]; then
-              echo "📁✅ Backup for volume $FULL_VOLUME_PATH completed successfully at $(date)" | tee -a "$BACKUP_LOG"
+              log_to_fluentd "📁✅ Backup for volume $FULL_VOLUME_PATH completed successfully at $(date)"
             else
-              echo "📁❌ Error during backup of volume $FULL_VOLUME_PATH" | tee -a "$BACKUP_LOG"
+              log_to_fluentd "📁❌ Error during backup of volume $FULL_VOLUME_PATH"
             fi
           done
 
@@ -685,37 +685,37 @@
           while IFS=',' read -r DB_TYPE DB_NAME DB_USER DB_PASSWORD DB_CONTAINER; do
             if [[ "$DB_TYPE" == "mysql" ]]; then
               BACKUP_FILE="$BACKUP_DIR/${DB_NAME}-mysql.sql.gz"
-              echo "🛢️ Backing up MySQL database $DB_NAME..." | tee -a "$BACKUP_LOG"
+              log_to_fluentd "🛢️ Backing up MySQL database $DB_NAME..."
 
               # استفاده از docker exec برای انجام عملیات در داخل کانتینر MySQL
               docker exec $DB_CONTAINER mysqldump -u "$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" 2>>"$BACKUP_LOG" | gzip > "$BACKUP_FILE"
 
               if [[ $? -eq 0 ]]; then
                 chmod 0777 "$BACKUP_FILE"
-                echo "🛢️✅ MySQL backup for $DB_NAME completed at $(date)" | tee -a "$BACKUP_LOG"
+                log_to_fluentd "🛢️✅ MySQL backup for $DB_NAME completed at $(date)"
               else
-                echo "🛢️❌ Error backing up MySQL database $DB_NAME" | tee -a "$BACKUP_LOG"
+                log_to_fluentd "🛢️❌ Error backing up MySQL database $DB_NAME"
               fi
 
             elif [[ "$DB_TYPE" == "postgresql" ]]; then
               BACKUP_FILE="$BACKUP_DIR/${DB_NAME}-postgresql.sql.gz"
-              echo "🐘 Backing up PostgreSQL database $DB_NAME..." | tee -a "$BACKUP_LOG"
+              log_to_fluentd "🐘 Backing up PostgreSQL database $DB_NAME..."
 
               # استفاده از docker exec برای انجام عملیات در داخل کانتینر PostgreSQL
               docker exec $DB_CONTAINER pg_dump -U "$DB_USER" -h "$DB_HOST" -d "$DB_NAME" 2>>"$BACKUP_LOG" | gzip > "$BACKUP_FILE"
 
               if [[ $? -eq 0 ]]; then
                 chmod 0777 "$BACKUP_FILE"
-                echo "🐘✅ PostgreSQL backup for $DB_NAME completed at $(date)" | tee -a "$BACKUP_LOG"
+                log_to_fluentd "🐘✅ PostgreSQL backup for $DB_NAME completed at $(date)"
               else
-                echo "🐘❌ Error backing up PostgreSQL database $DB_NAME" | tee -a "$BACKUP_LOG"
+                log_to_fluentd "🐘❌ Error backing up PostgreSQL database $DB_NAME"
               fi
             fi
           done < "$DATABASES"
 
           # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           # ارسال فایل بکاپ به تلگرام
-          # echo "📤 Sending backup files to Telegram..." | tee -a "$BACKUP_LOG"
+          # log_to_fluentd "📤 Sending backup files to Telegram..."
           # TELEGRAM_TOKEN="8104111863:AAG1Lic90mVzbFKbfOonWjh4oBZtEmCBQmY"
           # CHAT_ID="-1002529041410"
           # for FILE in "$BACKUP_DIR"/*.gz; do
@@ -724,16 +724,16 @@
           #       -F document=@"$FILE" \
           #       -F chat_id="$CHAT_ID")
           #     if [[ "$RESPONSE" == *'"ok":true'* ]]; then
-          #       echo "📤✅ Sent $FILE to Telegram" | tee -a "$BACKUP_LOG"
+          #       log_to_fluentd "📤✅ Sent $FILE to Telegram"
           #     else
-          #       echo "📤❌ Failed to send $FILE to Telegram" | tee -a "$BACKUP_LOG"
+          #       log_to_fluentd "📤❌ Failed to send $FILE to Telegram"
           #     fi
           #   fi
           # done
 
           # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           # ارسال فایل به FTP
-          # echo "🌐 Sending backup files to FTP..." | tee -a "$BACKUP_LOG"
+          # log_to_fluentd "🌐 Sending backup files to FTP..."
           # FTP_SERVER="ftp.example.com"
           # FTP_USER="ftp_username"
           # FTP_PASSWORD="ftp_password"
@@ -742,16 +742,31 @@
           #   if [ -f "$FILE" ]; then
           #     curl -s -T "$FILE" ftp://$FTP_SERVER$FTP_PATH/ --user "$FTP_USER:$FTP_PASSWORD"
           #     if [[ $? -eq 0 ]]; then
-          #       echo "🌐✅ Sent $FILE to FTP at $(date)" | tee -a "$BACKUP_LOG"
+          #       log_to_fluentd "🌐✅ Sent $FILE to FTP at $(date)"log_to_fluentd "
           #     else
-          #       echo "🌐❌ Error sending $FILE to FTP" | tee -a "$BACKUP_LOG"
+          #       log_to_fluentd "🌐❌ Error sending $FILE to FTP"
           #     fi
           #   fi
           # done
 
           # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-          echo "🏁 Backup completed at $(date)" | tee -a "$BACKUP_LOG"
-          echo "----------------------------------------------------------------------------------" | tee -a "$BACKUP_LOG"
+          log_to_fluentd "🏁 Backup completed at $(date)"
+          log_to_fluentd "----------------------------------------------------------------------------------"
+
+          # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          log_to_fluentd() {
+            local message="$1"
+            local tag="${2:-backup.log}"  # تگ Fluentd (پیش‌فرض: backup.log)
+            local fluentd_url="${3:-http://localhost:9880/$tag}"
+
+            echo "$message" | tee -a "$BACKUP_LOG" | logger -t backup_script
+
+            # ارسال به fluentd از طریق in_http
+            curl -s -X POST -H "Content-Type: application/json" \
+                -d "{\"log\": \"$message\"}" \
+                "$fluentd_url" > /dev/null
+          }
+
 
         dest: "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
         mode: '0777'  # اعطای دسترسی اجرایی به اسکریپت
