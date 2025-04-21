@@ -304,12 +304,21 @@ GitLab >> Preferences >> Access tokens >> Add new token
 
 ### 🛠️ Cloud Providers
 <details>
-  <summary>DevSecOps</summary>
+  <summary>AWS</summary>
   <p>
     <!-- SMD -->
-    AWS
-    Azure
-    GCP
+  </p>
+</details>
+<details>
+  <summary>Azure</summary>
+  <p>
+    <!-- SMD -->
+  </p>
+</details>
+<details>
+  <summary>GCP</summary>
+  <p>
+    <!-- SMD -->
   </p>
 </details>
 
@@ -323,8 +332,23 @@ GitLab >> Preferences >> Access tokens >> Add new token
   </p>
 </details>
 
-
 ---
+
+### 🛠️ سایر
+<details>
+  <summary>نصب ابزارهای مورد نیاز</summary>
+  
+  ```bash
+    sudo apt update
+    sudo apt-get install cron
+    sudo apt install gzip
+    sudo apt install tar
+    sudo apt install curl
+    sudo apt install mysql-client
+    sudo apt install postgresql-client
+    ```
+
+</details>
 
 ### 🛠️ نصب ابزارهای مورد نیاز
 ```bash
