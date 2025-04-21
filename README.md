@@ -220,7 +220,7 @@ sudo docker network create traefik_reverse_proxy
 
 ---
 
-### 📄 Elasticsearch, Kibana, Fluentd, Beats
+### 📑 Elasticsearch, Kibana, Fluentd, Beats
 <details>
   <summary>Elasticsearch (ذخیره و جستجو لاگ‌ها)  </summary>
   <p>
@@ -270,9 +270,49 @@ http://kibana:5601/
 
 ---
 
-### 🦊 تست نویسی
+### 🔁 CICD
 <details>
-  <summary>GitLab</summary>
+  <summary>Jennkins</summary>
+  <p>
+    <!-- SMD -->
+  </p>
+</details>
+<details>
+  <summary>Gitlab CI</summary>
+  <p>
+    <!-- SMD -->
+  </p>
+</details>
+<details>
+  <summary>Nexus</summary>
+  <p>
+    <!-- SMD -->
+  </p>
+</details>
+
+---
+
+### 📜 Software Testing
+<details>
+  <summary>Selenium</summary>
+  <p>
+    <!-- SMD -->
+  </p>
+</details>
+<details>
+  <summary>SonarQube</summary>
+  <p>
+    <!-- SMD -->
+  </p>
+</details>
+<details>
+  <summary>pyTest</summary>
+  <p>
+    <!-- SMD -->
+  </p>
+</details>
+<details>
+  <summary>Postman</summary>
   <p>
     <!-- SMD -->
   </p>
@@ -309,7 +349,7 @@ GitLab >> Preferences >> Access tokens >> Add new token
 
 ---
 
-### 🛠️ Cloud Providers
+### ☁️ Cloud Providers
 <details>
   <summary>AWS</summary>
   <p>
@@ -331,7 +371,7 @@ GitLab >> Preferences >> Access tokens >> Add new token
 
 ---
 
-### 🛠️ اتوماسیون سازی با n8n
+### 🛠️ Automation with n8n
 <details>
   <summary>n8n</summary>
   <p>
@@ -341,7 +381,7 @@ GitLab >> Preferences >> Access tokens >> Add new token
 
 ---
 
-### 🛠️ سایر
+### ✴️ Other
 <details>
   <summary>نصب ابزارهای مورد نیاز</summary>
   
@@ -359,22 +399,22 @@ sudo apt install postgresql-client
 <details>
   <summary>راهنماهای مورد نیاز برای مهندسین دواپس</summary>
   
-* [Agile](/cheatsheet/agile.md)
-* [Scrum](/cheatsheet/scrum.md)
-* [Git](/cheatsheet/git.md)
-* [Docker](/cheatsheet/docker.md)
-* [Docker Compose](/cheatsheet/docker-compose.md)
-* [Dockerfile](/cheatsheet/dockerfile.md)
-* [Bash](/cheatsheet/bash.md)
-* [Yaml](/cheatsheet/yaml.md)
-* [Marrkdown](/cheatsheet/marrkdown.md)
-
+  * [Agile](/cheatsheet/agile.md)
+  * [Scrum](/cheatsheet/scrum.md)
+  * [Git](/cheatsheet/git.md)
+  * [Docker](/cheatsheet/docker.md)
+  * [Docker Compose](/cheatsheet/docker-compose.md)
+  * [Dockerfile](/cheatsheet/dockerfile.md)
+  * [Bash](/cheatsheet/bash.md)
+  * [Yaml](/cheatsheet/yaml.md)
+  * [Marrkdown](/cheatsheet/marrkdown.md)
 </details>
+
 <details>
   <summary>نقشه راه یادگیری DevOps</summary>
-  
-![DevOps](./img/devops2.jpg)
+  <br>
 
+  ![DevOps](./img/devops2.jpg)
 </details>
 
 
