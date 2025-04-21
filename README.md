@@ -270,7 +270,13 @@ http://kibana:5601/
 
 ---
 
-
+### 🦊 تست نویسی
+<details>
+  <summary>GitLab</summary>
+  <p>
+    <!-- SMD -->
+  </p>
+</details>
 
 ---
 
@@ -296,9 +302,10 @@ GitLab >> Preferences >> Access tokens >> Add new token
   <p>
     <!-- SMD -->
   </p>
-</details>
 
 ![DevSecOps](./img/devsecops.jpg)
+
+</details>
 
 ---
 
@@ -338,33 +345,6 @@ GitLab >> Preferences >> Access tokens >> Add new token
 <details>
   <summary>نصب ابزارهای مورد نیاز</summary>
   
-    ```bash
-    sudo apt update
-    sudo apt-get install cron
-    sudo apt install gzip
-    sudo apt install tar
-    sudo apt install curl
-    sudo apt install mysql-client
-    sudo apt install postgresql-client
-    ```
-
-</details>
-<details>
-  <summary>راهنماهای مورد نیاز برای مهندسین دواپس</summary>
-  
-    * [Agile](/cheatsheet/agile.md)
-    * [Scrum](/cheatsheet/scrum.md)
-    * [Git](/cheatsheet/git.md)
-    * [Docker](/cheatsheet/docker.md)
-    * [Docker Compose](/cheatsheet/docker-compose.md)
-    * [Dockerfile](/cheatsheet/dockerfile.md)
-    * [Bash](/cheatsheet/bash.md)
-    * [Yaml](/cheatsheet/yaml.md)
-    * [Marrkdown](/cheatsheet/marrkdown.md)
-
-</details>
-
-### 🛠️ نصب ابزارهای مورد نیاز
 ```bash
 sudo apt update
 sudo apt-get install cron
@@ -375,9 +355,10 @@ sudo apt install mysql-client
 sudo apt install postgresql-client
 ```
 
----
-
-### 🛠️ راهنماهای مورد نیاز برای مهندسین دواپس
+</details>
+<details>
+  <summary>راهنماهای مورد نیاز برای مهندسین دواپس</summary>
+  
 * [Agile](/cheatsheet/agile.md)
 * [Scrum](/cheatsheet/scrum.md)
 * [Git](/cheatsheet/git.md)
@@ -388,8 +369,12 @@ sudo apt install postgresql-client
 * [Yaml](/cheatsheet/yaml.md)
 * [Marrkdown](/cheatsheet/marrkdown.md)
 
----
-
-### 🛠️ نقشه راه یادگیری DevOps
+</details>
+<details>
+  <summary>نقشه راه یادگیری DevOps</summary>
+  
 ![DevOps](./img/devops2.jpg)
+
+</details>
+
 
