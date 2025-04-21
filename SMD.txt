@@ -44,14 +44,12 @@
 ---------------------------------------
 
 
-- اشاره کردن به داکر کامپوز
 
 - تست نویسی و ابزارها
-
-- نصب برخی کامپزهای مهم
-▫️Dozzle
-▫️Portainer
-یافتن کامپوز های مهم
+▫️Selenium
+▫️SonarQube
+▫️pyTest
+▫️Postman
 
 - محتوا برای CICD
 
@@ -59,4 +57,41 @@
 ▫️Uptime Kuma
 ▫️Netdata
 
+اشاره کردن به 
+▫️Gitlab
+🔸RabbitMQ
+🔸Ceph
 
+▫️Jenkins
+🔸Gitlab CI
+▫️Nexus
+
+▫️Docker Compose
+🔸HAProxy
+🔸Nginx
+
+▫️Prometheus
+▫️Zabbix
+▫️Grafana
+🔸Splunk
+🔸Netdata
+🔸Uptime Kuma
+
+▫️Elasticsearch  
+▫️Kibana
+▫️Fluentd
+▫️Beats(Filebeat, Metricbeat, Packetbeat, Heartbeat, Auditbeat)
+🔸Logstash
+🔸Dozzle
+
+▫️Terraform
+
+▫️Bash
+▫️Git (Git Flow)
+▫️python
+YAML
+
+▫️Kubernetes
+▫️Portainer
+▫️Rancher
+▫️kind(***) / k0s(***) / k3s(**) / Minikube(*)
