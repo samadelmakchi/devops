@@ -338,7 +338,7 @@ GitLab >> Preferences >> Access tokens >> Add new token
 <details>
   <summary>نصب ابزارهای مورد نیاز</summary>
   
-  ```bash
+    ```bash
     sudo apt update
     sudo apt-get install cron
     sudo apt install gzip
@@ -347,6 +347,20 @@ GitLab >> Preferences >> Access tokens >> Add new token
     sudo apt install mysql-client
     sudo apt install postgresql-client
     ```
+
+</details>
+<details>
+  <summary>راهنماهای مورد نیاز برای مهندسین دواپس</summary>
+  
+    * [Agile](/cheatsheet/agile.md)
+    * [Scrum](/cheatsheet/scrum.md)
+    * [Git](/cheatsheet/git.md)
+    * [Docker](/cheatsheet/docker.md)
+    * [Docker Compose](/cheatsheet/docker-compose.md)
+    * [Dockerfile](/cheatsheet/dockerfile.md)
+    * [Bash](/cheatsheet/bash.md)
+    * [Yaml](/cheatsheet/yaml.md)
+    * [Marrkdown](/cheatsheet/marrkdown.md)
 
 </details>
 
