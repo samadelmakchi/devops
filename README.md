@@ -105,6 +105,11 @@ sudo chmod +x ./tools/install_docker.sh
 
 Terraform
 
+n8n
+
+Consul
+Vault
+
 Kubernetes
 Portainer
 Rancher
