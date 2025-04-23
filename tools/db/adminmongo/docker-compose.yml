@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  adminmongo:
+    image: mrvautin/adminmongo
+    container_name: adminmongo
+    restart: always
+    ports:
+      - "8081:1234"
+    environment:
+      - HOST=0.0.0.0
+    volumes:
+      - adminmongo_data:/app/data
+
+volumes:
+  adminmongo_data:

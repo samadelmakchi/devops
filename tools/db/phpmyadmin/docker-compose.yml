@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin
+    restart: unless-stopped
+    environment:
+      # متغیرهای محیطی برای دیتابیس‌های مختلف
+      PMA_HOSTS: calibri-crm-database,calibri-gateway-database  # لیست سرویس‌های دیتابیس مختلف
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    networks:
+      - traefik_reverse_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.phpmyadmin.rule=Host(`phpmyadmin.elmakchi.ir`)"
+      - "traefik.http.routers.phpmyadmin.entrypoints=websecure"
+      - "traefik.http.routers.phpmyadmin.tls.certresolver=myresolver"
+      - "traefik.http.services.phpmyadmin.loadbalancer.server.port=80"
+
+networks:
+  traefik_reverse_proxy:
+    external: true

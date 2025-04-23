@@ -25,22 +25,19 @@ read ARCHITECTURE
 # به پوشه هدف بروید
 cd /home/install/docker/
 
-# نسخه و معماری را برای دانلود فایل‌ها تنظیم کنید
-VERSION="latest_version"  # به جای "latest_version" نسخه مورد نظر را وارد کنید
-
 # دانلود فایل‌های .deb از Docker
-wget https://download.docker.com/linux/ubuntu/dists/$UBUNTU_VERSION/pool/stable/$ARCHITECTURE/containerd.io_${VERSION}_$ARCHITECTURE.deb
-wget https://download.docker.com/linux/ubuntu/dists/$UBUNTU_VERSION/pool/stable/$ARCHITECTURE/docker-ce_${VERSION}_$ARCHITECTURE.deb
-wget https://download.docker.com/linux/ubuntu/dists/$UBUNTU_VERSION/pool/stable/$ARCHITECTURE/docker-ce-cli_${VERSION}_$ARCHITECTURE.deb
-wget https://download.docker.com/linux/ubuntu/dists/$UBUNTU_VERSION/pool/stable/$ARCHITECTURE/docker-buildx-plugin_${VERSION}_$ARCHITECTURE.deb
-wget https://download.docker.com/linux/ubuntu/dists/$UBUNTU_VERSION/pool/stable/$ARCHITECTURE/docker-compose-plugin_${VERSION}_$ARCHITECTURE.deb
+wget https://download.docker.com/linux/ubuntu/dists/$UBUNTU_VERSION/pool/stable/$ARCHITECTURE/containerd.io_1.7.27-1_$ARCHITECTURE.deb
+wget https://download.docker.com/linux/ubuntu/dists/$UBUNTU_VERSION/pool/stable/$ARCHITECTURE/docker-ce_28.1.1-1~ubuntu.20.04~$UBUNTU_VERSION_$ARCHITECTURE.deb
+wget https://download.docker.com/linux/ubuntu/dists/$UBUNTU_VERSION/pool/stable/$ARCHITECTURE/docker-ce-cli_28.1.1-1~ubuntu.20.04~$UBUNTU_VERSION_$ARCHITECTURE.deb
+wget https://download.docker.com/linux/ubuntu/dists/$UBUNTU_VERSION/pool/stable/$ARCHITECTURE/docker-buildx-plugin_0.23.0-1~ubuntu.20.04~$UBUNTU_VERSION_$ARCHITECTURE.deb
+wget https://download.docker.com/linux/ubuntu/dists/$UBUNTU_VERSION/pool/stable/$ARCHITECTURE/docker-compose-plugin_2.6.0~ubuntu-$UBUNTU_VERSION_$ARCHITECTURE.deb
 
 # نصب فایل‌های .deb دانلود شده
-sudo dpkg -i containerd.io_${VERSION}_$ARCHITECTURE.deb
-sudo dpkg -i docker-ce_${VERSION}_$ARCHITECTURE.deb
-sudo dpkg -i docker-ce-cli_${VERSION}_$ARCHITECTURE.deb
-sudo dpkg -i docker-buildx-plugin_${VERSION}_$ARCHITECTURE.deb
-sudo dpkg -i docker-compose-plugin_${VERSION}_$ARCHITECTURE.deb
+sudo dpkg -i containerd.io_1.7.27-1_$ARCHITECTURE.deb
+sudo dpkg -i docker-ce_28.1.1-1~ubuntu.20.04~$UBUNTU_VERSION_$ARCHITECTURE.deb
+sudo dpkg -i docker-ce-cli_28.1.1-1~ubuntu.20.04~$UBUNTU_VERSION_$ARCHITECTURE.deb
+sudo dpkg -i docker-buildx-plugin_0.23.0-1~ubuntu.20.04~$UBUNTU_VERSION_$ARCHITECTURE.deb
+sudo dpkg -i docker-compose-plugin_2.6.0~ubuntu-$UBUNTU_VERSION_$ARCHITECTURE.deb
 
 # رفع مشکلات وابستگی‌ها
 sudo apt-get install -f
