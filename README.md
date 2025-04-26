@@ -6,7 +6,8 @@
 ### ✴️ نصب ابزارهای مورد نیاز
 ```bash
 sudo apt update && 
-sudo apt-get install cron git gzip tar curl mysql-client postgresql-client -y
+sudo apt-get install cron git gzip tar curl python3-pip mysql-client postgresql-client -y
+pip3 install docker
 ```
 
 ---
