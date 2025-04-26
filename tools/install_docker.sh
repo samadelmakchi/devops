@@ -1,56 +1,66 @@
 #!/bin/bash
 
-# انتخاب نسخه اوبونتو و معماری مناسب
-echo "لطفا نسخه اوبونتو خود را از لیست انتخاب کنید:"
-echo "| نسخه اوبونتو |       نام کد     |"
-echo "|--------------|------------------|"
-echo "| 20.04        | Focal Fossa      |"
-echo "| 18.04        | Bionic Beaver    |"
-echo "| 16.04        | Xenial Xerus     |"
-echo "| 22.04        | Jammy Jellyfish  |"
-echo "| 21.10        | Impish Indri     |"
-echo "| 19.10        | Eoan Ermine      |"
-echo "| 17.10        | Artful Aardvark  |"
-echo "| 15.04        | Vivid Vervet     |"
-echo "| 14.04        | Trusty Tahr      |"
-echo "| 12.04        | Precise Pangolin |"
-echo ""
-echo "لطفا نام کد نسخه اوبونتو خود را وارد کنید (مثال: focal, bionic, xenial و ...):"
-read UBUNTU_VERSION
+# شناسایی نسخه اوبونتو و معماری
+UBUNTU_VERSION=$(lsb_release -cs)
+ARCHITECTURE=$(dpkg --print-architecture)
 
-# انتخاب معماری مناسب
-echo "لطفا معماری سیستم خود را وارد کنید (مثال: amd64, armhf, arm64, s390x):"
-read ARCHITECTURE
+echo "✅ شناسایی شد: نسخه اوبونتو شما '$UBUNTU_VERSION' و معماری '$ARCHITECTURE' است."
 
-# به پوشه هدف بروید
-cd /home/install/docker/
+if [[ "$UBUNTU_VERSION" == "focal" && "$ARCHITECTURE" == "amd64" ]]; then
 
-# دانلود فایل‌های .deb از Docker
-wget https://download.docker.com/linux/ubuntu/dists/$UBUNTU_VERSION/pool/stable/$ARCHITECTURE/containerd.io_1.7.27-1_$ARCHITECTURE.deb
-wget https://download.docker.com/linux/ubuntu/dists/$UBUNTU_VERSION/pool/stable/$ARCHITECTURE/docker-ce_28.1.1-1~ubuntu.20.04~$UBUNTU_VERSION_$ARCHITECTURE.deb
-wget https://download.docker.com/linux/ubuntu/dists/$UBUNTU_VERSION/pool/stable/$ARCHITECTURE/docker-ce-cli_28.1.1-1~ubuntu.20.04~$UBUNTU_VERSION_$ARCHITECTURE.deb
-wget https://download.docker.com/linux/ubuntu/dists/$UBUNTU_VERSION/pool/stable/$ARCHITECTURE/docker-buildx-plugin_0.23.0-1~ubuntu.20.04~$UBUNTU_VERSION_$ARCHITECTURE.deb
-wget https://download.docker.com/linux/ubuntu/dists/$UBUNTU_VERSION/pool/stable/$ARCHITECTURE/docker-compose-plugin_2.6.0~ubuntu-$UBUNTU_VERSION_$ARCHITECTURE.deb
+    DOWNLOAD_DIR="docker"
+    mkdir -p "$DOWNLOAD_DIR"
 
-# نصب فایل‌های .deb دانلود شده
-sudo dpkg -i containerd.io_1.7.27-1_$ARCHITECTURE.deb
-sudo dpkg -i docker-ce_28.1.1-1~ubuntu.20.04~$UBUNTU_VERSION_$ARCHITECTURE.deb
-sudo dpkg -i docker-ce-cli_28.1.1-1~ubuntu.20.04~$UBUNTU_VERSION_$ARCHITECTURE.deb
-sudo dpkg -i docker-buildx-plugin_0.23.0-1~ubuntu.20.04~$UBUNTU_VERSION_$ARCHITECTURE.deb
-sudo dpkg -i docker-compose-plugin_2.6.0~ubuntu-$UBUNTU_VERSION_$ARCHITECTURE.deb
+    FILES=(
+        "containerd.io_1.7.27-1_amd64.deb"
+        "docker-ce_28.1.1-1~ubuntu.20.04~focal_amd64.deb"
+        "docker-ce-cli_28.1.1-1~ubuntu.20.04~focal_amd64.deb"
+        "docker-buildx-plugin_0.23.0-1~ubuntu.20.04~focal_amd64.deb"
+        "docker-compose-plugin_2.6.0~ubuntu-focal_amd64.deb"
+    )
 
-# رفع مشکلات وابستگی‌ها
-sudo apt-get install -f
+    BASE_URL="https://download.docker.com/linux/ubuntu/dists/focal/pool/stable/amd64"
 
-# شروع Docker
+    for FILE in "${FILES[@]}"; do
+        if [ ! -f "$DOWNLOAD_DIR/$FILE" ]; then
+            echo "🔽 در حال دانلود $FILE ..."
+            wget -O "$DOWNLOAD_DIR/$FILE" "$BASE_URL/$FILE"
+        else
+            echo "✅ $FILE قبلاً دانلود شده، رد شد."
+        fi
+    done
+
+    sudo dpkg -i "$DOWNLOAD_DIR/"*.deb
+
+elif [[ "$UBUNTU_VERSION" == "bionic" && "$ARCHITECTURE" == "amd64" ]]; then
+    echo "✅ اوبونتو bionic و معماری amd64 شناسایی شد. (کد این قسمت کامل نشده)"
+else
+    echo "❌ نسخه یا معماری شناسایی شده پشتیبانی نمی‌شود."
+    exit 1
+fi
+
+# رفع مشکلات احتمالی وابستگی‌ها
+sudo apt-get install -f -y
+
+# شروع و فعال سازی Docker
 sudo systemctl start docker
-
-# فعال‌سازی خودکار Docker در هنگام بوت
 sudo systemctl enable docker
 
-# بررسی نصب Docker
+# بررسی نسخه‌های نصب شده
 docker --version
-
-# نصب Docker Compose
 docker compose version
 
+# تنظیم Docker برای ArvanCloud
+echo "⚙️ تنظیم ArvanCloud Mirror برای Docker..."
+
+sudo mkdir -p /etc/docker
+
+sudo tee /etc/docker/daemon.json > /dev/null <<EOF
+{
+  "insecure-registries" : ["https://docker.arvancloud.ir"],
+  "registry-mirrors": ["https://docker.arvancloud.ir"]
+}
+EOF
+
+docker logout
+sudo systemctl restart docker

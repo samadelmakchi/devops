@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  sqlite-web:
+    image: coleifer/sqlite-web:latest
+    container_name: sqlite-web
+    restart: unless-stopped
+    environment:
+      - SQLITE_DATABASE=/data/your-database.db
+    volumes:
+      - ./data:/data
+    ports:
+      - "8080:8080"
+    command: --password yourpassword --read-only
+    networks:
+      - traefik_reverse_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sqlite.rule=Host(`sqlite.elmakchi.ir`)"
+      - "traefik.http.routers.sqlite.entrypoints=websecure"
+      - "traefik.http.routers.sqlite.tls.certresolver=myresolver"
+      - "traefik.http.services.sqlite.loadbalancer.server.port=80"
+
+networks:
+  traefik_reverse_proxy:
+    external: true

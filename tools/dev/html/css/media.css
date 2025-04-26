@@ -1,0 +1,424 @@
+@media only screen and (max-width: 1169px) {
+.container {
+	width: 92%;
+}
+.logo {
+	padding: 18px 0 0 0;
+}
+.counter ul.countdown {
+	margin: 75px 0;
+	line-height: normal;
+}
+.counter ul.countdown li p {
+	font-size: 14px;
+}
+.counter ul.countdown li.day {
+	margin: 0 12px 0 0;
+}
+.counter ul.countdown li.day span.days {
+	font-size: 160px;
+	margin: 5px 0 0 0;
+}
+.counter ul.countdown li.sec{
+	text-align: left; /* display: inline-block ; */
+}
+.counter ul.countdown li.sec span.ab {
+	display: none;
+}
+.counter ul.countdown li.sec span.seconds.last {
+	font-size: 30px;
+	margin: 5px 5px 0 0;
+	display: inline-block;
+}
+.counter .notify {
+	width: 380px;
+	margin: 114px 0 0 0;
+}
+.counter .notify p {
+	text-align: left;
+	float: none;
+}
+.lightcounter .lightnotify {
+	width: 100%;
+	text-align: center;
+	float: none;
+	display: inline-block;
+}
+.lightcounter .lightnotify p {
+	float: none;
+	text-align: center;
+}
+.spacecounter .spacenotify {
+	width: 100%;
+	text-align: center;
+	float: none;
+	display: inline-block;
+}
+.spacecounter .spacenotify p {
+	float: none;
+	text-align: center;
+}
+}
+ @media only screen and (max-width: 1024px) {
+.counter {
+	text-align: center;
+	margin: 0% 0 0 0;
+}
+.counter ul.countdown {
+	display: inline-block;
+	float: none;
+	margin: 42px 0;
+	width: auto;
+}
+.counter ul.countdown li {
+	float: none;
+}
+.counter ul.countdown .hour {
+	margin: 24px 0 0px 0;
+	text-align: center;
+	display: inline-block;
+	float: none;
+}
+.counter ul.countdown .second li.sec {
+	float: none;
+	display: inline-block;
+}
+.counter ul.countdown .second {
+	width: 100%;
+	text-align: center;
+	display: inline-block !Important;
+	float: none;
+}
+.counter ul.countdown li.sec span.ab {
+	display: none;
+}
+.counter ul.countdown li.sec p.seconds_ref {
+	margin: 0px 0 0 0;
+	float: none;
+	display: inline-block;
+}
+.counter .notify {
+	margin: -28px 0 0 0;
+	width: 100%;
+}
+.lightcounter ul.countdown_2 li span {
+	margin: 0 10px 0 25px;
+	padding: 0 0;
+}
+.lightfooter {
+	margin: 48px 0;
+}
+.spacecounter ul.countdown_2 li span {
+	margin: 0 10px 0 25px;
+	padding: 0 0;
+}
+.spacefooter {
+	margin: 48px 0;
+}
+}
+ @media only screen and (max-width: 768px) {
+.logo {
+	padding: 22px 0 0 0;
+}
+.counter ul.countdown {
+	text-align: left;
+}
+.counter ul.countdown .dayy li.day {
+	width: 100%;
+	display: inline-block;
+	float: none;
+}
+.counter ul.countdown .dayy li.day span.days {
+	font-size: 130px;
+	line-height: 80px;
+	float: none;
+}
+.counter ul.countdown li span {
+	margin: 0 0px 0 0;
+}
+.counter ul.countdown li {
+	float: none;
+
+}
+.counter ul.countdown .hour {
+	display: inline-block;
+}
+.counter ul.countdown .second {
+	display: inline-block;
+}
+.counter ul.countdown li p {
+	font-size: 12px;
+	line-height: 22px;
+}
+.counter ul.countdown .second li.sec {
+	float: none;
+	text-align: CENTER;
+	width: 97%;
+}
+.counter .notify {
+	margin: 28px 0 0 0;
+}
+.lightcounter ul.countdown_2 li span {
+	font-size: 48px;
+	line-height: normal;
+}
+.lightsocial ul li a.fa {
+	font-size: 18px;
+}
+.lightfooter {
+	margin: 0 0;
+}
+.spacecounter ul.countdown_2 li span {
+	font-size: 48px;
+	line-height: normal;
+}
+.spacesocial ul li a.fa {
+	font-size: 18px;
+}
+.spacefooter {
+	margin: 0 0;
+}
+canvas.snow-canvas {
+    display: none;
+}
+}
+ @media only screen and (max-width: 640px) {
+.container {
+	width: 90%;
+}
+.logo {
+	padding: 12px 0 0 0;
+}
+.counter {
+	margin: 0% 0 0 0;
+}
+.counter ul.countdown .dayy li.day span.days {
+	font-size: 85px;
+	line-height: 52px;
+}
+.counter ul.countdown li span {
+	margin: 0 0px 0 0;
+}
+.counter ul.countdown li span {
+	font-size: 55px;
+	line-height: 53px;
+}
+li.sec span.seconds.last {
+	font-size: 31px;
+}
+.counter .notify p {
+	font-size: 12px;
+	margin: 0 0 8px 0;
+}
+.counter .notify input[type=text] {
+	border: solid 2px #fff;
+	padding: 0 2%;
+	width: 95%;
+	height: 38px;
+}
+.counter .notify input[type=submit] {
+	margin: -55px -5px 0 0;
+
+}
+.footer {
+	text-align: center;
+}
+.footer p {
+	float: none;
+	padding: 0px 0;
+}
+.footer .social {
+	text-align: center;
+	float: none;
+	display: inline-block;
+}
+.darkfooter {
+	text-align: center;
+}
+.darkfooter p {
+	float: none;
+	padding: 0px 0;
+}
+.darkfooter .social {
+	float: left;
+	text-align: center;
+	float: none;
+	display: inline-block;
+}
+.lightfooter {
+	text-align: center;
+	margin: 0 0;
+}
+.lightfooter p {
+	float: none;
+	padding: 0px 0;
+}
+.lightfooter .social {
+	text-align: center;
+	float: none;
+	display: inline-block;
+}
+.spacefooter {
+	text-align: center;
+	margin: 0 0;
+}
+.spacefooter p {
+	float: none;
+	padding: 0px 0;
+}
+.spacefooter .social {
+	text-align: center;
+	float: none;
+	display: inline-block;
+}
+.lightnotify {
+	margin: 24px 0 0 0;
+}
+.lightsocial {
+	margin: 25px 0 0 0;
+}
+.lightsocial ul li a.fa {
+}
+.lightcounter .lightnotify p {
+	width: 100%;
+}
+.lightcounter .lightnotify input[type=text] {
+	width: 73%;
+}
+.spacenotify {
+	margin: 24px 0 0 0;
+}
+.spacesocial {
+	margin: 25px 0 0 0;
+}
+.spacecounter .lightnotify p {
+	width: 100%;
+}
+.spacecounter .lightnotify input[type=text] {
+	width: 73%;
+}
+.mid #result .error {width: 96%;}
+.mid #result .success{width: 96%;}
+.footer {position: relative;margin: 25px 0 0 0;}
+.darkfooter{position: relative;margin: 25px 0 0 0;}
+canvas {
+    display: none !important;
+}
+.lightcounter .lightnotify input[type=submit] { margin: 0px 0 0 -4px; height: 56px;}
+.spacecounter ul.countdown_2 {margin: 16px 0;}
+.spacecounter .spacenotify input[type=submit] { margin: 0px 0 0 -8px; height: 56px;}}
+ @media only screen and (max-width: 480px) {
+.container {
+	width: 82%;
+}
+.logo img.logo {
+	width: 195px;
+}
+.counter ul.countdown li {
+	margin: 0 0 0 0;
+}
+.counter ul.countdown .hour {
+	float: none;
+	margin: 7px 0 0px 0;
+}
+.counter ul.countdown li.day span.days {
+    font-size: 85px;
+    margin: -12px 0 0 0;
+}
+.counter ul.countdown .second {
+	float: none;
+}
+.counter ul.countdown li span {
+	font-size: 31px;
+	line-height: normal;
+	margin: 0 9px 0 0
+}
+.counter .notify input[type=text] {
+	font-size: 12px;
+}
+.counter .notify input[type=submit] {
+	font-size: 11px;
+	margin: -53px -2px 0 0;
+}
+.footer p {
+	font-size: 12px;
+	padding: 0px 0;
+}
+.darkfooter p {
+	font-size: 12px;
+	padding: 0px 0;
+}
+.lightfooter {
+	margin: 0 0;
+}
+.lightfooter p {
+	font-size: 12px;
+}
+.spacefooter {
+	margin: 0 0;
+}
+.spacefooter p {
+	font-size: 12px;
+}
+.lightcounter ul.countdown_2 li {
+	margin: 0 0;
+}
+.lightcounter ul.countdown_2 .hour {
+	float: none;
+}
+.lightcounter ul.countdown_2 .second {
+	float: none;
+}
+.lightnotify {
+	margin: 0 0 0 0;
+}
+.spacecounter ul.countdown_2 {margin: 75px 0 0 0;}
+.lightcounter .lightnotify input[type=text] {
+	font-size: 12px;
+	width: 70%;
+}
+.lightcounter .lightnotify input[type=submit] {
+	font-size: 11px;
+	margin: 0 0 0 -98px;
+	padding: 0px 12px;
+}
+.spacecounter ul.countdown_2 li {
+	margin: 0 0;
+}
+.spacecounter ul.countdown_2 .hour {
+	float: none;
+}
+.spacecounter ul.countdown_2 .second {
+	float: none;
+}
+.spacenotify {margin:0 0 0 0;}
+.spacecounter h1 {margin: 68px 0 0 0;}
+.spacecounter .spacenotify input[type=text] {
+	font-size: 12px;
+	width: 70%;
+}
+.spacecounter .spacenotify input[type=submit] {
+	font-size: 11px;
+	margin: 0 0 0 -98px;
+	padding: 0px 12px;
+}
+.spacesocial ul li {
+	 margin: 0 5px 0 0;
+}
+.lightcounter ul.countdown_2 li p {font-size: 12px;}
+.lightcounter ul.countdown_2 li span {margin: 0 5px;}
+.lightcounter .lightnotify input[type=email] {width: 96%;height: 38px; padding:0 0 0 2%;}
+.lightcounter .lightnotify input[type=submit] {width: 100%; height: 38px; margin: 5px 0 0 0;}
+.counter .notify input[type=email] {width: 96%;height: 38px; padding:0 0 0 2%;}
+.counter .notify input[type=submit] {width: 100%; height: 38px; margin: 5px 0 0 0;}
+
+.spacecounter .spacenotify input[type=email]{width: 96%;height: 38px; padding:0 0 0 2%;}
+.spacecounter .spacenotify input[type=submit]{width: 100%; height: 38px; margin: 5px 0 0 0;}
+
+.spacecounter ul.countdown_2 li span {
+    margin: 0 5px;
+}
+.spacecounter ul.countdown_2 li p {font-size: 12px;}
+.spacecounter .spacenotify {margin: 25px 0 0 0;}
+.spacecounter .spacenotify p { font-size: 14px; width: 100%;}
+}

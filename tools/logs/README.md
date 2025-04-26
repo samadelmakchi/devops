@@ -32,7 +32,7 @@ Winlogbeat یکی از ابزارهای مجموعه Beats است که به طو
 
 در زیر یک تصویر از رابط کاربری Beats آورده شده است:
 
-![Screenshot](screenshot.png)
+![Logs](../../img/logs.png)
 
 ### جهت اجرای Beats با استفاده از Docker Compose، دستور زیر را وارد کنید:
 

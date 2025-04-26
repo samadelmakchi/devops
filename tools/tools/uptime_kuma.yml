@@ -1,0 +1,25 @@
+version: '3'
+services:
+  uptime-kuma:
+    container_name: uptime_kuma
+    image: 'louislam/uptime-kuma:1'
+    networks:
+      - traefik_reverse_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.uptime_kuma.rule=Host(`uptime.elmakchi.ir`)"
+      - "traefik.http.routers.uptime_kuma.entrypoints=websecure"
+      - "traefik.http.routers.uptime_kuma.tls.certresolver=myresolver"
+      - "traefik.http.services.uptime_kuma.loadbalancer.server.port=3001"
+    volumes:
+      - './data:/app/data'
+    ports:
+      - '3001:3001'
+    restart: always
+   
+networks:
+  traefik_reverse_proxy:
+    external: true
+
+volumes:
+  data:
