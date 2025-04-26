@@ -8,10 +8,22 @@ services:
     ports:
       - "5050:80"
     environment:
-      PGADMIN_DEFAULT_EMAIL: "admin@example.com"
-      PGADMIN_DEFAULT_PASSWORD: "StrongPassword"
+      - PGADMIN_DEFAULT_EMAIL=samad.elmakchi@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=6165
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - traefik_reverse_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pgadmin.rule=Host(`pgadmin.elmakchi.ir`)"
+      - "traefik.http.routers.pgadmin.entrypoints=websecure"
+      - "traefik.http.routers.pgadmin.tls.certresolver=myresolver"
+      - "traefik.http.services.pgadmin.loadbalancer.server.port=80"
+
+networks:
+  traefik_reverse_proxy:
+    external: true
 
 volumes:
   pgadmin_data:

@@ -34,10 +34,6 @@ Winlogbeat یکی از ابزارهای مجموعه Beats است که به طو
 
 ![Logs](../../img/logs.png)
 
-### جهت اجرای Beats با استفاده از Docker Compose، دستور زیر را وارد کنید:
 
-```bash
-sudo docker compose up -d
-```
 
 

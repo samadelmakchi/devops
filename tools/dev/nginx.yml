@@ -2,7 +2,7 @@ version: '3'
 
 services:
   nginx-cdn:
-    container_name: nginx_cdn
+    container_name: nginx-cdn-server
     image: nginx:latest
     networks:
       - traefik_reverse_proxy
@@ -15,7 +15,7 @@ services:
     volumes:
       - ./html:/usr/share/nginx/html 
     restart: always
-   
+
 networks:
   traefik_reverse_proxy:
     external: true

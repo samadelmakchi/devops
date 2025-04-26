@@ -13,7 +13,7 @@ services:
       - 4369:4369
       - 5671:5671
       - 5672:5672
-      - 15672:15672
+      - 15672:15672  # پورت مدیریتی RabbitMQ
     volumes:
       - './rabbitmq_data:/data'
     networks:
@@ -23,7 +23,7 @@ services:
       - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.elmakchi.ir`)"
       - "traefik.http.routers.rabbitmq.entrypoints=websecure"
       - "traefik.http.routers.rabbitmq.tls.certresolver=myresolver"
-      - "traefik.http.services.rabbitmq.loadbalancer.server.port=8080"
+      - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"  # تغییر پورت به 15672 برای کنسول مدیریتی
 
 volumes:
   rabbitmq_data:
@@ -31,4 +31,3 @@ volumes:
 networks:
   traefik_reverse_proxy:
     external: true
-

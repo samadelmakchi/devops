@@ -11,7 +11,7 @@ services:
       - ./data:/data
     ports:
       - "8080:8080"
-    command: --password yourpassword --read-only
+    command: --password 6165 --read-only
     networks:
       - traefik_reverse_proxy
     labels:

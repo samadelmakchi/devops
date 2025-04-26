@@ -5,11 +5,12 @@ services:
     image: phpmyadmin/phpmyadmin:latest
     container_name: phpmyadmin
     restart: unless-stopped
+    ports:
+      - "8081:80"
     environment:
-      # متغیرهای محیطی برای دیتابیس‌های مختلف
-      PMA_HOSTS: calibri-crm-database,calibri-gateway-database  # لیست سرویس‌های دیتابیس مختلف
-      PMA_PORT: 3306
-      PMA_ARBITRARY: 1
+      - PMA_HOSTS=calibri-crm-database,calibri-gateway-database
+      - PMA_PORT=3306
+      - PMA_ARBITRARY=1
     networks:
       - traefik_reverse_proxy
     labels:

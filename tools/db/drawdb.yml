@@ -7,6 +7,8 @@ services:
     ports:
       - 3500:80
     restart: always
+    volumes:
+      - drawdb_data:/app/data
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.drawdb.rule=Host(`drawdb.elmakchi.ir`)"
@@ -19,3 +21,6 @@ services:
 networks:
   traefik_reverse_proxy:
     external: true
+
+volumes:
+  drawdb_data:

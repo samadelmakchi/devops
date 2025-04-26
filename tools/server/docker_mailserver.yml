@@ -21,3 +21,15 @@ services:
     cap_add:
       - NET_ADMIN
     restart: always
+    networks:
+      - traefik_reverse_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mailserver.rule=Host(`mailserver.elmakchi.ir`)"
+      - "traefik.http.routers.mailserver.entrypoints=websecure"
+      - "traefik.http.routers.mailserver.tls.certresolver=myresolver"
+      - "traefik.http.services.mailserver.loadbalancer.server.port=8080"
+
+networks:
+  traefik_reverse_proxy:
+    external: true

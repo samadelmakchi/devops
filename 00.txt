@@ -1,8 +1,0 @@
-
-```bash
-sudo nano /etc/resolv.conf
-
-nameserver 185.51.200.2
-nameserver 185.51.200.3
-```
-

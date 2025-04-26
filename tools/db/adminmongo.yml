@@ -15,10 +15,10 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.redis.rule=Host(`redis.elmakchi.ir`)"
-      - "traefik.http.routers.redis.entrypoints=websecure"
-      - "traefik.http.routers.redis.tls.certresolver=myresolver"
-      - "traefik.http.services.redis.loadbalancer.server.port=80"
+      - "traefik.http.routers.adminmongo.rule=Host(`adminmongo.elmakchi.ir`)"
+      - "traefik.http.routers.adminmongo.entrypoints=websecure"
+      - "traefik.http.routers.adminmongo.tls.certresolver=myresolver"
+      - "traefik.http.services.adminmongo.loadbalancer.server.port=1234"
 
 networks:
   traefik_reverse_proxy:

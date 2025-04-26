@@ -127,6 +127,30 @@ services:
     depends_on:
       - elasticsearch
 
+  # Logstash
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.6.0
+    container_name: logstash
+    environment:
+      - LS_JAVA_OPTS="-Xmx1g -Xms1g"  # تنظیمات حافظه JVM
+      - LOGSTASH_PASSWORD=your_password_here  # رمز عبور برای دسترسی به Logstash
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline  # فایل‌های pipeline Logstash
+    ports:
+      - "5044:5044"  # پورت برای دریافت داده‌ها از Filebeat
+    networks:
+      - elastic
+      - traefik_reverse_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.logstash.rule=Host(`logstash.elmakchi.ir`)"
+      - "traefik.http.routers.logstash.entrypoints=websecure"
+      - "traefik.http.routers.logstash.tls.certresolver=myresolver"
+      - "traefik.http.services.logstash.loadbalancer.server.port=5044"
+    depends_on:
+      - elasticsearch
+      - kibana
+
 networks:
   elastic:
     driver: bridge

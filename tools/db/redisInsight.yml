@@ -11,10 +11,10 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.redis.rule=Host(`redis.elmakchi.ir`)"
-      - "traefik.http.routers.redis.entrypoints=websecure"
-      - "traefik.http.routers.redis.tls.certresolver=myresolver"
-      - "traefik.http.services.redis.loadbalancer.server.port=80"
+      - "traefik.http.routers.redisinsight.rule=Host(`redis.elmakchi.ir`)"
+      - "traefik.http.routers.redisinsight.entrypoints=websecure"
+      - "traefik.http.routers.redisinsight.tls.certresolver=myresolver"
+      - "traefik.http.services.redisinsight.loadbalancer.server.port=8001"
 
 networks:
   traefik_reverse_proxy:
