@@ -19,6 +19,14 @@ services:
       - "9000:9000"
     networks:
       - ${NETWORK_TYPE:-ipv4}
+      - traefik_reverse_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarqube.rule=Host(`sonarqube.elmakchi.ir`)"
+      - "traefik.http.routers.sonarqube.entrypoints=websecure"
+      - "traefik.http.routers.sonarqube.tls.certresolver=myresolver"
+      - "traefik.http.services.sonarqube.loadbalancer.server.port=9000"
+
   db:
     image: postgres:15
     healthcheck:
@@ -36,6 +44,7 @@ services:
       - postgresql_data:/var/lib/postgresql/data
     networks:
       - ${NETWORK_TYPE:-ipv4}
+      - traefik_reverse_proxy
 
 volumes:
   sonarqube_data:
@@ -46,6 +55,8 @@ volumes:
   postgresql_data:
 
 networks:
+  traefik_reverse_proxy:
+    external: true
   ipv4:
     driver: bridge
     enable_ipv6: false

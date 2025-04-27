@@ -1,11 +1,1 @@
-version: '3'
 
-services:
-  chatbot-ui:
-    image: ghcr.io/mckaywrigley/chatbot-ui:latest
-    container_name: chatbot-ui
-    restart: always
-    ports:
-      - "3000:3000"
-    environment:
-      - OPENAI_API_KEY=sk-YOUR-API-KEY
