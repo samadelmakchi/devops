@@ -41,7 +41,7 @@ dig shecan.ir
 
 ---
 
-### 🤖 Ansible
+### 🤖 نصب ابزار زیر ساخت به عنوان کد
 <details>
   <summary>Ansible</summary>
   <p>
@@ -70,7 +70,7 @@ sudo ansible-playbook -i inventory_file.yml playbook.yml
 
 ---
 
-### 🐳 Docker
+### 🐳 نصب ابزارهای کانتینر و مجازی سازی
 <details>
   <summary>Docker</summary>
   <p>
@@ -102,7 +102,7 @@ sudo chmod +x ./tools/install_docker.sh
 
 ---
 
-### 🚦 Traefik
+### 🚦 نصب ابزار لود بالانسر و ریورس پروکسی
 <details>
   <summary>Traefik</summary>
   <p>
