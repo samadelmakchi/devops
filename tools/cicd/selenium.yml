@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  selenium-hub:
+    image: selenium/hub:4.0.0-20220114
+    container_name: selenium-hub
+    restart: always
+    ports:
+      - "4444:4444"  # پورت اصلی برای اتصال به Hub
+    networks:
+      - selenium
+      - traefik_reverse_proxy
+    environment:
+      - GRID_TIMEOUT=30000
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.selenium-hub.rule=Host(`selenium.elmakchi.ir`)"
+      - "traefik.http.routers.selenium-hub.entrypoints=websecure"
+      - "traefik.http.routers.selenium-hub.tls.certresolver=myresolver"
+      - "traefik.http.services.selenium-hub.loadbalancer.server.port=4444"
+
+  chrome:
+    image: selenium/node-chrome:4.0.0-20220114
+    container_name: selenium-node-chrome
+    restart: always
+    ports:
+      - "5900:5900"  # پورت VNC برای دسترسی به نمایشگر Chrome
+    depends_on:
+      - selenium-hub
+    networks:
+      - selenium
+      - traefik_reverse_proxy
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PORT=4444
+      - SE_NODE_MAX_SESSIONS=5
+      - SE_NODE_PORT=5555
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.selenium-node-chrome.rule=Host(`chrome.selenium.elmakchi.ir`)"
+      - "traefik.http.routers.selenium-node-chrome.entrypoints=websecure"
+      - "traefik.http.routers.selenium-node-chrome.tls.certresolver=myresolver"
+      - "traefik.http.services.selenium-node-chrome.loadbalancer.server.port=5900"
+
+  firefox:
+    image: selenium/node-firefox:4.0.0-20220114
+    container_name: selenium-node-firefox
+    restart: always
+    ports:
+      - "5901:5901"  # پورت VNC برای دسترسی به نمایشگر Firefox
+    depends_on:
+      - selenium-hub
+    networks:
+      - selenium
+      - traefik_reverse_proxy
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PORT=4444
+      - SE_NODE_MAX_SESSIONS=5
+      - SE_NODE_PORT=5555
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.selenium-node-firefox.rule=Host(`firefox.selenium.elmakchi.ir`)"
+      - "traefik.http.routers.selenium-node-firefox.entrypoints=websecure"
+      - "traefik.http.routers.selenium-node-firefox.tls.certresolver=myresolver"
+      - "traefik.http.services.selenium-node-firefox.loadbalancer.server.port=5901"
+
+networks:
+  selenium:
+    driver: bridge
+  traefik_reverse_proxy:
+    external: true
