@@ -1,0 +1,8 @@
+selenium
+pytest
+pytest-selenium
+requests
+pylint
+pytest-cov
+locust
+newman
