@@ -6,38 +6,29 @@ ARCHITECTURE=$(dpkg --print-architecture)
 
 echo "✅ شناسایی شد: نسخه اوبونتو شما '$UBUNTU_VERSION' و معماری '$ARCHITECTURE' است."
 
-if [[ "$UBUNTU_VERSION" == "focal" && "$ARCHITECTURE" == "amd64" ]]; then
+DOWNLOAD_DIR="docker"
+mkdir -p "$DOWNLOAD_DIR"
 
-    DOWNLOAD_DIR="docker"
-    mkdir -p "$DOWNLOAD_DIR"
+FILES=(
+    "containerd.io_1.7.27-1_amd64.deb"
+    "docker-ce_28.1.1-1~ubuntu.20.04~$UBUNTU_VERSION_$ARCHITECTURE.deb"
+    "docker-ce-cli_28.1.1-1~ubuntu.20.04~$UBUNTU_VERSION_$ARCHITECTURE.deb"
+    "docker-buildx-plugin_0.23.0-1~ubuntu.20.04~$UBUNTU_VERSION_$ARCHITECTURE.deb"
+    "docker-compose-plugin_2.6.0~ubuntu-$UBUNTU_VERSION_$ARCHITECTURE.deb"
+)
 
-    FILES=(
-        "containerd.io_1.7.27-1_amd64.deb"
-        "docker-ce_28.1.1-1~ubuntu.20.04~focal_amd64.deb"
-        "docker-ce-cli_28.1.1-1~ubuntu.20.04~focal_amd64.deb"
-        "docker-buildx-plugin_0.23.0-1~ubuntu.20.04~focal_amd64.deb"
-        "docker-compose-plugin_2.6.0~ubuntu-focal_amd64.deb"
-    )
+BASE_URL="https://download.docker.com/linux/ubuntu/dists/$UBUNTU_VERSION/pool/stable/$ARCHITECTURE"
 
-    BASE_URL="https://download.docker.com/linux/ubuntu/dists/focal/pool/stable/amd64"
+for FILE in "${FILES[@]}"; do
+    if [ ! -f "$DOWNLOAD_DIR/$FILE" ]; then
+        echo "🔽 در حال دانلود $FILE ..."
+        wget -O "$DOWNLOAD_DIR/$FILE" "$BASE_URL/$FILE"
+    else
+        echo "✅ $FILE قبلاً دانلود شده، رد شد."
+    fi
+done
 
-    for FILE in "${FILES[@]}"; do
-        if [ ! -f "$DOWNLOAD_DIR/$FILE" ]; then
-            echo "🔽 در حال دانلود $FILE ..."
-            wget -O "$DOWNLOAD_DIR/$FILE" "$BASE_URL/$FILE"
-        else
-            echo "✅ $FILE قبلاً دانلود شده، رد شد."
-        fi
-    done
-
-    sudo dpkg -i "$DOWNLOAD_DIR/"*.deb
-
-elif [[ "$UBUNTU_VERSION" == "bionic" && "$ARCHITECTURE" == "amd64" ]]; then
-    echo "✅ اوبونتو bionic و معماری amd64 شناسایی شد. (کد این قسمت کامل نشده)"
-else
-    echo "❌ نسخه یا معماری شناسایی شده پشتیبانی نمی‌شود."
-    exit 1
-fi
+sudo dpkg -i "$DOWNLOAD_DIR/"*.deb
 
 # رفع مشکلات احتمالی وابستگی‌ها
 sudo apt-get install -f -y
