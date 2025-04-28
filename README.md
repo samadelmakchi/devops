@@ -27,6 +27,11 @@ ansible-lint --version
 
 اجرای پلی بوک آنسیبل و کانفیگ سرور
 ```bash
+sudo ansible-playbook-server
+```
+
+اجرای پلی بوک آنسیبل و نصب سرویس ها برای مشتریان
+```bash
 sudo ansible-playbook -i inventory_file.yml playbook.yml
 ```
 
