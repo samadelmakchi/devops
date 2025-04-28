@@ -132,4 +132,3 @@
     #   community.docker.docker_network:
     #     name: traefik_reverse_proxy
     #     state: present
-
