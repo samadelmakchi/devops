@@ -32,7 +32,7 @@ Winlogbeat یکی از ابزارهای مجموعه Beats است که به طو
 
 در زیر یک تصویر از رابط کاربری Beats آورده شده است:
 
-![Logs](../../img/logs.png)
+![Logs](../../img/logs.jpg)
 
 
 
