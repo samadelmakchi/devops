@@ -27,7 +27,7 @@ ansible-lint --version
 
 اجرای پلی بوک آنسیبل و کانفیگ سرور
 ```bash
-sudo ansible-playbook-server
+sudo ansible-playbook playbook-server.yml
 ```
 
 اجرای پلی بوک آنسیبل و نصب سرویس ها برای مشتریان
@@ -90,17 +90,40 @@ GitLab >> Preferences >> Access tokens >> Add new token
 http://kibana:5601/
 ```
 
-<!-- 
-نصب ابزارهای کانتینر و مجازی سازی
-sudo chmod +x ./tools/install_docker.sh 
+♻️ Jenkins
+```
+```
 
+♻️ Harbor
+```
+```
+
+♻️ SonarQube
+```
+```
+
+♻️ Selenium
+```
+```
+
+🖥️ Prometheus
+```
+```
+
+🖥️ Zabbix
+```
+```
+
+🖥️ Grafana
+```
+```
+
+🖥️ Splunk
+```
+```
+<!-- 
 نصب ابزارهای مدیریت لاگ ها
 sudo docker compose -f tools/logs/docker-compose.yml up -d
-
-
-🖥️ Prometheus Zabbix Grafana Splunk
-
-♻️ Jenkins Harbor SonarQube Selenium
 
 Kubernetes
 Portainer
