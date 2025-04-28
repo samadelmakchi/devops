@@ -34,6 +34,59 @@
     gateway_mysql_db_name: "calibri_gateway"
 
   tasks:
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ آپدیت سرور و نصب ابزارهای اولیه
+    - name: Update server and install essential tools
+      ansible.builtin.apt:
+        update_cache: true
+        name:
+          - cron
+          - git
+          - gzip
+          - tar
+          - curl
+          - python3-pip
+          - mysql-client
+          - postgresql-client
+        state: present
+      become: true
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ راه اندازی و ست کردن شکن
+    - name: Set DNS for Shecan and configure systemd-resolved
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/resolved.conf
+        regexp: '^DNS='
+        line: 'DNS=185.51.200.2 185.51.200.3'
+        state: present
+
+    - name: Add FallbackDNS to /etc/systemd/resolved.conf
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/resolved.conf
+        regexp: '^FallbackDNS='
+        line: 'FallbackDNS=8.8.8.8 1.1.1.1'
+        state: present
+
+    - name: Restart systemd-resolved service
+      ansible.builtin.systemd:
+        name: systemd-resolved
+        state: restarted
+
+    - name: Create symlink for /etc/resolv.conf to /run/systemd/resolve/resolv.conf
+      ansible.builtin.file:
+        src: /run/systemd/resolve/resolv.conf
+        dest: /etc/resolv.conf
+        state: link
+
+    - name: Test DNS with dig
+      ansible.builtin.command:
+        cmd: dig shecan.ir
+      register: dig_result
+      changed_when: false
+
+    - name: Print DNS test result
+      ansible.builtin.debug:
+        msg: "DNS test result: {{ dig_result.stdout }}"
+      when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ایجاد پوشه‌ها و فایل‌ها
     # ایجاد پوشه‌ها و فایل‌ها برای هر مشتری
     - name: Ensure main directories exist
@@ -127,6 +180,82 @@
       poll: 1
       when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
 
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ داکر پایتون
+    # چک کنید آیا ماژول docker در پایتون نصب شده است
+    - name: Check if Python docker module is installed
+      ansible.builtin.shell: /usr/bin/python3 -c "import docker" >/dev/null 2>&1 && echo OK || echo FAIL
+      register: docker_module_status
+      changed_when: false
+      poll: 1
+
+    # اگر نصب نبود، پکیج docker را نصب کنید
+    - name: Install Python docker module if not present
+      ansible.builtin.pip:
+        name: docker
+        executable: /usr/bin/pip3
+      when: docker_module_status.stdout != "OK"
+      poll: 1
+
+    # اگر docker-compose نصب نبود، آن را نصب کنید
+    - name: Install docker-compose if not present
+      ansible.builtin.pip:
+        name: docker-compose
+        executable: /usr/bin/pip3
+      when: ansible_facts.packages['python3-docker-compose'] is not defined
+      poll: 1
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ تغییر داکر ایمیج
+    # ساخت پوشه /etc/docker
+    - name: Creating the /etc/docker folder
+      become: true
+      ansible.builtin.file:
+        path: /etc/docker
+        state: directory
+        mode: '0755'
+
+    # تنظیم ArvanCloud Mirror در فایل daemon.json
+    - name: Setting up ArvanCloud Mirror in the daemon.json file
+      become: true
+      ansible.builtin.copy:
+        dest: /etc/docker/daemon.json
+        content: |
+          {
+            "insecure-registries" : ["https://docker.arvancloud.ir"],
+            "registry-mirrors": ["https://docker.arvancloud.ir"]
+          }
+        mode: '0644'
+
+    # خروج از لاگین Docker
+    - name: Log out of Docker login
+      ansible.builtin.command:
+        cmd: docker logout
+      register: docker_logout
+      changed_when: false
+
+    # ریستارت سرویس Docker
+    - name: Restart the Docker service
+      become: true
+      ansible.builtin.systemd:
+        name: docker
+        state: restarted
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ نصب ترافیک
+    # Traefik را با استفاده از Docker Compose راه اندازی کنید
+    - name: Set up Traefik using Docker Compose
+      community.docker.docker_compose:
+        project_src: tools/server
+        files:
+          - tools/server/traefik.yml
+        state: present
+        pull: yes  # به‌روزرسانی تصویرهای Docker در صورت نیاز
+        recreate: smart  # مقدار معتبر برای recreate
+
+    # شبکه Docker traefik_reverse_proxy ایجاد کنید
+    - name: Create traefik_reverse_proxy Docker network
+      community.docker.docker_network:
+        name: traefik_reverse_proxy
+        state: present
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ گیت لب
     # تعریف پروژه‌ها و نام‌های پوشه‌ها
     - name: Define project repositories
@@ -163,11 +292,11 @@
       loop: "{{ projects }}"
       poll: 1
       when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
-      environment:
-        HTTP_PROXY: "http://127.0.0.1:2334"
-        HTTPS_PROXY: "http://127.0.0.1:2334"
-        GIT_PROXY_COMMAND: "nc -X 5 -x 127.0.0.1:2334 %h %p"
-        GIT_SSL_NO_VERIFY: "true"
+      # environment:
+      #   HTTP_PROXY: "http://127.0.0.1:2334"
+      #   HTTPS_PROXY: "http://127.0.0.1:2334"
+      #   GIT_PROXY_COMMAND: "nc -X 5 -x 127.0.0.1:2334 %h %p"
+      #   GIT_SSL_NO_VERIFY: "true"
 
     # تنظیم پرمیشن 0777 برای پوشه کلون شده
     - name: Set permissions to 0777 for cloned repositories
@@ -354,9 +483,19 @@
     - name: Run docker-compose for gateway
       ansible.builtin.command:
         cmd: docker compose -p {{ customer_containers }}-gateway -f "{{ project_path }}/{{ inventory_hostname }}/gateway/docker/docker-compose.yml" up -d
+      async: 1200
+      poll: 0
       when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
-      poll: 1
+      register: docker_compose_job
       changed_when: false
+
+    - name: Wait for docker-compose to finish
+      ansible.builtin.async_status:
+        jid: "{{ docker_compose_job.ansible_job_id }}"
+      register: docker_compose_result
+      until: docker_compose_result.finished
+      retries: 100
+      delay: 10
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر portal
     # چک کردن وضعیت و اجرای docker-compose برای portal

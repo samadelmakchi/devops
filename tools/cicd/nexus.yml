@@ -1,1 +1,31 @@
+version: '3.8'
+
+services:
+  nexus:
+    image: sonatype/nexus3:latest
+    container_name: nexus
+    restart: unless-stopped
+    ports:
+      - "8081:8081" 
+    environment:
+      - NEXUS_CONTEXT=  # اگر نیاز به تغییر context دارید، آن را اینجا وارد کنید
+    volumes:
+      - nexus-data:/nexus-data  # داده‌ها و پیکربندی‌های Nexus در این حجم ذخیره می‌شود
+    networks:
+      - nexus_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nexus.rule=Host(`nexus.elmakchi.ir`)"
+      - "traefik.http.routers.nexus.entrypoints=websecure"
+      - "traefik.http.routers.nexus.tls.certresolver=myresolver"
+      - "traefik.http.services.nexus.loadbalancer.server.port=8081"
+
+volumes:
+  nexus-data: 
+
+networks:
+  nexus_network:
+    driver: bridge
+  traefik_reverse_proxy:
+    external: true
 
