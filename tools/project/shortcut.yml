@@ -1,30 +1,29 @@
-version: '3.9'
- 
+version: '3.8'
+
 services:
-  db:
-    image: mariadb:10
+  slash:
+    image: yourselfhosted/slash:latest
+    container_name: slash
     ports:
-      - "3306:3306"
+      - "5231:5231"
     volumes:
-      - ./data/mysql:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=root_password
-      - MYSQL_DATABASE=cypht
-      - MYSQL_USER=cypht
-      - MYSQL_PASSWORD=cypht_password
-  cypht:
-    image: cypht/cypht:2.4.0
-    ports:
-      - "80:80"
-    environment:
-      - AUTH_USERNAME=admin
-      - AUTH_PASSWORD=admin
-      - DB_CONNECTION_TYPE=host
-      - DB_DRIVER=mysql
-      - DB_HOST=db
-      - DB_NAME=cypht
-      - DB_USER=cypht
-      - DB_PASS=cypht_password
-      - SESSION_TYPE=DB
-      - USER_CONFIG_TYPE=DB
+      - slash_data:/var/opt/slash
+    networks:
+      - slash_net
+      - traefik_reverse_proxy
     restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.slash.rule=Host(`shortcut.elmakchi.ir`)"
+      - "traefik.http.routers.slash.entrypoints=websecure"
+      - "traefik.http.routers.slash.tls.certresolver=myresolver"
+      - "traefik.http.services.slash.loadbalancer.server.port=5231"
+
+volumes:
+  slash_data:
+
+networks:
+  slash_net:
+    driver: bridge
+  traefik_reverse_proxy:
+    external: true
