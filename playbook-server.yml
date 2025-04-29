@@ -208,7 +208,7 @@
         name: docker
         state: restarted
 
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ نصب ترافیک
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Traefik
     # Traefik را با استفاده از Docker Compose راه اندازی کنید
     - name: Set up Traefik using Docker Compose
       community.docker.docker_compose:
@@ -224,3 +224,80 @@
       community.docker.docker_network:
         name: traefik_reverse_proxy
         state: present
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Portainer
+    # Portainer را با استفاده از Docker Compose راه اندازی کنید
+    - name: Set up Portainer using Docker Compose
+      community.docker.docker_compose:
+        project_src: tools/tools
+        files:
+          - portainer.yml
+        state: present
+        pull: yes  # به‌روزرسانی تصویرهای Docker در صورت نیاز
+        recreate: smart  # مقدار معتبر برای recreate
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dozzle
+    # Dozzle را با استفاده از Docker Compose راه اندازی کنید
+    - name: Set up Dozzle using Docker Compose
+      community.docker.docker_compose:
+        project_src: tools/tools
+        files:
+          - dozzle.yml
+        state: present
+        pull: yes  # به‌روزرسانی تصویرهای Docker در صورت نیاز
+        recreate: smart  # مقدار معتبر برای recreate
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Uptime Kuma
+    # Uptime Kuma را با استفاده از Docker Compose راه اندازی کنید
+    - name: Set up Uptime Kuma using Docker Compose
+      community.docker.docker_compose:
+        project_src: tools/tools
+        files:
+          - uptime_kuma.yml
+        state: present
+        pull: yes  # به‌روزرسانی تصویرهای Docker در صورت نیاز
+        recreate: smart  # مقدار معتبر برای recreate
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Webmin & Bind9
+    # Webmin & Bind9 را با استفاده از Docker Compose راه اندازی کنید
+    - name: Set up Webmin & Bind9 using Docker Compose
+      community.docker.docker_compose:
+        project_src: tools/tools
+        files:
+          - webmin_bind9.yml
+        state: present
+        pull: yes  # به‌روزرسانی تصویرهای Docker در صورت نیاز
+        recreate: smart  # مقدار معتبر برای recreate
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ phpMyAdmin
+    # phpMyAdmin را با استفاده از Docker Compose راه اندازی کنید
+    - name: Set up phpMyAdmin using Docker Compose
+      community.docker.docker_compose:
+        project_src: tools/db
+        files:
+          - phpmyadmin.yml
+        state: present
+        pull: yes  # به‌روزرسانی تصویرهای Docker در صورت نیاز
+        recreate: smart  # مقدار معتبر برای recreate
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Elasticsearch - Kibana - Fluentd - Logstash - Beats
+    # Elasticsearch - Kibana - Fluentd - Logstash - Beats را با استفاده از Docker Compose راه اندازی کنید
+    - name: Set up (Elasticsearch - Kibana - Fluentd - Logstash - Beats) using Docker Compose
+      community.docker.docker_compose:
+        project_src: tools/logs
+        files:
+          - docker-compose.yml
+        state: present
+        pull: yes  # به‌روزرسانی تصویرهای Docker در صورت نیاز
+        recreate: smart  # مقدار معتبر برای recreate
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Jenkins
+    # Harbor
+    # SonarQube
+    # Selenium
+
+    # Prometheus
+    # Zabbix
+    # Grafana
+    # Splunk
