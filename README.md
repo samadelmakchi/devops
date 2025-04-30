@@ -121,12 +121,3 @@ http://kibana:5601/
 🖥️ Splunk
 ```
 ```
-<!-- 
-نصب ابزارهای مدیریت لاگ ها
-sudo docker compose -f tools/logs/docker-compose.yml up -d
-
-Kubernetes
-Portainer
-Rancher
-kind(+++) / k0s(+++) / k3s(++) / Minikube(+)
--->

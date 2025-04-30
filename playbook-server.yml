@@ -4,23 +4,6 @@
   become: true
 
   tasks:
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ آپدیت سرور و نصب ابزارهای اولیه
-    - name: Update server and install essential tools
-      ansible.builtin.apt:
-        update_cache: true
-        name:
-          - cron
-          - git
-          - gzip
-          - tar
-          - curl
-          - python3-pip
-          - mysql-client
-          - postgresql-client
-        state: present
-      become: true
-      poll: 1
-
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ راه اندازی و ست کردن شکن
     - name: Set DNS for Shecan and configure systemd-resolved
       ansible.builtin.lineinfile:
@@ -61,6 +44,29 @@
     - name: Print DNS test result
       ansible.builtin.debug:
         msg: "DNS test result: {{ dig_result.stdout }}"
+      poll: 1
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ آپدیت سرور و نصب ابزارهای اولیه
+    - name: Ensure python3-apt is installed (needed for apt module)
+      ansible.builtin.apt:
+        name: python3-apt
+        state: present
+        update_cache: true
+      poll: 1
+
+    - name: Update server and install essential tools
+      ansible.builtin.apt:
+        update_cache: true
+        name:
+          - cron
+          - git
+          - gzip
+          - tar
+          - curl
+          - python3-pip
+          - mysql-client
+          - postgresql-client
+        state: present
       poll: 1
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ نصب داکر
@@ -105,6 +111,8 @@
         dpkg -i {{ playbook_dir }}/tools/docker/*.deb
       args:
         executable: /bin/bash
+      changed_when: true
+      poll: 1
 
     # رفع مشکلات احتمالی وابستگی‌ها
     - name: Fix dependencies
@@ -207,97 +215,3 @@
       ansible.builtin.systemd:
         name: docker
         state: restarted
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Traefik
-    # Traefik را با استفاده از Docker Compose راه اندازی کنید
-    - name: Set up Traefik using Docker Compose
-      community.docker.docker_compose:
-        project_src: tools/server
-        files:
-          - traefik.yml
-        state: present
-        pull: yes  # به‌روزرسانی تصویرهای Docker در صورت نیاز
-        recreate: smart  # مقدار معتبر برای recreate
-
-    # شبکه Docker traefik_reverse_proxy ایجاد کنید
-    - name: Create traefik_reverse_proxy Docker network
-      community.docker.docker_network:
-        name: traefik_reverse_proxy
-        state: present
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Portainer
-    # Portainer را با استفاده از Docker Compose راه اندازی کنید
-    - name: Set up Portainer using Docker Compose
-      community.docker.docker_compose:
-        project_src: tools/tools
-        files:
-          - portainer.yml
-        state: present
-        pull: yes  # به‌روزرسانی تصویرهای Docker در صورت نیاز
-        recreate: smart  # مقدار معتبر برای recreate
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dozzle
-    # Dozzle را با استفاده از Docker Compose راه اندازی کنید
-    - name: Set up Dozzle using Docker Compose
-      community.docker.docker_compose:
-        project_src: tools/tools
-        files:
-          - dozzle.yml
-        state: present
-        pull: yes  # به‌روزرسانی تصویرهای Docker در صورت نیاز
-        recreate: smart  # مقدار معتبر برای recreate
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Uptime Kuma
-    # Uptime Kuma را با استفاده از Docker Compose راه اندازی کنید
-    - name: Set up Uptime Kuma using Docker Compose
-      community.docker.docker_compose:
-        project_src: tools/tools
-        files:
-          - uptime_kuma.yml
-        state: present
-        pull: yes  # به‌روزرسانی تصویرهای Docker در صورت نیاز
-        recreate: smart  # مقدار معتبر برای recreate
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Webmin & Bind9
-    # Webmin & Bind9 را با استفاده از Docker Compose راه اندازی کنید
-    - name: Set up Webmin & Bind9 using Docker Compose
-      community.docker.docker_compose:
-        project_src: tools/tools
-        files:
-          - webmin_bind9.yml
-        state: present
-        pull: yes  # به‌روزرسانی تصویرهای Docker در صورت نیاز
-        recreate: smart  # مقدار معتبر برای recreate
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ phpMyAdmin
-    # phpMyAdmin را با استفاده از Docker Compose راه اندازی کنید
-    - name: Set up phpMyAdmin using Docker Compose
-      community.docker.docker_compose:
-        project_src: tools/db
-        files:
-          - phpmyadmin.yml
-        state: present
-        pull: yes  # به‌روزرسانی تصویرهای Docker در صورت نیاز
-        recreate: smart  # مقدار معتبر برای recreate
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Elasticsearch - Kibana - Fluentd - Logstash - Beats
-    # Elasticsearch - Kibana - Fluentd - Logstash - Beats را با استفاده از Docker Compose راه اندازی کنید
-    - name: Set up (Elasticsearch - Kibana - Fluentd - Logstash - Beats) using Docker Compose
-      community.docker.docker_compose:
-        project_src: tools/logs
-        files:
-          - docker-compose.yml
-        state: present
-        pull: yes  # به‌روزرسانی تصویرهای Docker در صورت نیاز
-        recreate: smart  # مقدار معتبر برای recreate
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Jenkins
-    # Harbor
-    # SonarQube
-    # Selenium
-
-    # Prometheus
-    # Zabbix
-    # Grafana
-    # Splunk

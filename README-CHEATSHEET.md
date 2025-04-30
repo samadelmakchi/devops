@@ -3,6 +3,7 @@
 * [Agile](/cheatsheet/agile.md)
 * [Scrum](/cheatsheet/scrum.md)
 * [Git](/cheatsheet/git.md)
+* [Ansible](/cheatsheet/ansible.md)
 * [Docker](/cheatsheet/docker.md)
 * [Docker Compose](/cheatsheet/docker-compose.md)
 * [Dockerfile](/cheatsheet/dockerfile.md)
