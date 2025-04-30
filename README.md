@@ -13,14 +13,23 @@
 
 نصب آنسیبل
 ```bash
-sudo apt update
-sudo apt install software-properties-common
-sudo add-apt-repository ppa:ansible/ansible
-sudo apt update
+# حذف نسخه‌های قدیمی Ansible (در صورت نیاز)
+sudo apt remove ansible -y
 
+# نصب Ansible از طریق apt
+sudo apt update
 sudo apt install ansible -y
+
+# نصب Ansible (پیشنهاد شده)
+sudo pip3 install ansible -y
+
+# نصب ansible-lint
 sudo apt install ansible-lint -y
 
+# نصب مجموعه‌های مورد نیاز
+sudo ansible-galaxy collection install community.docker
+
+#  بررسی نسخه‌های نصب شده
 ansible --version
 ansible-lint --version
 ```

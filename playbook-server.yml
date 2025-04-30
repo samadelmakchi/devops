@@ -87,7 +87,7 @@
         mkdir -p "$DOWNLOAD_DIR"
         BASE_URL="https://download.docker.com/linux/ubuntu/dists/{{ system_info.stdout.split(' ')[0] }}/pool/stable/{{ system_info.stdout.split(' ')[1] }}"
         FILES=(
-          "containerd.io_1.7.27-1_amd64.deb"
+          "containerd.io_1.7.27-1_{{ system_info.stdout.split(' ')[1] }}.deb"
           "docker-ce_28.1.1-1~ubuntu.20.04~{{ system_info.stdout.split(' ')[0] }}_{{ system_info.stdout.split(' ')[1] }}.deb"
           "docker-ce-cli_28.1.1-1~ubuntu.20.04~{{ system_info.stdout.split(' ')[0] }}_{{ system_info.stdout.split(' ')[1] }}.deb"
           "docker-buildx-plugin_0.23.0-1~ubuntu.20.04~{{ system_info.stdout.split(' ')[0] }}_{{ system_info.stdout.split(' ')[1] }}.deb"
@@ -215,3 +215,20 @@
       ansible.builtin.systemd:
         name: docker
         state: restarted
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Traefik
+    # Traefik را با استفاده از Docker Compose راه اندازی کنید
+    - name: Set up Traefik using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools/server
+        files:
+          - traefik.yml
+        state: present
+        pull: always  # به‌روزرسانی تصویرهای Docker همیشه
+        recreate: auto  # بازسازی کانتینرها فقط در صورت نیاز
+
+    # شبکه Docker traefik_reverse_proxy ایجاد کنید
+    - name: Create traefik_reverse_proxy Docker network
+      community.docker.docker_network:
+        name: traefik_reverse_proxy
+        state: present
