@@ -1,12 +1,28 @@
 # ✳️ راهنماهای مورد نیاز برای مهندسین دواپس
 
-* [Agile](/cheatsheet/agile.md)
-* [Scrum](/cheatsheet/scrum.md)
-* [Git](/cheatsheet/git.md)
-* [Ansible](/cheatsheet/ansible.md)
-* [Docker](/cheatsheet/docker.md)
-* [Docker Compose](/cheatsheet/docker-compose.md)
-* [Dockerfile](/cheatsheet/dockerfile.md)
-* [Bash](/cheatsheet/bash.md)
-* [Yaml](/cheatsheet/yaml.md)
-* [Marrkdown](/cheatsheet/marrkdown.md)
+## 📒 مدیریت پروژه
+✅ [Agile](/cheatsheet/agile.md)
+
+✅ [Scrum](/cheatsheet/scrum.md)
+
+## 📕 پایه
+✅ [Git](/cheatsheet/git.md)
+
+✅ [Bash](/cheatsheet/bash.md)
+
+✅ [Yaml](/cheatsheet/yaml.md)
+
+✅ [Marrkdown](/cheatsheet/marrkdown.md)
+
+## 📘 کد به عنوان زیر ساخت
+✅ [Ansible](/cheatsheet/ansible.md)
+
+## 📙 داکر
+✅ [Docker](/cheatsheet/docker.md)
+
+✅ [Docker Compose](/cheatsheet/docker-compose.md)
+
+✅ [Dockerfile](/cheatsheet/dockerfile.md)
+
+## 📗 سایر ابزارها
+✅ [Traefik](/cheatsheet/traefik.md)

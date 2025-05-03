@@ -73,9 +73,10 @@
     # شناسایی نسخه اوبونتو و معماری
     - name: Check Ubuntu version and architecture
       ansible.builtin.shell: |
-        UBUNTU_VERSION=$(lsb_release -cs)
+        CODENAME=$(lsb_release -cs)
+        VERSION=$(lsb_release -rs)
         ARCHITECTURE=$(dpkg --print-architecture)
-        echo "$UBUNTU_VERSION $ARCHITECTURE"
+        echo "$CODENAME $VERSION $ARCHITECTURE"
       register: system_info
       changed_when: false
       poll: 1
@@ -85,13 +86,18 @@
       ansible.builtin.shell: |
         DOWNLOAD_DIR="tools/docker"
         mkdir -p "$DOWNLOAD_DIR"
-        BASE_URL="https://download.docker.com/linux/ubuntu/dists/{{ system_info.stdout.split(' ')[0] }}/pool/stable/{{ system_info.stdout.split(' ')[1] }}"
+
+        CODENAME="{{ system_info.stdout.split(' ')[0] }}"
+        VERSION="{{ system_info.stdout.split(' ')[1] }}"
+        ARCH="{{ system_info.stdout.split(' ')[2] }}"
+
+        BASE_URL="https://download.docker.com/linux/ubuntu/dists/$CODENAME/pool/stable/$ARCH"
         FILES=(
-          "containerd.io_1.7.27-1_{{ system_info.stdout.split(' ')[1] }}.deb"
-          "docker-ce_28.1.1-1~ubuntu.20.04~{{ system_info.stdout.split(' ')[0] }}_{{ system_info.stdout.split(' ')[1] }}.deb"
-          "docker-ce-cli_28.1.1-1~ubuntu.20.04~{{ system_info.stdout.split(' ')[0] }}_{{ system_info.stdout.split(' ')[1] }}.deb"
-          "docker-buildx-plugin_0.23.0-1~ubuntu.20.04~{{ system_info.stdout.split(' ')[0] }}_{{ system_info.stdout.split(' ')[1] }}.deb"
-          "docker-compose-plugin_2.6.0~ubuntu-{{ system_info.stdout.split(' ')[0] }}_{{ system_info.stdout.split(' ')[1] }}.deb"
+          "containerd.io_1.7.27-1_${ARCH}.deb"
+          "docker-ce_28.1.1-1~ubuntu.${VERSION}~${CODENAME}_${ARCH}.deb"
+          "docker-ce-cli_28.1.1-1~ubuntu.${VERSION}~${CODENAME}_${ARCH}.deb"
+          "docker-buildx-plugin_0.23.0-1~ubuntu.${VERSION}~${CODENAME}_${ARCH}.deb"
+          "docker-compose-plugin_2.35.1-1~ubuntu.${VERSION}~${CODENAME}_${ARCH}.deb"
         )
 
         for FILE in "${FILES[@]}"; do
@@ -226,9 +232,44 @@
         state: present
         pull: always  # به‌روزرسانی تصویرهای Docker همیشه
         recreate: auto  # بازسازی کانتینرها فقط در صورت نیاز
+      environment:
+        PATH: "/root/.docker/cli-plugins:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
     # شبکه Docker traefik_reverse_proxy ایجاد کنید
     - name: Create traefik_reverse_proxy Docker network
       community.docker.docker_network:
         name: traefik_reverse_proxy
         state: present
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Portainer
+    # Portainer را با استفاده از Docker Compose راه اندازی کنید
+    - name: Set up Portainer using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools/tools
+        files:
+          - portainer.yml
+        state: present
+        pull: always  # به‌روزرسانی تصویرهای Docker همیشه
+        recreate: auto  # بازسازی کانتینرها فقط در صورت نیاز
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dozzle
+    # Dozzle را با استفاده از Docker Compose راه اندازی کنید
+    - name: Set up Dozzle using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools/tools
+        files:
+          - dozzle.yml
+        state: present
+        pull: always  # به‌روزرسانی تصویرهای Docker همیشه
+        recreate: auto  # بازسازی کانتینرها فقط در صورت نیاز
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Uptime Kuma
+    # Uptime Kuma را با استفاده از Docker Compose راه اندازی کنید
+    - name: Set up Uptime Kuma using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools/tools
+        files:
+          - uptime_kuma.yml
+        state: present
+        pull: always  # به‌روزرسانی تصویرهای Docker همیشه
+        recreate: auto  # بازسازی کانتینرها فقط در صورت نیاز

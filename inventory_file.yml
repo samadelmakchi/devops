@@ -12,9 +12,9 @@ all:
           customer_portal_git_tags: "01-dev"
           customer_portal_frontend_git_branches: "dev"
           customer_portal_frontend_git_tags: "01-dev"
-          customer_gateway_ports: 8001
-          customer_portal_ports: 3001
-          customer_portal_frontend_ports: 4001
+          customer_gateway_ports: 10101
+          customer_portal_ports: 10201
+          customer_portal_frontend_ports: 10301
           customer_network_names: "test_alfa_network"
           customer_containers: "test_alfa_container"
           customer_state: "update"
@@ -29,9 +29,9 @@ all:
           customer_portal_git_tags: "01-dev"
           customer_portal_frontend_git_branches: "dev"
           customer_portal_frontend_git_tags: "01-dev"
-          customer_gateway_ports: 8002
-          customer_portal_ports: 3002
-          customer_portal_frontend_ports: 4002
+          customer_gateway_ports: 10102
+          customer_portal_ports: 10202
+          customer_portal_frontend_ports: 10302
           customer_network_names: "nikan_network"
           customer_containers: "nikan_container"
           customer_state: "no_update"
@@ -46,9 +46,9 @@ all:
           customer_portal_git_tags: "01-dev"
           customer_portal_frontend_git_branches: "dev"
           customer_portal_frontend_git_tags: "01-dev"
-          customer_gateway_ports: 8003
-          customer_portal_ports: 3003
-          customer_portal_frontend_ports: 4003
+          customer_gateway_ports: 10103
+          customer_portal_ports: 10203
+          customer_portal_frontend_ports: 10303
           customer_network_names: "simnad_network"
           customer_containers: "simnad_container"
           customer_state: "down"

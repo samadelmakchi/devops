@@ -56,13 +56,13 @@ GitLab >> Preferences >> Access tokens >> Add new token
 ---
 
 ### سرویس های مشتریان
-📜 Gateway (8001 - ...)
+📜 Gateway (10101 - ...)
 ```
 ```
-📜 Portal Backend (3001 - ...)
+📜 Portal Backend (10201 - ...)
 ```
 ```
-📜 Portal Frontend (4001 - ...)
+📜 Portal Frontend (10301 - ...)
 ```
 ```
 
@@ -70,63 +70,77 @@ GitLab >> Preferences >> Access tokens >> Add new token
 
 ### ابزارهای نصب شده
 
-🚦 Traefik
-```
-```
-
-🐳 Portainer
-```
+🚦 Traefik (80)
 ```
 
-⚙️ Webmin & Bind9
-```
 ```
 
-🐳 Dozzle
-```
-```
-
-🐳 Uptime Kuma
-```
+🐳 Portainer (9000)
 ```
 
-📀 phpMyAdmin
-```
 ```
 
-📑 Log Management (Elasticsearch - Kibana - Fluentd - Logstash - Beats)
+⚙️ Webmin & Bind9 (10000)
+```
+
+```
+
+🐳 Dozzle (8080)
+```
+
+```
+
+🐳 Uptime Kuma (3001)
+```
+
+```
+
+📀 phpMyAdmin (8083)
+```
+
+```
+
+📑 Log Management (Elasticsearch - Kibana - Fluentd - Logstash - Beats) (5601)
 ```
 http://kibana:5601/
 ```
 
-♻️ Jenkins
-```
-```
-
-♻️ Harbor
-```
+♻️ Jenkins (8081)
 ```
 
-♻️ SonarQube
-```
 ```
 
-♻️ Selenium
-```
-```
-
-🖥️ Prometheus
-```
+♻️ Harbor (9010)
 ```
 
-🖥️ Zabbix
-```
 ```
 
-🖥️ Grafana
-```
+♻️ SonarQube (9001)
 ```
 
-🖥️ Splunk
 ```
+
+♻️ Selenium (4444 - Chrome: 5900 - Firefox: 5901)
+```
+
+```
+
+🖥️ Prometheus (9090)
+```
+
+```
+
+🖥️ Zabbix (8082)
+```
+
+```
+
+🖥️ Grafana (3000)
+```
+
+```
+
+🖥️ Splunk (8000)
+```
+
 ```

@@ -48,7 +48,7 @@ services:
       - mysql
       - zabbix-server
     ports:
-      - "8080:8080"
+      - "8082:8080"
       - "8443:8443"
     networks:
       - zabbix-net
