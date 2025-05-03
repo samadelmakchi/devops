@@ -1,28 +1,76 @@
 # ✳️ راهنماهای مورد نیاز برای مهندسین دواپس
 
-## 📒 مدیریت پروژه
-✅ [Agile](/cheatsheet/agile.md)
+## 📕 Basic
+✅ [Git](/cheatsheet/git.md)  
+✅ [Bash](/cheatsheet/bash.md)  
+✅ [Yaml](/cheatsheet/yaml.md)  
+✅ [Marrkdown](/cheatsheet/marrkdown.md)  
+✅ C  
+✅ C++  
+✅ Go  
+✅ Shell Scripting  
+✅ Python  
 
-✅ [Scrum](/cheatsheet/scrum.md)
+## 🤖 IaC
+✅ [Ansible](/cheatsheet/ansible.md)  
+✅ Terraform  
 
-## 📕 پایه
-✅ [Git](/cheatsheet/git.md)
+## 🐳 Docker
+✅ [Docker](/cheatsheet/docker.md)  
+✅ [Docker Compose](/cheatsheet/docker-compose.md)  
+✅ [Dockerfile](/cheatsheet/dockerfile.md)  
 
-✅ [Bash](/cheatsheet/bash.md)
+## 📜 Kubernetes
+✅ Kubernetes  
 
-✅ [Yaml](/cheatsheet/yaml.md)
+## 🚦 Server
+✅ [Traefik](/cheatsheet/traefik.md)  
+✅ Bind9  
+✅ Nginx  
 
-✅ [Marrkdown](/cheatsheet/marrkdown.md)
+## ♻️ CI/CD
+✅ Jenkins  
+✅ Webmin  
+✅ SonarQube  
+✅ Gitlab CI  
+✅ Github Action  
 
-## 📘 کد به عنوان زیر ساخت
-✅ [Ansible](/cheatsheet/ansible.md)
+## ⚙️ ???
+✅ Gitlab  
+✅ Github  
+✅ Gitea  
 
-## 📙 داکر
-✅ [Docker](/cheatsheet/docker.md)
+## 📙 Test
+✅ Type of test  
+✅ pyTest  
+✅ Selenium  
+✅ Cypress  
+✅ Appium  
 
-✅ [Docker Compose](/cheatsheet/docker-compose.md)
+## 🖥️ Monitoring
+✅ Prometheus  
+✅ Grafana  
+✅ Zabbix  
+✅ Splunk  
 
-✅ [Dockerfile](/cheatsheet/dockerfile.md)
+## 📑 Log
+✅ Elasticsearch  
+✅ Kibana  
+✅ Logstash  
+✅ Fluentd  
 
-## 📗 سایر ابزارها
-✅ [Traefik](/cheatsheet/traefik.md)
+## 📒 Other
+✅ OpenStack  
+
+## 📗 Cloud
+✅ AWS  
+✅ GCP  
+✅ Azure  
+
+## 📝 Develop
+✅ Ceph  
+✅ RabbitMQ  
+
+## 🗃️ Project Management
+✅ [Agile](/cheatsheet/agile.md)  
+✅ [Scrum](/cheatsheet/scrum.md)  

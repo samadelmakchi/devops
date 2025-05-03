@@ -291,11 +291,16 @@
       poll: 1
 
     # اجرای اسکریپت بکاپ برای دیتابیس‌ها و ولوم‌ها تنها در صورتی که فایل موجود باشد
+    - name: Check if backup script exists
+      ansible.builtin.stat:
+        path: "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
+      register: backup_script
+
     - name: Run backup script for volumes and databases
       ansible.builtin.shell: |
         bash "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
       register: backup_result
-      async: 1800  # حداکثر زمان برای اجرای اسکریپت (۳۰ دقیقه)
+      async: 1800 # حداکثر زمان برای اجرای اسکریپت (۳۰ دقیقه)
       poll: 1
       when: backup_script.stat.exists and customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
       changed_when: true
