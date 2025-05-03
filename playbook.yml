@@ -268,8 +268,8 @@
       poll: 1
       become: true
 
-    # ایجاد فایل my_database.php برای gateway
-    - name: Create my_database.php for gateway
+    # ایجاد فایل my_config.php برای gateway
+    - name: Create my_config.php for gateway
       ansible.builtin.copy:
         dest: "{{ project_path }}/{{ inventory_hostname }}/gateway/admin/application/config/my_config.php"
         content: |
