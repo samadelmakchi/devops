@@ -57,6 +57,8 @@ all:
     ansible_ssh_private_key_file: id_rsa  # فقط در صورت نیاز به SSH برای ماشین‌های دیگر
     ansible_user: your_ssh_user           # فقط در صورت نیاز به SSH برای ماشین‌های دیگر
     gitlab_token: "glpat-utu8r9Nq4TLvy5-3BUzx"
+    ansible_playbook_dir: "~/Downloads/ansible"
+    project_path: "~/Downloads/test_ansible"
 
 # customer_type  : test - regular - VIP
 # customer_state : update - no_update - down

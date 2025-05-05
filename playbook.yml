@@ -5,11 +5,9 @@
 
   vars:
     # مسیرهای پروژه
-    ansible_playbook_dir: "/home/smd/Downloads/ansible"        # مسیر پوشه انسیبل
-    project_path: "/home/smd/Downloads/test_ansible"           # مسیر پروژه
-    backup_path: "/home/smd/Downloads/test_ansible/backup"     # مسیر بکاپ
-    info_path: "/home/smd/Downloads/test_ansible/info"         # مسیر اطلاعات
-    log_path: "/home/smd/Downloads/test_ansible/log"           # مسیر لاگ ها
+    backup_path: "{{ project_path }}/backup"     # مسیر بکاپ
+    info_path: "{{ project_path }}/info"         # مسیر اطلاعات
+    log_path: "{{ project_path }}/log"           # مسیر لاگ ها
 
     # اطلاعات SonarQube
     sonar_url: "http://your-sonarqube-server"  # URL سرور SonarQube
