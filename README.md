@@ -36,12 +36,12 @@ ansible-lint --version
 
 اجرای پلی بوک آنسیبل و کانفیگ سرور
 ```bash
-sudo ansible-playbook playbook-server.yml
+sudo ansible-playbook -i inventory-server.yml playbook-server.yml
 ```
 
 اجرای پلی بوک آنسیبل و نصب سرویس ها برای مشتریان
 ```bash
-sudo ansible-playbook -i inventory_file.yml playbook.yml
+sudo ansible-playbook -i inventory.yml playbook.yml
 ```
 
 ---
@@ -51,7 +51,7 @@ sudo ansible-playbook -i inventory_file.yml playbook.yml
 ```
 GitLab >> Preferences >> Access tokens >> Add new token
 ```
-و توکن بدست امده را در فایل inventory_file.yml و در متغیر gitlab_token بنویسید
+و توکن بدست امده را در فایل inventory.yml و در متغیر gitlab_token بنویسید
 
 ---
 

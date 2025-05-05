@@ -1,0 +1,24 @@
+all:
+  vars:
+    domain: elmakchi.ir
+
+  children:
+    bind_hosts:
+      hosts:
+        dns1:
+          ansible_host: 127.0.0.1
+
+    dns_entries:
+      hosts:
+        dozzle:
+          ansible_host: 127.0.0.1
+        portainer:
+          ansible_host: 127.0.0.1
+        traefik:
+          ansible_host: 127.0.0.1
+        sonarqube:
+          ansible_host: 127.0.0.1
+        nexus:
+          ansible_host: 127.0.0.1
+        uptime:
+          ansible_host: 127.0.0.1

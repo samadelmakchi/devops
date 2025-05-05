@@ -1,0 +1,13 @@
+$TTL {{ ttl }}
+@   IN  SOA {{ ns_record }} {{ soa_email }} (
+        2025050501 ; Serial
+        3600       ; Refresh
+        1800       ; Retry
+        1209600    ; Expire
+        86400 )    ; Negative Cache TTL
+
+    IN  NS   {{ ns_record }}
+
+{% for item in groups['dns_entries'] %}
+{{ item }}   IN  A    {{ hostvars[item]['ansible_host'] }}
+{% endfor %}

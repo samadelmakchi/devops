@@ -222,7 +222,53 @@
         name: docker
         state: restarted
 
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Bind9
+    # تولید فایل زون BIND9 بر اساس اطلاعات inventory
+    - name: Ensure BIND9 config directory exists
+      ansible.builtin.file:
+        path: "tools/server/etc/bind"
+        state: directory
+        mode: '0755'
+
+    - name: Generate BIND9 zone file from template
+      ansible.builtin.template:
+        src: template/zonefile.j2
+        dest: "tools/server/etc/bind/db.{{ domain }}"
+        owner: root
+        group: root
+        mode: '0644'
+      vars:
+        soa_email: "admin.{{ domain | replace('.', '\\.') }}"
+        ttl: 3600
+        ns_record: "ns1.{{ domain }}."
+        origin: "{{ domain }}"
+
+    - name: Copy BIND9 named.conf
+      ansible.builtin.copy:
+        src: templates/bind9/named.conf
+        dest: "tools/server/etc/bind/named.conf"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Set up Bind9 using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools/server
+        files:
+          - bind9.yml
+        state: present
+        pull: always
+        recreate: auto
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Traefik
+    - name: Generate traefik.yml from template
+      ansible.builtin.template:
+        src: template/traefik.yml.j2
+        dest: tools/server/traefik.yml
+        owner: root
+        group: root
+        mode: '0644'
+
     # Traefik را با استفاده از Docker Compose راه اندازی کنید
     - name: Set up Traefik using Docker Compose
       community.docker.docker_compose_v2:

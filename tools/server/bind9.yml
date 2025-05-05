@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  bind9:
+    image: internetsystemsconsortium/bind9:9.18
+    container_name: bind9
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Tehran
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+    volumes:
+      - ./etc/bind:/etc/bind
+      - ./var/cache:/var/cache/bind
+      - ./var/lib:/var/lib/bind
+
+networks:
+  traefik_reverse_proxy:
+    external: true
