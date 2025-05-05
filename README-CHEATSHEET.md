@@ -31,7 +31,7 @@
 ## ♻️ CI/CD
 ✅ Jenkins  
 ✅ Webmin  
-✅ SonarQube  
+✅ [SonarQube](/cheatsheet/sonarqube.md)  
 ✅ Gitlab CI  
 ✅ Github Action  
 

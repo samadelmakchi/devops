@@ -273,3 +273,25 @@
         state: present
         pull: always  # به‌روزرسانی تصویرهای Docker همیشه
         recreate: auto  # بازسازی کانتینرها فقط در صورت نیاز
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ SonarQube
+    # SonarQube را با استفاده از Docker Compose راه اندازی کنید
+    - name: Set up SonarQube using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools/cicd
+        files:
+          - sonarqube.yml
+        state: present
+        pull: always  # به‌روزرسانی تصویرهای Docker همیشه
+        recreate: auto  # بازسازی کانتینرها فقط در صورت نیاز
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Nexus
+    # Nexus را با استفاده از Docker Compose راه اندازی کنید
+    - name: Set up Nexus using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools/cicd
+        files:
+          - nexus.yml
+        state: present
+        pull: always  # به‌روزرسانی تصویرهای Docker همیشه
+        recreate: auto  # بازسازی کانتینرها فقط در صورت نیاز

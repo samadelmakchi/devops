@@ -72,12 +72,12 @@ GitLab >> Preferences >> Access tokens >> Add new token
 
 🚦 Traefik (80)
 ```
-
+http://traefik:80/
 ```
 
 🐳 Portainer (9000)
 ```
-
+http://portainer:9000/
 ```
 
 ⚙️ Webmin & Bind9 (10000)
@@ -87,17 +87,17 @@ GitLab >> Preferences >> Access tokens >> Add new token
 
 🐳 Dozzle (8080)
 ```
-
+http://dozzle:8080/
 ```
 
 🐳 Uptime Kuma (3001)
 ```
-
+http://uptime-kuma:3001/
 ```
 
 📀 phpMyAdmin (8083)
 ```
-
+http://phpmyadmin:8083/
 ```
 
 📑 Log Management (Elasticsearch - Kibana - Fluentd - Logstash - Beats) (5601)
@@ -117,7 +117,7 @@ http://kibana:5601/
 
 ♻️ SonarQube (9001)
 ```
-
+http://sonarqube:9001/
 ```
 
 ♻️ Selenium (4444 - Chrome: 5900 - Firefox: 5901)

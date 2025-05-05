@@ -46,6 +46,21 @@ services:
       - ${NETWORK_TYPE:-ipv4}
       - traefik_reverse_proxy
 
+  sonarscanner:
+    image: sonarsource/sonar-scanner-cli:latest
+    container_name: sonarscanner
+    working_dir: /usr/src
+    volumes:
+      - ./your-code:/usr/src
+    environment:
+      - SONAR_HOST_URL=http://sonarqube:9000
+      # برای استفاده از توکن شخصی:
+      # - SONAR_LOGIN=your_token
+    networks:
+      - ${NETWORK_TYPE:-ipv4}
+      - traefik_reverse_proxy
+    entrypoint: ["tail", "-f", "/dev/null"] # اجرای دائمی برای دسترسی دستی به shell
+
 volumes:
   sonarqube_data:
   sonarqube_temp:
