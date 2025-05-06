@@ -9,12 +9,6 @@
     info_path: "{{ project_path }}/info"         # مسیر اطلاعات
     log_path: "{{ project_path }}/log"           # مسیر لاگ ها
 
-    # اطلاعات SonarQube
-    sonar_url: "http://your-sonarqube-server"  # URL سرور SonarQube
-    sonar_token: "your_sonarqube_token"        # توکن SonarQube
-    sonar_project_key: "simple-log-manager"    # کلید پروژه در SonarQube
-    sonar_project_name: "Simple Log Manager"   # نام پروژه در SonarQube
-
     # اطلاعات دیتابیس مشتریان
     portal_database_type: "mysql"
     portal_mysql_root_password: "1234"
@@ -593,7 +587,7 @@
     #     python3 database_test.py             # تست‌های پایگاه داده برای بررسی صحت داده‌ها و عملیات پایگاه داده
     #   when: customer_type in ['test', 'VIP', 'regular'] and customer_state == 'update'
     #   poll: 1
-    #   changed_when: true                     # به منظور شناسایی تغییر در هر بار اجرای این تسک
+    #   changed_when: true
 
     # # اجرای تست‌های CI/CD برای مشتریان تست
     # - name: Run additional tests for customer test

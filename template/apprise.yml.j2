@@ -12,7 +12,7 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.apprise.rule=Host(`apprise.elmakchi.ir`)"
+      - "traefik.http.routers.apprise.rule=Host(`apprise.{{ domain }}`)"
       - "traefik.http.routers.apprise.entrypoints=websecure"
       - "traefik.http.routers.apprise.tls.certresolver=myresolver"
       - "traefik.http.services.apprise.loadbalancer.server.port=8000"

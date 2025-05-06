@@ -3,7 +3,7 @@ all:
     local:
       hosts:
         localhost:
-          ansible_connection: local  # بدون نیاز به SSH
+          ansible_connection: local  # No need for SSH
           customer_type: "test"
           customer_name: "تست آلفا"
           customer_gateway_git_branches: "dev"
@@ -54,11 +54,19 @@ all:
         #   customer_state: "update"
 
   vars:
-    ansible_ssh_private_key_file: id_rsa  # فقط در صورت نیاز به SSH برای ماشین‌های دیگر
-    ansible_user: your_ssh_user           # فقط در صورت نیاز به SSH برای ماشین‌های دیگر
-    gitlab_token: "glpat-utu8r9Nq4TLvy5-3BUzx"
-    ansible_playbook_dir: "~/Downloads/ansible"
+    # SSH
+    ansible_ssh_private_key_file: id_rsa        # فقط در صورت نیاز به SSH برای ماشین‌های دیگر
+    ansible_user: your_ssh_user                 # فقط در صورت نیاز به SSH برای ماشین‌های دیگر
+    gitlab_token: "glpat-utu8r9Nq4TLvy5-3BUzx"  # توکن اتصال به گیت لب
+
+    # Path
     project_path: "~/Downloads/test_ansible"
+
+    # SonarQube
+    sonar_url: "http://your-sonarqube-server"  # SonarQube Server URL
+    sonar_token: "your_sonarqube_token"        # SonarQube Token
+    sonar_project_key: "calibri"               # Project Key In SonarQube
+    sonar_project_name: "calibri"              # Project Name In SonarQube
 
 # customer_type  : test - regular - VIP
 # customer_state : update - no_update - down

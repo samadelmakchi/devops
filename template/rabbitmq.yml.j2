@@ -5,7 +5,7 @@ services:
     container_name: rabbitmq
     image: rabbitmq:latest
     restart: always
-    hostname: rabbitmq.elmakchi.ir
+    hostname: rabbitmq.{{ domain }}
     environment:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=admin
@@ -20,7 +20,7 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.elmakchi.ir`)"
+      - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.{{ domain }}`)"
       - "traefik.http.routers.rabbitmq.entrypoints=websecure"
       - "traefik.http.routers.rabbitmq.tls.certresolver=myresolver"
       - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"

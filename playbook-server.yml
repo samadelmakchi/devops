@@ -269,15 +269,14 @@
         group: root
         mode: '0644'
 
-    # Traefik را با استفاده از Docker Compose راه اندازی کنید
     - name: Set up Traefik using Docker Compose
       community.docker.docker_compose_v2:
         project_src: tools/server
         files:
           - traefik.yml
         state: present
-        pull: always  # به‌روزرسانی تصویرهای Docker همیشه
-        recreate: auto  # بازسازی کانتینرها فقط در صورت نیاز
+        pull: always
+        recreate: auto
       environment:
         PATH: "/root/.docker/cli-plugins:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
@@ -288,56 +287,147 @@
         state: present
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Portainer
-    # Portainer را با استفاده از Docker Compose راه اندازی کنید
+    - name: Generate portainer.yml from template
+      ansible.builtin.template:
+        src: template/portainer.yml.j2
+        dest: tools/server/portainer.yml
+        owner: root
+        group: root
+        mode: '0644'
+      when: install_portainer is true
+
     - name: Set up Portainer using Docker Compose
       community.docker.docker_compose_v2:
-        project_src: tools/tools
+        project_src: tools/server
         files:
           - portainer.yml
         state: present
-        pull: always  # به‌روزرسانی تصویرهای Docker همیشه
-        recreate: auto  # بازسازی کانتینرها فقط در صورت نیاز
+        pull: always
+        recreate: auto
+      when: install_portainer is true
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dozzle
-    # Dozzle را با استفاده از Docker Compose راه اندازی کنید
+    - name: Generate dozzle.yml from template
+      ansible.builtin.template:
+        src: template/dozzle.yml.j2
+        dest: tools/logs/dozzle.yml
+        owner: root
+        group: root
+        mode: '0644'
+      when: install_dozzle is true
+
     - name: Set up Dozzle using Docker Compose
       community.docker.docker_compose_v2:
-        project_src: tools/tools
+        project_src: tools/logs
         files:
           - dozzle.yml
         state: present
-        pull: always  # به‌روزرسانی تصویرهای Docker همیشه
-        recreate: auto  # بازسازی کانتینرها فقط در صورت نیاز
+        pull: always
+        recreate: auto
+      when: install_dozzle is true
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Uptime Kuma
-    # Uptime Kuma را با استفاده از Docker Compose راه اندازی کنید
+    - name: Generate uptime_kuma.yml from template
+      ansible.builtin.template:
+        src: template/uptime_kuma.yml.j2
+        dest: tools/monitor/uptime_kuma.yml
+        owner: root
+        group: root
+        mode: '0644'
+      when: install_uptime_kuma is true
+
     - name: Set up Uptime Kuma using Docker Compose
       community.docker.docker_compose_v2:
-        project_src: tools/tools
+        project_src: tools/monitor
         files:
           - uptime_kuma.yml
         state: present
-        pull: always  # به‌روزرسانی تصویرهای Docker همیشه
-        recreate: auto  # بازسازی کانتینرها فقط در صورت نیاز
+        pull: always
+        recreate: auto
+      when: install_uptime_kuma is true
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ SonarQube
-    # SonarQube را با استفاده از Docker Compose راه اندازی کنید
+    - name: Generate sonarqube.yml from template
+      ansible.builtin.template:
+        src: template/sonarqube.yml.j2
+        dest: tools/cicd/sonarqube.yml
+        owner: root
+        group: root
+        mode: '0644'
+      when: install_sonarqube is true
+
     - name: Set up SonarQube using Docker Compose
       community.docker.docker_compose_v2:
         project_src: tools/cicd
         files:
           - sonarqube.yml
         state: present
-        pull: always  # به‌روزرسانی تصویرهای Docker همیشه
-        recreate: auto  # بازسازی کانتینرها فقط در صورت نیاز
+        pull: always
+        recreate: auto
+      when: install_sonarqube is true
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Nexus
-    # Nexus را با استفاده از Docker Compose راه اندازی کنید
+    - name: Generate nexus.yml from template
+      ansible.builtin.template:
+        src: template/nexus.yml.j2
+        dest: tools/cicd/nexus.yml
+        owner: root
+        group: root
+        mode: '0644'
+      when: install_nexus is true
+
     - name: Set up Nexus using Docker Compose
       community.docker.docker_compose_v2:
         project_src: tools/cicd
         files:
           - nexus.yml
         state: present
-        pull: always  # به‌روزرسانی تصویرهای Docker همیشه
-        recreate: auto  # بازسازی کانتینرها فقط در صورت نیاز
+        pull: always
+        recreate: auto
+      when: install_nexus is true
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RabbitMQ
+    - name: Generate rabbitmq.yml from template
+      ansible.builtin.template:
+        src: template/rabbitmq.yml.j2
+        dest: tools/cicd/rabbitmq.yml
+        owner: root
+        group: root
+        mode: '0644'
+      when: install_rabbitmq is true
+
+    - name: Set up RabbitMQ using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools/cicd
+        files:
+          - rabbitmq.yml
+        state: present
+        pull: always
+        recreate: auto
+      when: install_rabbitmq is true
+
+    - name: Enable RabbitMQ management plugin
+      community.docker.docker_container_exec:
+        container: rabbitmq
+        command: rabbitmq-plugins enable rabbitmq_management
+      when: install_rabbitmq is true
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Apprise
+    - name: Generate apprise.yml from template
+      ansible.builtin.template:
+        src: template/apprise.yml.j2
+        dest: tools/cicd/apprise.yml
+        owner: root
+        group: root
+        mode: '0644'
+      when: install_apprise is true
+
+    - name: Set up Apprise using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools/cicd
+        files:
+          - apprise.yml
+        state: present
+        pull: always
+        recreate: auto
+      when: install_apprise is true

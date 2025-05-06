@@ -22,7 +22,7 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.sonarqube.rule=Host(`sonarqube.elmakchi.ir`)"
+      - "traefik.http.routers.sonarqube.rule=Host(`sonarqube.{{ domain }}`)"
       - "traefik.http.routers.sonarqube.entrypoints=websecure"
       - "traefik.http.routers.sonarqube.tls.certresolver=myresolver"
       - "traefik.http.services.sonarqube.loadbalancer.server.port=9000"

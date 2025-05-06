@@ -43,7 +43,7 @@ sudo ansible-playbook -i inventory.yml playbook.yml
 ---
 
 ### 🦊 ساخت Token برای اتصال به GitLab
-جهت دریافت توکت در گیت لب به مسیر زیر بروید
+جهت دریافت توکن در گیت لب به مسیر زیر بروید
 ```
 GitLab >> Preferences >> Access tokens >> Add new token
 ```
@@ -63,16 +63,16 @@ GitLab >> Preferences >> Access tokens >> Add new token
 ### ابزارهای نصب شده
 
 Server
-- ⚙️ Traefik (80)
+- ⚙️ Traefik (80) (user: admin - pass: admin)
 - ⚙️ Portainer (9000)
 - ⚙️ Bind9 (-)
 - ⚙️ Mailu (?)
 - ⚙️ Rancher (?)
 
 Develop
-- ✳️ Apprise (?)
+- ✳️ Apprise (8073)
 - ✳️ Nginx (?)
-- ✳️ RabbitMQ (?)
+- ✳️ RabbitMQ (15672)
 - ✳️ Ceph (?)
 
 Tools

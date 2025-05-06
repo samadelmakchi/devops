@@ -1,6 +1,16 @@
 all:
   vars:
     domain: elmakchi.ir
+    email: samd.elmakchi@gmail.com
+
+    # Install Tools
+    install_portainer: true
+    install_dozzle: true
+    install_uptime_kuma: true
+    install_sonarqube: true
+    install_nexus: true
+    install_rabbitmq: true
+    install_apprise: true
 
   children:
     bind_hosts:
