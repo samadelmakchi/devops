@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  slash:
+    image: yourselfhosted/slash:latest
+    container_name: slash
+    ports:
+      - "5231:5231"
+    volumes:
+      - slash_data:/var/opt/slash
+    networks:
+      - slash_net
+      - traefik_reverse_proxy
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.slash.rule=Host(`shortcut.{{ domain }}`)"
+      - "traefik.http.routers.slash.entrypoints=websecure"
+      - "traefik.http.routers.slash.tls.certresolver=myresolver"
+      - "traefik.http.services.slash.loadbalancer.server.port=5231"
+
+volumes:
+  slash_data:
+
+networks:
+  slash_net:
+    driver: bridge
+  traefik_reverse_proxy:
+    external: true

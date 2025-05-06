@@ -1,0 +1,33 @@
+version: '3.9'
+services:
+  drawio:
+    image: jgraph/drawio:latest
+    container_name: drawio
+    restart: unless-stopped
+    ports:
+      - 8089:8080
+      - 8449:8443
+    environment:
+      PUBLIC_DNS: domain
+      ORGANISATION_UNIT: unit
+      ORGANISATION: org
+      CITY: city
+      STATE: state
+      COUNTRY_CODE: country
+    healthcheck:
+      interval: 1m30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.drawio.rule=Host(`drawio.{{ domain }}`)"
+      - "traefik.http.routers.drawio.entrypoints=websecure"
+      - "traefik.http.routers.drawio.tls.certresolver=myresolver"
+      - "traefik.http.services.drawio.loadbalancer.server.port=80"
+    networks:
+      - traefik_reverse_proxy
+
+networks:
+  traefik_reverse_proxy:
+    external: true

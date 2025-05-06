@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  redisinsight:
+    image: redislabs/redisinsight:latest
+    container_name: redisinsight
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+    networks:
+      - traefik_reverse_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.redisinsight.rule=Host(`redis.elmakchi.ir`)"
+      - "traefik.http.routers.redisinsight.entrypoints=websecure"
+      - "traefik.http.routers.redisinsight.tls.certresolver=myresolver"
+      - "traefik.http.services.redisinsight.loadbalancer.server.port=8001"
+
+networks:
+  traefik_reverse_proxy:
+    external: true

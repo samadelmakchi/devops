@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SERVER_DOMAIN=grafana.elmakchi.ir
+      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s/
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - traefik_reverse_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.elmakchi.ir`)"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.tls.certresolver=myresolver"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+
+volumes:
+  grafana_data:
+
+networks:
+  traefik_reverse_proxy:
+    external: true 

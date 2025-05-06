@@ -84,7 +84,7 @@
     # دانلود فایل‌های Docker
     - name: Download Docker .deb files if not already downloaded
       ansible.builtin.shell: |
-        DOWNLOAD_DIR="tools/docker"
+        DOWNLOAD_DIR="docker"
         mkdir -p "$DOWNLOAD_DIR"
 
         CODENAME="{{ system_info.stdout.split(' ')[0] }}"
@@ -114,7 +114,7 @@
     # نصب Docker از فایل‌های دانلود شده
     - name: Install Docker packages
       ansible.builtin.shell: |
-        dpkg -i {{ playbook_dir }}/tools/docker/*.deb
+        dpkg -i {{ playbook_dir }}/docker/*.deb
       args:
         executable: /bin/bash
       changed_when: true
@@ -223,17 +223,17 @@
         state: restarted
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Bind9
-    # تولید فایل زون BIND9 بر اساس اطلاعات inventory
-    - name: Ensure BIND9 config directory exists
+    # تولید فایل زون Bind9 بر اساس اطلاعات inventory
+    - name: Ensure Bind9 config directory exists
       ansible.builtin.file:
-        path: "tools/server/etc/bind"
+        path: "tools/etc/bind"
         state: directory
         mode: '0755'
 
-    - name: Generate BIND9 zone file from template
+    - name: Generate Bind9 zone file from template
       ansible.builtin.template:
         src: template/zonefile.j2
-        dest: "tools/server/etc/bind/db.{{ domain }}"
+        dest: "tools/etc/bind/db.{{ domain }}"
         owner: root
         group: root
         mode: '0644'
@@ -243,17 +243,17 @@
         ns_record: "ns1.{{ domain }}."
         origin: "{{ domain }}"
 
-    - name: Copy BIND9 named.conf
+    - name: Copy Bind9 named.conf
       ansible.builtin.copy:
         src: templates/bind9/named.conf
-        dest: "tools/server/etc/bind/named.conf"
+        dest: "tools/etc/bind/named.conf"
         owner: root
         group: root
         mode: '0644'
 
     - name: Set up Bind9 using Docker Compose
       community.docker.docker_compose_v2:
-        project_src: tools/server
+        project_src: tools
         files:
           - bind9.yml
         state: present
@@ -264,14 +264,14 @@
     - name: Generate traefik.yml from template
       ansible.builtin.template:
         src: template/traefik.yml.j2
-        dest: tools/server/traefik.yml
+        dest: tools/traefik.yml
         owner: root
         group: root
         mode: '0644'
 
     - name: Set up Traefik using Docker Compose
       community.docker.docker_compose_v2:
-        project_src: tools/server
+        project_src: tools
         files:
           - traefik.yml
         state: present
@@ -290,7 +290,7 @@
     - name: Generate portainer.yml from template
       ansible.builtin.template:
         src: template/portainer.yml.j2
-        dest: tools/server/portainer.yml
+        dest: tools/portainer.yml
         owner: root
         group: root
         mode: '0644'
@@ -298,7 +298,7 @@
 
     - name: Set up Portainer using Docker Compose
       community.docker.docker_compose_v2:
-        project_src: tools/server
+        project_src: tools
         files:
           - portainer.yml
         state: present
@@ -306,51 +306,11 @@
         recreate: auto
       when: install_portainer is true
 
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dozzle
-    - name: Generate dozzle.yml from template
-      ansible.builtin.template:
-        src: template/dozzle.yml.j2
-        dest: tools/logs/dozzle.yml
-        owner: root
-        group: root
-        mode: '0644'
-      when: install_dozzle is true
-
-    - name: Set up Dozzle using Docker Compose
-      community.docker.docker_compose_v2:
-        project_src: tools/logs
-        files:
-          - dozzle.yml
-        state: present
-        pull: always
-        recreate: auto
-      when: install_dozzle is true
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Uptime Kuma
-    - name: Generate uptime_kuma.yml from template
-      ansible.builtin.template:
-        src: template/uptime_kuma.yml.j2
-        dest: tools/monitor/uptime_kuma.yml
-        owner: root
-        group: root
-        mode: '0644'
-      when: install_uptime_kuma is true
-
-    - name: Set up Uptime Kuma using Docker Compose
-      community.docker.docker_compose_v2:
-        project_src: tools/monitor
-        files:
-          - uptime_kuma.yml
-        state: present
-        pull: always
-        recreate: auto
-      when: install_uptime_kuma is true
-
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ SonarQube
     - name: Generate sonarqube.yml from template
       ansible.builtin.template:
         src: template/sonarqube.yml.j2
-        dest: tools/cicd/sonarqube.yml
+        dest: tools/sonarqube.yml
         owner: root
         group: root
         mode: '0644'
@@ -358,7 +318,7 @@
 
     - name: Set up SonarQube using Docker Compose
       community.docker.docker_compose_v2:
-        project_src: tools/cicd
+        project_src: tools
         files:
           - sonarqube.yml
         state: present
@@ -370,7 +330,7 @@
     - name: Generate nexus.yml from template
       ansible.builtin.template:
         src: template/nexus.yml.j2
-        dest: tools/cicd/nexus.yml
+        dest: tools/nexus.yml
         owner: root
         group: root
         mode: '0644'
@@ -378,7 +338,7 @@
 
     - name: Set up Nexus using Docker Compose
       community.docker.docker_compose_v2:
-        project_src: tools/cicd
+        project_src: tools
         files:
           - nexus.yml
         state: present
@@ -390,7 +350,7 @@
     - name: Generate rabbitmq.yml from template
       ansible.builtin.template:
         src: template/rabbitmq.yml.j2
-        dest: tools/cicd/rabbitmq.yml
+        dest: tools/rabbitmq.yml
         owner: root
         group: root
         mode: '0644'
@@ -398,7 +358,7 @@
 
     - name: Set up RabbitMQ using Docker Compose
       community.docker.docker_compose_v2:
-        project_src: tools/cicd
+        project_src: tools
         files:
           - rabbitmq.yml
         state: present
@@ -416,7 +376,7 @@
     - name: Generate apprise.yml from template
       ansible.builtin.template:
         src: template/apprise.yml.j2
-        dest: tools/cicd/apprise.yml
+        dest: tools/apprise.yml
         owner: root
         group: root
         mode: '0644'
@@ -424,10 +384,170 @@
 
     - name: Set up Apprise using Docker Compose
       community.docker.docker_compose_v2:
-        project_src: tools/cicd
+        project_src: tools
         files:
           - apprise.yml
         state: present
         pull: always
         recreate: auto
       when: install_apprise is true
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Uptime Kuma
+    - name: Generate uptime_kuma.yml from template
+      ansible.builtin.template:
+        src: template/uptime_kuma.yml.j2
+        dest: tools/uptime_kuma.yml
+        owner: root
+        group: root
+        mode: '0644'
+      when: install_uptime_kuma is true
+
+    - name: Set up Uptime Kuma using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - uptime_kuma.yml
+        state: present
+        pull: always
+        recreate: auto
+      when: install_uptime_kuma is true
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Splunk
+    - name: Generate splunk.yml from template
+      ansible.builtin.template:
+        src: template/splunk.yml.j2
+        dest: tools/splunk.yml
+        owner: root
+        group: root
+        mode: '0644'
+      when: install_splunk is true
+
+    - name: Set up Splunk using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - splunk.yml
+        state: present
+        pull: always
+        recreate: auto
+      when: install_splunk is true
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Grafana
+    - name: Generate grafana.yml from template
+      ansible.builtin.template:
+        src: template/grafana.yml.j2
+        dest: tools/grafana.yml
+        owner: root
+        group: root
+        mode: '0644'
+      when: install_grafana is true
+
+    - name: Set up Grafana using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - grafana.yml
+        state: present
+        pull: always
+        recreate: auto
+      when: install_grafana is true
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Pometheus
+    - name: Generate prometheus.yml from template
+      ansible.builtin.template:
+        src: template/prometheus.yml.j2
+        dest: tools/prometheus.yml
+        owner: root
+        group: root
+        mode: '0644'
+      when: install_prometheus is true
+
+    - name: Set up Pometheus using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - prometheus.yml
+        state: present
+        pull: always
+        recreate: auto
+      when: install_prometheus is true
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dozzle
+    - name: Generate dozzle.yml from template
+      ansible.builtin.template:
+        src: template/dozzle.yml.j2
+        dest: tools/dozzle.yml
+        owner: root
+        group: root
+        mode: '0644'
+      when: install_dozzle is true
+
+    - name: Set up Dozzle using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - dozzle.yml
+        state: present
+        pull: always
+        recreate: auto
+      when: install_dozzle is true
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Shortcut
+    - name: Generate shortcut.yml from template
+      ansible.builtin.template:
+        src: template/shortcut.yml.j2
+        dest: tools/shortcut.yml
+        owner: root
+        group: root
+        mode: '0644'
+      when: install_shortcut is true
+
+    - name: Set up Shortcut using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - shortcut.yml
+        state: present
+        pull: always
+        recreate: auto
+      when: install_shortcut is true
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DrawDB
+    - name: Generate drawdb.yml from template
+      ansible.builtin.template:
+        src: template/drawdb.yml.j2
+        dest: tools/drawdb.yml
+        owner: root
+        group: root
+        mode: '0644'
+      when: install_drawdb is true
+
+    - name: Set up DrawDB using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - drawdb.yml
+        state: present
+        pull: always
+        recreate: auto
+      when: install_drawdb is true
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Draw.io
+    - name: Generate drawio.yml from template
+      ansible.builtin.template:
+        src: template/drawio.yml.j2
+        dest: tools/drawio.yml
+        owner: root
+        group: root
+        mode: '0644'
+      when: install_drawio is true
+
+    - name: Set up Draw.io using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - drawio.yml
+        state: present
+        pull: always
+        recreate: auto
+      when: install_drawio is true

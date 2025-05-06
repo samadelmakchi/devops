@@ -1,0 +1,41 @@
+version: "3.7"
+
+services:
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik    
+    command:
+      - "--api.dashboard=true"                                                        # فعال‌سازی داشبورد Traefik
+      - "--api.insecure=false"                                                        # غیرفعال کردن دسترسی ناامن داشبورد
+      - "--providers.docker=true"                                                     # خواندن پیکربندی از داکر
+      - "--entryPoints.web.address=:80"                                               # پورت HTTP
+      - "--entryPoints.websecure.address=:443"                                        # پورت HTTPS
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"                   # صدور گواهی از Let's Encrypt
+      - "--certificatesresolvers.myresolver.acme.email=samd.elmakchi@gmail.com"       # ایمیل برای Let's Encrypt
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"      # ذخیره‌سازی گواهی‌ها
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"                                   # دسترسی به Docker
+      - "./letsencrypt:/letsencrypt"                                                  # ذخیره گواهی‌های Let's Encrypt
+    ports:
+      - "80:80"  
+      - "443:443"
+    networks:
+      - traefik_reverse_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.elmakchi.ir`)"               # تنظیم مسیر برای داشبورد
+      - "traefik.http.routers.traefik.entrypoints=websecure"                          # دسترسی از طریق HTTPS
+      - "traefik.http.routers.traefik.tls.certresolver=myresolver"                    # استفاده از SSL
+      - "traefik.http.routers.traefik.service=api@internal"                           # اتصال به داشبورد Traefik
+      - "traefik.http.routers.traefik.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.users=admin:$$apr1$$ZjqNihhn$$W/jOU6F1QXZt4YRATR86O0"
+
+volumes:
+  letsencrypt:
+  html:
+
+networks:
+  traefik_reverse_proxy:
+    name: traefik_reverse_proxy
+    driver: bridge
+    external: true

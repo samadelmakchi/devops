@@ -1,3 +1,5 @@
-tools/tools/data
-tools/tools/portainer_data
-tools/cicd/your-code
+tools/data
+tools/portainer_data
+tools/your-code
+
+_del
