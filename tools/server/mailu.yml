@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:alpine
+    restart: always
+
+  front:
+    image: mailu/nginx:1.9
+    restart: always
+    environment:
+      - MAILU_VERSION=1.9
+      - DOMAIN=elmakchi.ir
+      - HOSTNAMES=mail.elmakchi.ir
+      - TLS_FLAVOR=letsencrypt
+      - POSTMASTER=postmaster
+      - WEBMAIL=roundcube
+    ports:
+      - "25:25"       # SMTP
+      - "465:465"     # SMTPS
+      - "587:587"     # SMTP Submission
+      - "110:110"     # POP3
+      - "995:995"     # POP3S
+      - "143:143"     # IMAP
+      - "993:993"     # IMAPS
+      - "80:80"       # HTTP (برای Let's Encrypt)
+      - "443:443"     # HTTPS
+    volumes:
+      - "./data/certs:/certs"
+      - "./data/overrides:/overrides"
+      - "./data/mail:/mail"
+      - "./data/filters:/filters"
+    depends_on:
+      - resolver
+      - imap
+      - smtp
+
+  resolver:
+    image: mailu/unbound:1.9
+    restart: always
+
+  imap:
+    image: mailu/dovecot:1.9
+    restart: always
+
+  smtp:
+    image: mailu/postfix:1.9
+    restart: always
+
+  antispam:
+    image: mailu/rspamd:1.9
+    restart: always
+
+  antivirus:
+    image: mailu/clamav:1.9
+    restart: always
+
+  webmail:
+    image: mailu/roundcube:1.9
+    restart: always
+
+  admin:
+    image: mailu/admin:1.9
+    restart: always
+    environment:
+      - MAILU_VERSION=1.9
+      - DOMAIN=elmakchi.ir
+      - HOSTNAMES=mail.elmakchi.ir
+      - TLS_FLAVOR=letsencrypt
+      - ADMIN=admin
+      - ADMIN_USER=admin
+      - ADMIN_PW=your_strong_password_here
+      - POSTMASTER=postmaster
+      - WEBMAIL=roundcube
+
+  fetchmail:
+    image: mailu/fetchmail:1.9
+    restart: always
+
+networks:
+  default:
+    driver: bridge

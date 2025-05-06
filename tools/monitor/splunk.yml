@@ -5,10 +5,10 @@ services:
     image: splunk/splunk:latest
     container_name: splunk
     environment:
-      SPLUNK_PASSWORD: "your_password_here"  # رمز عبور برای دسترسی به Splunk
+      SPLUNK_PASSWORD: "admin"               # رمز عبور برای دسترسی به Splunk
       SPLUNK_START_ARGS: "--accept-license"  # پذیرش لایسنس
-      SPLUNK_ENABLE_LISTENER: "true"  # فعال‌سازی listener برای دریافت داده‌ها
-      SPLUNK_FORWARD_SERVER: "false"  # استفاده از این سرویس به عنوان سرور برای دریافت داده
+      SPLUNK_ENABLE_LISTENER: "true"         # فعال‌سازی listener برای دریافت داده‌ها
+      SPLUNK_FORWARD_SERVER: "false"         # استفاده از این سرویس به عنوان سرور برای دریافت داده
     ports:
       - "8000:8000"  # رابط کاربری Splunk
       - "8088:8088"  # HTTP Event Collector
