@@ -6,7 +6,7 @@ services:
     container_name: nexus
     restart: unless-stopped
     ports:
-      - "8081:8081" 
+      - "8084:8081" 
     environment:
       - NEXUS_CONTEXT=  # اگر نیاز به تغییر context دارید، آن را اینجا وارد کنید
     volumes:
