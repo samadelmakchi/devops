@@ -36,7 +36,7 @@
 
     - name: Copy Bind9 named.conf
       ansible.builtin.copy:
-        src: templates/bind9/named.conf
+        src: template/bind9/named.conf
         dest: "tools/etc/bind/named.conf"
         owner: root
         group: root
