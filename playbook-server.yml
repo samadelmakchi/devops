@@ -60,6 +60,11 @@
         recreate: auto
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Traefik
+    - name: Create traefik_reverse_proxy Docker network
+      community.docker.docker_network:
+        name: traefik_reverse_proxy
+        state: present
+
     - name: Generate traefik.yml from template
       ansible.builtin.template:
         src: template/traefik.yml.j2
@@ -76,14 +81,6 @@
         state: present
         pull: always
         recreate: auto
-      environment:
-        PATH: "/root/.docker/cli-plugins:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-
-    # شبکه Docker traefik_reverse_proxy ایجاد کنید
-    - name: Create traefik_reverse_proxy Docker network
-      community.docker.docker_network:
-        name: traefik_reverse_proxy
-        state: present
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Portainer
     - name: Generate portainer.yml from template
@@ -105,6 +102,19 @@
         recreate: auto
       when: install_portainer is true
 
+    - name: Check if portainer.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/portainer.yml"
+      register: portainer_file
+
+    - name: Tear down Portainer container if install_portainer is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - portainer.yml
+        state: absent
+      when: install_portainer is false and portainer_file.stat.exists
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ SonarQube
     - name: Generate sonarqube.yml from template
       ansible.builtin.template:
@@ -125,6 +135,19 @@
         recreate: auto
       when: install_sonarqube is true
 
+    - name: Check if sonarqube.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/sonarqube.yml"
+      register: sonarqube_file
+
+    - name: Tear down SonarQube container if install_sonarqube is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - sonarqube.yml
+        state: absent
+      when: install_sonarqube is false and sonarqube_file.stat.exists
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Nexus
     - name: Generate nexus.yml from template
       ansible.builtin.template:
@@ -144,6 +167,19 @@
         pull: always
         recreate: auto
       when: install_nexus is true
+
+    - name: Check if nexus.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/nexus.yml"
+      register: nexus_file
+
+    - name: Tear down Nexus container if install_nexus is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - nexus.yml
+        state: absent
+      when: install_nexus is false and nexus_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RabbitMQ
     - name: Generate rabbitmq.yml from template
@@ -171,6 +207,19 @@
         command: rabbitmq-plugins enable rabbitmq_management
       when: install_rabbitmq is true
 
+    - name: Check if rabbitmq.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/rabbitmq.yml"
+      register: rabbitmq_file
+
+    - name: Tear down RabbitMQ container if install_rabbitmq is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - rabbitmq.yml
+        state: absent
+      when: install_rabbitmq is false and rabbitmq_file.stat.exists
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Apprise
     - name: Generate apprise.yml from template
       ansible.builtin.template:
@@ -190,6 +239,19 @@
         pull: always
         recreate: auto
       when: install_apprise is true
+
+    - name: Check if apprise.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/apprise.yml"
+      register: apprise_file
+
+    - name: Tear down Apprise container if install_apprise is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - apprise.yml
+        state: absent
+      when: install_apprise is false and rapprise_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Uptime Kuma
     - name: Generate uptime_kuma.yml from template
@@ -211,6 +273,19 @@
         recreate: auto
       when: install_uptime_kuma is true
 
+    - name: Check if uptime_kuma.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/uptime_kuma.yml"
+      register: uptime_kuma_file
+
+    - name: Tear down Uptime Kuma container if install_uptime_kuma is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - uptime_kuma.yml
+        state: absent
+      when: install_uptime_kuma is false and ruptime_kuma_file.stat.exists
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Splunk
     - name: Generate splunk.yml from template
       ansible.builtin.template:
@@ -230,6 +305,19 @@
         pull: always
         recreate: auto
       when: install_splunk is true
+
+    - name: Check if splunk.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/splunk.yml"
+      register: splunk_file
+
+    - name: Tear down Splunk container if install_splunk is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - splunk.yml
+        state: absent
+      when: install_splunk is false and splunk_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Grafana
     - name: Generate grafana.yml from template
@@ -251,6 +339,19 @@
         recreate: auto
       when: install_grafana is true
 
+    - name: Check if grafana.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/grafana.yml"
+      register: grafana_file
+
+    - name: Tear down Grafana container if install_grafana is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - grafana.yml
+        state: absent
+      when: install_grafana is false and grafana_file.stat.exists
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Pometheus
     - name: Generate prometheus.yml from template
       ansible.builtin.template:
@@ -270,6 +371,19 @@
         pull: always
         recreate: auto
       when: install_prometheus is true
+
+    - name: Check if prometheus.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/prometheus.yml"
+      register: prometheus_file
+
+    - name: Tear down Pometheus container if install_prometheus is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - prometheus.yml
+        state: absent
+      when: install_prometheus is false and prometheus_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dozzle
     - name: Generate dozzle.yml from template
@@ -291,6 +405,19 @@
         recreate: auto
       when: install_dozzle is true
 
+    - name: Check if dozzle.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/dozzle.yml"
+      register: dozzle_file
+
+    - name: Tear down Dozzle container if install_dozzle is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - dozzle.yml
+        state: absent
+      when: install_dozzle is false and dozzle_file.stat.exists
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Shortcut
     - name: Generate shortcut.yml from template
       ansible.builtin.template:
@@ -310,6 +437,19 @@
         pull: always
         recreate: auto
       when: install_shortcut is true
+
+    - name: Check if shortcut.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/shortcut.yml"
+      register: shortcut_file
+
+    - name: Tear down Shortcut container if install_shortcut is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - shortcut.yml
+        state: absent
+      when: install_shortcut is false and shortcut_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DrawDB
     - name: Generate drawdb.yml from template
@@ -331,6 +471,19 @@
         recreate: auto
       when: install_drawdb is true
 
+    - name: Check if drawdb.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/drawdb.yml"
+      register: drawdb_file
+
+    - name: Tear down DrawDB container if install_drawdb is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - drawdb.yml
+        state: absent
+      when: install_drawdb is false and drawdb_file.stat.exists
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Draw.io
     - name: Generate drawio.yml from template
       ansible.builtin.template:
@@ -350,3 +503,16 @@
         pull: always
         recreate: auto
       when: install_drawio is true
+
+    - name: Check if drawio.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/drawio.yml"
+      register: drawio_file
+
+    - name: Tear down Draw.io container if install_drawio is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - drawio.yml
+        state: absent
+      when: install_drawio is false and drawio_file.stat.exists

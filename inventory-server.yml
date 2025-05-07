@@ -28,7 +28,6 @@ all:
     install_portainer: true
     install_mailu: false
     install_rancher: false
-    install_traefik: true
     # Install Tools
     install_adminmongo: false
     install_drawdb: false

@@ -46,8 +46,8 @@ GitLab >> Preferences >> Access tokens >> Add new token
 
 Server
 - ⚙️ Traefik (80) (user: admin - pass: admin)
-- ⚙️ Portainer (9000)
-- ⚙️ Bind9 (-)
+- ⚙️ Portainer (9000) (set user and pass)
+- ⚙️ Bind9 (5353)
 - ⚙️ Mailu (?)
 - ⚙️ Rancher (?)
 
