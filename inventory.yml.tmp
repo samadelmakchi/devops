@@ -1,0 +1,72 @@
+all:
+  children:
+    local:
+      hosts:
+        localhost:
+          ansible_connection: local  # No need for SSH
+          customer_type: "test"
+          customer_name: "تست آلفا"
+          customer_gateway_git_branches: "dev"
+          customer_gateway_git_tags: "02.69-dev"
+          customer_portal_git_branches: "dev"
+          customer_portal_git_tags: "01-dev"
+          customer_portal_frontend_git_branches: "dev"
+          customer_portal_frontend_git_tags: "01-dev"
+          customer_gateway_ports: 10101
+          customer_portal_ports: 10201
+          customer_portal_frontend_ports: 10301
+          customer_network_names: "test_alfa_network"
+          customer_containers: "test_alfa_container"
+          customer_state: "update"
+
+        # nikan:
+        #   ansible_connection: local
+        #   customer_type: "regular"
+        #   customer_name: "نیکان"
+        #   customer_gateway_git_branches: "dev"
+        #   customer_gateway_git_tags: "02.69-dev"
+        #   customer_portal_git_branches: "dev"
+        #   customer_portal_git_tags: "01-dev"
+        #   customer_portal_frontend_git_branches: "dev"
+        #   customer_portal_frontend_git_tags: "01-dev"
+        #   customer_gateway_ports: 10102
+        #   customer_portal_ports: 10202
+        #   customer_portal_frontend_ports: 10302
+        #   customer_network_names: "nikan_network"
+        #   customer_containers: "nikan_container"
+        #   customer_state: "update"
+
+        # simnad:
+        #   ansible_connection: local
+        #   customer_type: "VIP"
+        #   customer_name: "سیمناد"
+        #   customer_gateway_git_branches: "dev"
+        #   customer_gateway_git_tags: "02.69-dev"
+        #   customer_portal_git_branches: "dev"
+        #   customer_portal_git_tags: "01-dev"
+        #   customer_portal_frontend_git_branches: "dev"
+        #   customer_portal_frontend_git_tags: "01-dev"
+        #   customer_gateway_ports: 10103
+        #   customer_portal_ports: 10203
+        #   customer_portal_frontend_ports: 10303
+        #   customer_network_names: "simnad_network"
+        #   customer_containers: "simnad_container"
+        #   customer_state: "update"
+
+  vars:
+    # SSH
+    ansible_ssh_private_key_file: id_rsa        # فقط در صورت نیاز به SSH برای ماشین‌های دیگر
+    ansible_user: your_ssh_user                 # فقط در صورت نیاز به SSH برای ماشین‌های دیگر
+    gitlab_token: "glpat-utu8r9Nq4TLvy5-3BUzx"  # توکن اتصال به گیت لب
+
+    # Path
+    project_path: "~/Downloads/test_ansible"
+
+    # SonarQube
+    sonar_url: "http://your-sonarqube-server"  # SonarQube Server URL
+    sonar_token: "your_sonarqube_token"        # SonarQube Token
+    sonar_project_key: "calibri"               # Project Key In SonarQube
+    sonar_project_name: "calibri"              # Project Name In SonarQube
+
+# customer_type  : test - regular - VIP
+# customer_state : update - no_update - down

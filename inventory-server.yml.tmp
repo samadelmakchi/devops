@@ -1,0 +1,67 @@
+all:
+  vars:
+    domain: elmakchi.ir
+    email: samd.elmakchi@gmail.com
+
+    # Install CICD
+    install_gitlab: false
+    install_jenkins: false
+    install_nexus: false
+    install_selenium: true
+    install_sonarqube: true
+    # Install Develop
+    install_apprise: false
+    install_rabbitmq: false
+    install_nginx: false
+    install_ceph: false
+    # Install Logs
+    install_dozzle: true
+    install_elk: true
+    install_fluentd: true
+    # Install Monitor
+    install_uptime_kuma: true
+    install_grafana: true
+    install_splunk: true
+    install_prometheus: true
+    install_zabbix: false
+    # Install Server
+    install_portainer: true
+    install_mailu: false
+    install_rancher: false
+    install_traefik: true
+    # Install Tools
+    install_adminmongo: false
+    install_drawdb: false
+    install_drawio: false
+    install_joomla: false
+    install_mattermost: false
+    install_n8n: false
+    install_nextcloud: false
+    install_pgadmin: false
+    install_phpmyadmin: false
+    install_redis_insight: false
+    install_shortcut: false
+    install_sqlite_web: false
+    install_wordpress: false
+    install_vscode: false
+
+  children:
+    bind_hosts:
+      hosts:
+        dns1:
+          ansible_host: 127.0.0.1
+
+    dns_entries:
+      hosts:
+        dozzle:
+          ansible_host: 127.0.0.1
+        portainer:
+          ansible_host: 127.0.0.1
+        traefik:
+          ansible_host: 127.0.0.1
+        sonarqube:
+          ansible_host: 127.0.0.1
+        nexus:
+          ansible_host: 127.0.0.1
+        uptime:
+          ansible_host: 127.0.0.1
