@@ -6,3 +6,6 @@ template/letsencrypt/acme.json
 
 inventory.local.yml
 inventory-server.local.yml
+
+id_rsa
+id_rsa.pub
