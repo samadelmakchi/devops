@@ -81,7 +81,8 @@
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ نصب ابزارهای انسیبل
     # بررسی اینکه مجموعه community.docker نصب شده یا نه
     - name: Check if community.docker collection is installed
-      ansible.builtin.command: ansible-galaxy collection list community.docker
+      ansible.builtin.command:
+        cmd: ansible-galaxy collection list community.docker
       register: docker_collection_check
       changed_when: false
       failed_when: false
@@ -89,7 +90,8 @@
 
     # اجرای اسکریپت نصب اگر مجموعه نصب نبود
     - name: Install community.docker collection using setup script if not present
-      ansible.builtin.command: ./install-community-docker.sh
+      ansible.builtin.command:
+        cmd: ./install-community-docker.sh
       when: docker_collection_check.rc != 0
       changed_when: true
       poll: 1
