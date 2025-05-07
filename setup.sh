@@ -37,6 +37,7 @@ dig shecan.ir
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # نصب ابزارهای ضروری
 echo "🛠️  Installing essential packages"
+sudo apt update
 sudo apt install -y python3-apt cron git gzip tar curl python3-pip mysql-client postgresql-client
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -70,7 +71,7 @@ sudo pip3 uninstall ansible -y
 
 # نصب Ansible از طریق pip3
 echo "🤖  Installing Ansible via pip3"
-sudo pip3 install ansible
+sudo pip3 install ansible -y  # sudo apt install ansible -y
 
 # نصب ansible-lint
 echo "🧹  Installing ansible-lint"
