@@ -3,7 +3,7 @@
 ### ⚙️ مراحل راه‌اندازی (Setup)
 این مخزن شامل تنظیمات دواپس برای پروژه‌های شما است. لطفاً پیش از اجرای هر پلی بوک، مراحل راه‌اندازی زیر را انجام دهید.
 ``` bash
-git clone https://github.com/samadelmakchi/devops.git
+git clone --depth=1 https://github.com/samadelmakchi/devops.git
 
 cd devops
 

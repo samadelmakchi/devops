@@ -2,4 +2,9 @@ tools/data
 tools/portainer_data
 tools/your-code
 
+docker
+
+inventory.local.yml
+inventory-server.local.yml
+
 _del
