@@ -60,7 +60,7 @@ all:
     gitlab_token: "glpat-utu8r9Nq4TLvy5-3BUzx"  # توکن اتصال به گیت لب
 
     # Path
-    project_path: "~/Downloads/test_ansible"
+    project_path: "~/calibri"
 
     # SonarQube
     sonar_url: "http://your-sonarqube-server"  # SonarQube Server URL

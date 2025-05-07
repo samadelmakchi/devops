@@ -78,8 +78,8 @@
       changed_when: false
       poll: 1
 
-    # نصب مجموعه community.docker اگر نصب نشده باشد
-    - name: Install community.docker collection
+    # نصب مجموعه community.docker اگر نصب نشده بود
+    - name: Install community.docker collection if not present
       ansible.builtin.command: ansible-galaxy collection install community.docker
       when: docker_collection_check.rc != 0
       changed_when: true
