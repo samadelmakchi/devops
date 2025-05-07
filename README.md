@@ -7,8 +7,6 @@ git clone --depth=1 https://github.com/samadelmakchi/devops.git
 
 cd devops
 
-chmod +x setup.sh
-
 ./setup.sh
 ```
 
