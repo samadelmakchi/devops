@@ -1,6 +1,6 @@
 tools
 
-docker
+docker/*
 
 template/letsencrypt/acme.json
 
