@@ -69,6 +69,22 @@
         state: present
       poll: 1
 
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ نصب ابزارهای انسیبل
+    # بررسی اینکه مجموعه community.docker نصب شده یا نه
+    - name: Check if community.docker collection is installed
+      ansible.builtin.command: ansible-galaxy collection list community.docker
+      register: docker_collection_check
+      ignore_errors: true
+      changed_when: false
+      poll: 1
+
+    # نصب مجموعه community.docker اگر نصب نشده باشد
+    - name: Install community.docker collection
+      ansible.builtin.command: ansible-galaxy collection install community.docker
+      when: docker_collection_check.rc != 0
+      changed_when: true
+      poll: 1
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ نصب داکر
     # بررسی اینکه آیا Docker نصب شده یا نه
     - name: Check if Docker is installed
