@@ -183,7 +183,7 @@
     # کپی کردن فایل‌های docker-compose به پوشه پروژه‌ها
     - name: Copy docker-compose files to the project folder
       ansible.builtin.template:
-        src: "{{ item.compose_file }}"
+        src: "template/{{ item.compose_file }}"
         dest: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}/docker/docker-compose.yml"
         mode: '0777'
       poll: 1

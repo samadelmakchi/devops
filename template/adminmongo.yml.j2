@@ -15,7 +15,7 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.adminmongo.rule=Host(`adminmongo.elmakchi.ir`)"
+      - "traefik.http.routers.adminmongo.rule=Host(`adminmongo.{{ domain }}`)"
       - "traefik.http.routers.adminmongo.entrypoints=websecure"
       - "traefik.http.routers.adminmongo.tls.certresolver=myresolver"
       - "traefik.http.services.adminmongo.loadbalancer.server.port=1234"

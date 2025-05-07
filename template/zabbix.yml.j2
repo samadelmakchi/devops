@@ -55,7 +55,7 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.zabbix.rule=Host(`zabbix.elmakchi.ir`)"
+      - "traefik.http.routers.zabbix.rule=Host(`zabbix.{{ domain }}`)"
       - "traefik.http.routers.zabbix.entrypoints=websecure"
       - "traefik.http.routers.zabbix.tls.certresolver=myresolver"
       - "traefik.http.services.zabbix.loadbalancer.server.port=8080"

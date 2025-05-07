@@ -7,7 +7,7 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.uptime_kuma.rule=Host(`uptime.elmakchi.ir`)"
+      - "traefik.http.routers.uptime_kuma.rule=Host(`uptime.{{ domain }}`)"
       - "traefik.http.routers.uptime_kuma.entrypoints=websecure"
       - "traefik.http.routers.uptime_kuma.tls.certresolver=myresolver"
       - "traefik.http.services.uptime_kuma.loadbalancer.server.port=3001"

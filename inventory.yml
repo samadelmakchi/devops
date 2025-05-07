@@ -59,9 +59,6 @@ all:
     ansible_user: your_ssh_user                 # فقط در صورت نیاز به SSH برای ماشین‌های دیگر
     gitlab_token: "glpat-utu8r9Nq4TLvy5-3BUzx"  # توکن اتصال به گیت لب
 
-    # Path
-    project_path: "~/calibri"
-
     # SonarQube
     sonar_url: "http://your-sonarqube-server"  # SonarQube Server URL
     sonar_token: "your_sonarqube_token"        # SonarQube Token

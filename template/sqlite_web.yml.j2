@@ -16,7 +16,7 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.sqlite.rule=Host(`sqlite.elmakchi.ir`)"
+      - "traefik.http.routers.sqlite.rule=Host(`sqlite.{{ domain }}`)"
       - "traefik.http.routers.sqlite.entrypoints=websecure"
       - "traefik.http.routers.sqlite.tls.certresolver=myresolver"
       - "traefik.http.services.sqlite.loadbalancer.server.port=80"

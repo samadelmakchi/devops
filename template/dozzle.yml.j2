@@ -11,7 +11,7 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dozzle.rule=Host(`dozzle.elmakchi.ir`)"
+      - "traefik.http.routers.dozzle.rule=Host(`dozzle.{{ domain }}`)"
       - "traefik.http.routers.dozzle.entrypoints=websecure"
       - "traefik.http.routers.dozzle.tls.certresolver=myresolver"
       - "traefik.http.services.dozzle.loadbalancer.server.port=80"

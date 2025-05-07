@@ -7,7 +7,7 @@ services:
     restart: always
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'https://gitlab.elmakchi.ir'
+        external_url 'https://gitlab.{{ domain }}'
         gitlab_rails['gitlab_shell_ssh_port'] = 22
     ports:
       - "443:443"  # پورت HTTPS
@@ -22,7 +22,7 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.gitlab.rule=Host(`gitlab.elmakchi.ir`)"
+      - "traefik.http.routers.gitlab.rule=Host(`gitlab.{{ domain }}`)"
       - "traefik.http.routers.gitlab.entrypoints=websecure"
       - "traefik.http.routers.gitlab.tls.certresolver=myresolver"
       - "traefik.http.services.gitlab.loadbalancer.server.port=80"

@@ -31,7 +31,7 @@ services:
       - kb_data:/usr/share/kibana/data
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.kibana.rule=Host(`kibana.elmakchi.ir`)"
+      - "traefik.http.routers.kibana.rule=Host(`kibana.{{ domain }}`)"
       - "traefik.http.routers.kibana.entrypoints=websecure"
       - "traefik.http.routers.kibana.tls.certresolver=myresolver"
       - "traefik.http.services.kibana.loadbalancer.server.port=5601"
@@ -56,7 +56,7 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.fluentd.rule=Host(`fluentd.elmakchi.ir`)"
+      - "traefik.http.routers.fluentd.rule=Host(`fluentd.{{ domain }}`)"
       - "traefik.http.routers.fluentd.entrypoints=websecure"
       - "traefik.http.routers.fluentd.tls.certresolver=myresolver"
       - "traefik.http.services.fluentd.loadbalancer.server.port=9880"
@@ -143,7 +143,7 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.logstash.rule=Host(`logstash.elmakchi.ir`)"
+      - "traefik.http.routers.logstash.rule=Host(`logstash.{{ domain }}`)"
       - "traefik.http.routers.logstash.entrypoints=websecure"
       - "traefik.http.routers.logstash.tls.certresolver=myresolver"
       - "traefik.http.services.logstash.loadbalancer.server.port=5044"

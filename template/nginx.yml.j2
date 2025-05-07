@@ -8,7 +8,7 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.cdn.rule=Host(`cdn.elmakchi.ir`)"
+      - "traefik.http.routers.cdn.rule=Host(`cdn.{{ domain }}`)"
       - "traefik.http.routers.cdn.entrypoints=websecure"
       - "traefik.http.routers.cdn.tls.certresolver=myresolver"
       - "traefik.http.services.cdn.loadbalancer.server.port=80"

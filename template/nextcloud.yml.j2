@@ -35,7 +35,7 @@ services:
       - POSTGRES_HOST=nextcloud-postgres
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.elmakchi.ir`)"
+      - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.{{ domain }}`)"
       - "traefik.http.routers.nextcloud.entrypoints=websecure"
       - "traefik.http.routers.nextcloud.tls.certresolver=myresolver"
       - "traefik.http.services.nextcloud.loadbalancer.server.port=80"

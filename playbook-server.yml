@@ -4,6 +4,15 @@
   become: true
 
   tasks:
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ساخت پوشه برنامه
+    # ایجاد پوشه project_path اگر وجود نداشت
+    - name: Ensure project_path directory exists
+      ansible.builtin.file:
+        path: "{{ project_path }}"
+        state: directory
+        mode: '0777'
+      poll: 1
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ راه اندازی و ست کردن شکن
     - name: Set DNS for Shecan and configure systemd-resolved
       ansible.builtin.lineinfile:
@@ -74,13 +83,13 @@
     - name: Check if community.docker collection is installed
       ansible.builtin.command: ansible-galaxy collection list community.docker
       register: docker_collection_check
-      ignore_errors: true
       changed_when: false
+      failed_when: false
       poll: 1
 
-    # نصب مجموعه community.docker اگر نصب نشده بود
-    - name: Install community.docker collection if not present
-      ansible.builtin.command: ansible-galaxy collection install community.docker
+    # اجرای اسکریپت نصب اگر مجموعه نصب نبود
+    - name: Install community.docker collection using setup script if not present
+      ansible.builtin.command: ./install-community-docker.sh
       when: docker_collection_check.rc != 0
       changed_when: true
       poll: 1
@@ -275,6 +284,14 @@
       ansible.builtin.copy:
         src: templates/bind9/named.conf
         dest: "tools/etc/bind/named.conf"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Generate bind9.yml from template
+      ansible.builtin.template:
+        src: template/bind9.yml.j2
+        dest: tools/bind9.yml
         owner: root
         group: root
         mode: '0644'

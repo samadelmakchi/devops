@@ -12,7 +12,7 @@ services:
       - ENCRYPTION_KEY=SMDd#6eJ2w9f8fU86IE@N5grtgkM!
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.portainer.rule=Host(`portainer.elmakchi.ir`)"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.{{ domain }}`)"
       - "traefik.http.routers.portainer.entrypoints=websecure"
       - "traefik.http.routers.portainer.tls.certresolver=myresolver"
       - "traefik.http.services.portainer.loadbalancer.server.port=9000"

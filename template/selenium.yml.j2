@@ -16,7 +16,7 @@ services:
       - HUB_PORT=4444
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.selenium-hub.rule=Host(`selenium.elmakchi.ir`)"
+      - "traefik.http.routers.selenium-hub.rule=Host(`selenium.{{ domain }}`)"
       - "traefik.http.routers.selenium-hub.entrypoints=websecure"
       - "traefik.http.routers.selenium-hub.tls.certresolver=myresolver"
       - "traefik.http.services.selenium-hub.loadbalancer.server.port=4444"
@@ -39,7 +39,7 @@ services:
       - SE_NODE_PORT=5555
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.selenium-node-chrome.rule=Host(`chrome.selenium.elmakchi.ir`)"
+      - "traefik.http.routers.selenium-node-chrome.rule=Host(`chrome.selenium.{{ domain }}`)"
       - "traefik.http.routers.selenium-node-chrome.entrypoints=websecure"
       - "traefik.http.routers.selenium-node-chrome.tls.certresolver=myresolver"
       - "traefik.http.services.selenium-node-chrome.loadbalancer.server.port=5900"
@@ -62,7 +62,7 @@ services:
       - SE_NODE_PORT=5555
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.selenium-node-firefox.rule=Host(`firefox.selenium.elmakchi.ir`)"
+      - "traefik.http.routers.selenium-node-firefox.rule=Host(`firefox.selenium.{{ domain }}`)"
       - "traefik.http.routers.selenium-node-firefox.entrypoints=websecure"
       - "traefik.http.routers.selenium-node-firefox.tls.certresolver=myresolver"
       - "traefik.http.services.selenium-node-firefox.loadbalancer.server.port=5901"

@@ -12,7 +12,7 @@ services:
       - ./rancher_data:/var/lib/rancher
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.rancher.rule=Host(`rancher.elmakchi.ir`)"
+      - "traefik.http.routers.rancher.rule=Host(`rancher.{{ domain }}`)"
       - "traefik.http.routers.rancher.entrypoints=websecure"
       - "traefik.http.routers.rancher.tls.certresolver=myresolver"
       - "traefik.http.services.rancher.loadbalancer.server.port=443"

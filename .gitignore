@@ -1,10 +1,8 @@
-tools/data
-tools/portainer_data
-tools/your-code
+tools
 
 docker
 
+template/letsencrypt/acme.json
+
 inventory.local.yml
 inventory-server.local.yml
-
-_del

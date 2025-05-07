@@ -22,7 +22,7 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.joomla.rule=Host(`joomla.elmakchi.ir`)"
+      - "traefik.http.routers.joomla.rule=Host(`joomla.{{ domain }}`)"
       - "traefik.http.routers.joomla.entrypoints=websecure"
       - "traefik.http.routers.joomla.tls.certresolver=myresolver"
       - "traefik.http.services.joomla.loadbalancer.server.port=80"

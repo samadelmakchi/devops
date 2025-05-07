@@ -10,8 +10,8 @@ services:
     restart: always
     environment:
       - MAILU_VERSION=1.9
-      - DOMAIN=elmakchi.ir
-      - HOSTNAMES=mail.elmakchi.ir
+      - DOMAIN={{ domain }}
+      - HOSTNAMES=mail.{{ domain }}
       - TLS_FLAVOR=letsencrypt
       - POSTMASTER=postmaster
       - WEBMAIL=roundcube
@@ -64,8 +64,8 @@ services:
     restart: always
     environment:
       - MAILU_VERSION=1.9
-      - DOMAIN=elmakchi.ir
-      - HOSTNAMES=mail.elmakchi.ir
+      - DOMAIN={{ domain }}
+      - HOSTNAMES=mail.{{ domain }}
       - TLS_FLAVOR=letsencrypt
       - ADMIN=admin
       - ADMIN_USER=admin

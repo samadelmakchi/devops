@@ -16,7 +16,7 @@ services:
       - jenkins_network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.jenkins.rule=Host(`jenkins.elmakchi.ir`)"
+      - "traefik.http.routers.jenkins.rule=Host(`jenkins.{{ domain }}`)"
       - "traefik.http.routers.jenkins.entrypoints=websecure"
       - "traefik.http.routers.jenkins.tls.certresolver=myresolver"
       - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
