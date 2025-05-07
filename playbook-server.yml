@@ -14,12 +14,32 @@
       poll: 1
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Bind9
-    # تولید فایل زون Bind9 بر اساس اطلاعات inventory
     - name: Ensure Bind9 config directory exists
       ansible.builtin.file:
         path: "tools/etc/bind"
         state: directory
         mode: '0755'
+      poll: 1
+
+    - name: Ensure Bind9 cache and lib directories exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - "tools/var/cache/bind"
+        - "tools/var/lib/bind"
+      poll: 1
+
+    - name: Set proper ownership for Bind9 directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        owner: bind
+        group: bind
+        recurse: true
+      loop:
+        - "tools/var/cache/bind"
+        - "tools/var/lib/bind"
       poll: 1
 
     - name: Generate Bind9 zone file from template
