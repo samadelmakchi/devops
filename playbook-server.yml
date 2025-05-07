@@ -70,7 +70,15 @@
       poll: 1
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ نصب داکر
-    # شناسایی نسخه اوبونتو و معماری
+    # بررسی اینکه آیا Docker نصب شده یا نه
+    - name: Check if Docker is installed
+      ansible.builtin.command: docker --version
+      register: docker_check
+      ignore_errors: true
+      changed_when: false
+      poll: 1
+
+    # شناسایی نسخه اوبونتو و معماری (در صورت نبود Docker)
     - name: Check Ubuntu version and architecture
       ansible.builtin.shell: |
         CODENAME=$(lsb_release -cs)
@@ -80,6 +88,7 @@
       register: system_info
       changed_when: false
       poll: 1
+      when: docker_check.rc != 0
 
     # دانلود فایل‌های Docker
     - name: Download Docker .deb files if not already downloaded
@@ -110,6 +119,7 @@
       register: download_files
       changed_when: false
       poll: 1
+      when: docker_check.rc != 0
 
     # نصب Docker از فایل‌های دانلود شده
     - name: Install Docker packages
@@ -119,6 +129,7 @@
         executable: /bin/bash
       changed_when: true
       poll: 1
+      when: docker_check.rc != 0
 
     # رفع مشکلات احتمالی وابستگی‌ها
     - name: Fix dependencies
@@ -127,6 +138,7 @@
         state: present
         update_cache: true
       poll: 1
+      when: docker_check.rc != 0
 
     # شروع و فعال‌سازی سرویس Docker
     - name: Start Docker service
@@ -135,8 +147,9 @@
         state: started
         enabled: true
       poll: 1
+      when: docker_check.rc != 0
 
-    # بررسی نسخه‌های نصب‌شده Docker و Docker Compose
+    # چک کردن نسخه داکر
     - name: Check Docker version
       ansible.builtin.command:
         cmd: docker --version
@@ -161,7 +174,6 @@
     - name: Show Docker Compose version
       ansible.builtin.debug:
         msg: "Docker Compose version: {{ docker_compose_version.stdout }}"
-      poll: 1
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ داکر پایتون
     # چک کنید آیا ماژول docker در پایتون نصب شده است
