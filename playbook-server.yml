@@ -20,6 +20,7 @@
         path: "tools/etc/bind"
         state: directory
         mode: '0755'
+      poll: 1
 
     - name: Generate Bind9 zone file from template
       ansible.builtin.template:
@@ -33,6 +34,7 @@
         ttl: 3600
         ns_record: "ns1.{{ domain }}."
         origin: "{{ domain }}"
+      poll: 1
 
     - name: Copy Bind9 named.conf
       ansible.builtin.copy:
@@ -41,6 +43,7 @@
         owner: root
         group: root
         mode: '0644'
+      poll: 1
 
     - name: Generate bind9.yml from template
       ansible.builtin.template:
@@ -49,6 +52,7 @@
         owner: root
         group: root
         mode: '0644'
+      poll: 1
 
     - name: Set up Bind9 using Docker Compose
       community.docker.docker_compose_v2:
@@ -58,12 +62,14 @@
         state: present
         pull: always
         recreate: auto
+      poll: 1
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Traefik
     - name: Create traefik_reverse_proxy Docker network
       community.docker.docker_network:
         name: traefik_reverse_proxy
         state: present
+      poll: 1
 
     - name: Generate traefik.yml from template
       ansible.builtin.template:
@@ -72,6 +78,7 @@
         owner: root
         group: root
         mode: '0644'
+      poll: 1
 
     - name: Set up Traefik using Docker Compose
       community.docker.docker_compose_v2:
@@ -81,6 +88,7 @@
         state: present
         pull: always
         recreate: auto
+      poll: 1
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Portainer
     - name: Generate portainer.yml from template
@@ -90,6 +98,7 @@
         owner: root
         group: root
         mode: '0644'
+      poll: 1
       when: install_portainer is true
 
     - name: Set up Portainer using Docker Compose
@@ -100,11 +109,13 @@
         state: present
         pull: always
         recreate: auto
+      poll: 1
       when: install_portainer is true
 
     - name: Check if portainer.yml file exists
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/portainer.yml"
+      poll: 1
       register: portainer_file
 
     - name: Tear down Portainer container if install_portainer is false
@@ -113,6 +124,7 @@
         files:
           - portainer.yml
         state: absent
+      poll: 1
       when: install_portainer is false and portainer_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ SonarQube
@@ -123,6 +135,7 @@
         owner: root
         group: root
         mode: '0644'
+      poll: 1
       when: install_sonarqube is true
 
     - name: Set up SonarQube using Docker Compose
@@ -133,11 +146,13 @@
         state: present
         pull: always
         recreate: auto
+      poll: 1
       when: install_sonarqube is true
 
     - name: Check if sonarqube.yml file exists
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/sonarqube.yml"
+      poll: 1
       register: sonarqube_file
 
     - name: Tear down SonarQube container if install_sonarqube is false
@@ -146,6 +161,7 @@
         files:
           - sonarqube.yml
         state: absent
+      poll: 1
       when: install_sonarqube is false and sonarqube_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Nexus
@@ -156,6 +172,7 @@
         owner: root
         group: root
         mode: '0644'
+      poll: 1
       when: install_nexus is true
 
     - name: Set up Nexus using Docker Compose
@@ -166,12 +183,14 @@
         state: present
         pull: always
         recreate: auto
+      poll: 1
       when: install_nexus is true
 
     - name: Check if nexus.yml file exists
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/nexus.yml"
       register: nexus_file
+      poll: 1
 
     - name: Tear down Nexus container if install_nexus is false
       community.docker.docker_compose_v2:
@@ -179,6 +198,7 @@
         files:
           - nexus.yml
         state: absent
+      poll: 1
       when: install_nexus is false and nexus_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RabbitMQ
@@ -189,6 +209,7 @@
         owner: root
         group: root
         mode: '0644'
+      poll: 1
       when: install_rabbitmq is true
 
     - name: Set up RabbitMQ using Docker Compose
@@ -199,18 +220,21 @@
         state: present
         pull: always
         recreate: auto
+      poll: 1
       when: install_rabbitmq is true
 
     - name: Enable RabbitMQ management plugin
       community.docker.docker_container_exec:
         container: rabbitmq
         command: rabbitmq-plugins enable rabbitmq_management
+      poll: 1
       when: install_rabbitmq is true
 
     - name: Check if rabbitmq.yml file exists
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/rabbitmq.yml"
       register: rabbitmq_file
+      poll: 1
 
     - name: Tear down RabbitMQ container if install_rabbitmq is false
       community.docker.docker_compose_v2:
@@ -218,6 +242,7 @@
         files:
           - rabbitmq.yml
         state: absent
+      poll: 1
       when: install_rabbitmq is false and rabbitmq_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Apprise
@@ -228,6 +253,7 @@
         owner: root
         group: root
         mode: '0644'
+      poll: 1
       when: install_apprise is true
 
     - name: Set up Apprise using Docker Compose
@@ -238,12 +264,14 @@
         state: present
         pull: always
         recreate: auto
+      poll: 1
       when: install_apprise is true
 
     - name: Check if apprise.yml file exists
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/apprise.yml"
       register: apprise_file
+      poll: 1
 
     - name: Tear down Apprise container if install_apprise is false
       community.docker.docker_compose_v2:
@@ -251,7 +279,8 @@
         files:
           - apprise.yml
         state: absent
-      when: install_apprise is false and rapprise_file.stat.exists
+      poll: 1
+      when: install_apprise is false and apprise_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Uptime Kuma
     - name: Generate uptime_kuma.yml from template
@@ -261,6 +290,7 @@
         owner: root
         group: root
         mode: '0644'
+      poll: 1
       when: install_uptime_kuma is true
 
     - name: Set up Uptime Kuma using Docker Compose
@@ -271,12 +301,14 @@
         state: present
         pull: always
         recreate: auto
+      poll: 1
       when: install_uptime_kuma is true
 
     - name: Check if uptime_kuma.yml file exists
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/uptime_kuma.yml"
       register: uptime_kuma_file
+      poll: 1
 
     - name: Tear down Uptime Kuma container if install_uptime_kuma is false
       community.docker.docker_compose_v2:
@@ -284,6 +316,7 @@
         files:
           - uptime_kuma.yml
         state: absent
+      poll: 1
       when: install_uptime_kuma is false and ruptime_kuma_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Splunk
@@ -294,6 +327,7 @@
         owner: root
         group: root
         mode: '0644'
+      poll: 1
       when: install_splunk is true
 
     - name: Set up Splunk using Docker Compose
@@ -304,12 +338,14 @@
         state: present
         pull: always
         recreate: auto
+      poll: 1
       when: install_splunk is true
 
     - name: Check if splunk.yml file exists
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/splunk.yml"
       register: splunk_file
+      poll: 1
 
     - name: Tear down Splunk container if install_splunk is false
       community.docker.docker_compose_v2:
@@ -317,6 +353,7 @@
         files:
           - splunk.yml
         state: absent
+      poll: 1
       when: install_splunk is false and splunk_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Grafana
@@ -327,6 +364,7 @@
         owner: root
         group: root
         mode: '0644'
+      poll: 1
       when: install_grafana is true
 
     - name: Set up Grafana using Docker Compose
@@ -337,12 +375,14 @@
         state: present
         pull: always
         recreate: auto
+      poll: 1
       when: install_grafana is true
 
     - name: Check if grafana.yml file exists
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/grafana.yml"
       register: grafana_file
+      poll: 1
 
     - name: Tear down Grafana container if install_grafana is false
       community.docker.docker_compose_v2:
@@ -350,6 +390,7 @@
         files:
           - grafana.yml
         state: absent
+      poll: 1
       when: install_grafana is false and grafana_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Pometheus
@@ -360,6 +401,7 @@
         owner: root
         group: root
         mode: '0644'
+      poll: 1
       when: install_prometheus is true
 
     - name: Set up Pometheus using Docker Compose
@@ -370,12 +412,14 @@
         state: present
         pull: always
         recreate: auto
+      poll: 1
       when: install_prometheus is true
 
     - name: Check if prometheus.yml file exists
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/prometheus.yml"
       register: prometheus_file
+      poll: 1
 
     - name: Tear down Pometheus container if install_prometheus is false
       community.docker.docker_compose_v2:
@@ -383,6 +427,7 @@
         files:
           - prometheus.yml
         state: absent
+      poll: 1
       when: install_prometheus is false and prometheus_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dozzle
@@ -393,6 +438,7 @@
         owner: root
         group: root
         mode: '0644'
+      poll: 1
       when: install_dozzle is true
 
     - name: Set up Dozzle using Docker Compose
@@ -403,12 +449,14 @@
         state: present
         pull: always
         recreate: auto
+      poll: 1
       when: install_dozzle is true
 
     - name: Check if dozzle.yml file exists
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/dozzle.yml"
       register: dozzle_file
+      poll: 1
 
     - name: Tear down Dozzle container if install_dozzle is false
       community.docker.docker_compose_v2:
@@ -416,6 +464,7 @@
         files:
           - dozzle.yml
         state: absent
+      poll: 1
       when: install_dozzle is false and dozzle_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Shortcut
@@ -426,6 +475,7 @@
         owner: root
         group: root
         mode: '0644'
+      poll: 1
       when: install_shortcut is true
 
     - name: Set up Shortcut using Docker Compose
@@ -436,12 +486,14 @@
         state: present
         pull: always
         recreate: auto
+      poll: 1
       when: install_shortcut is true
 
     - name: Check if shortcut.yml file exists
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/shortcut.yml"
       register: shortcut_file
+      poll: 1
 
     - name: Tear down Shortcut container if install_shortcut is false
       community.docker.docker_compose_v2:
@@ -449,6 +501,7 @@
         files:
           - shortcut.yml
         state: absent
+      poll: 1
       when: install_shortcut is false and shortcut_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DrawDB
@@ -459,6 +512,7 @@
         owner: root
         group: root
         mode: '0644'
+      poll: 1
       when: install_drawdb is true
 
     - name: Set up DrawDB using Docker Compose
@@ -469,12 +523,14 @@
         state: present
         pull: always
         recreate: auto
+      poll: 1
       when: install_drawdb is true
 
     - name: Check if drawdb.yml file exists
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/drawdb.yml"
       register: drawdb_file
+      poll: 1
 
     - name: Tear down DrawDB container if install_drawdb is false
       community.docker.docker_compose_v2:
@@ -482,6 +538,7 @@
         files:
           - drawdb.yml
         state: absent
+      poll: 1
       when: install_drawdb is false and drawdb_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Draw.io
@@ -492,6 +549,7 @@
         owner: root
         group: root
         mode: '0644'
+      poll: 1
       when: install_drawio is true
 
     - name: Set up Draw.io using Docker Compose
@@ -502,12 +560,14 @@
         state: present
         pull: always
         recreate: auto
+      poll: 1
       when: install_drawio is true
 
     - name: Check if drawio.yml file exists
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/drawio.yml"
       register: drawio_file
+      poll: 1
 
     - name: Tear down Draw.io container if install_drawio is false
       community.docker.docker_compose_v2:
@@ -515,4 +575,5 @@
         files:
           - drawio.yml
         state: absent
+      poll: 1
       when: install_drawio is false and drawio_file.stat.exists
