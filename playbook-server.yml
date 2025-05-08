@@ -14,6 +14,21 @@
       poll: 1
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Bind9
+    - name: Ensure group 'bind' exists
+      ansible.builtin.group:
+        name: bind
+        state: present
+      poll: 1
+
+    - name: Ensure user 'bind' exists
+      ansible.builtin.user:
+        name: bind
+        group: bind
+        shell: /usr/sbin/nologin
+        system: true
+        state: present
+      poll: 1
+
     - name: Ensure Bind9 config directory exists
       ansible.builtin.file:
         path: "tools/etc/bind"
@@ -56,10 +71,10 @@
         origin: "{{ domain }}"
       poll: 1
 
-    - name: Copy Bind9 named.conf
-      ansible.builtin.copy:
-        src: template/bind9/named.conf
-        dest: "tools/etc/bind/named.conf"
+    - name: Template Bind9 named.conf
+      ansible.builtin.template:
+        src: template/bind9/named.conf.j2
+        dest: tools/etc/bind/named.conf
         owner: root
         group: root
         mode: '0644'

@@ -17,3 +17,12 @@ zone "{{ domain }}" {
     type master;
     file "/etc/bind/db.{{ domain }}";
 };
+
+logging {
+    channel default_log {
+        file "/var/log/bind/bind.log";
+        severity info;
+        print-time yes;
+    };
+    category default { default_log; };
+};
