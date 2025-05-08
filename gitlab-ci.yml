@@ -3,15 +3,12 @@ image: python:3.9
 stages:
   - build
   - analysis
-  - docker_build_dev
   - deploy_dev
   - functional_testing
   - non_functional_testing
-  - docker_build_test
-  - push_to_nexus_test
   - deploy_test
-  - docker_build_product
-  - push_to_nexus_product
+  - docker_build
+  - push_to_nexus
   - deploy_product
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,28 +69,6 @@ check_lint: # Pylint
     - main
   # Check all code in directory "tests" And "api"
   # Use "exit 0" so that the pipeline does not stop if there are warnings
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Docker Build Dev
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-docker_build_dev_job:
-  stage: docker_build_dev
-  image: docker:latest
-  services:
-    - docker:dind
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_DRIVER: overlay2
-  before_script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-  script:
-    - docker build -t my_project:$CI_COMMIT_SHORT_SHA .
-    - docker tag my_project:$CI_COMMIT_SHORT_SHA nexus.example.com/repository/docker-hosted/my_project:$CI_COMMIT_SHORT_SHA
-  artifacts:
-    paths:
-      - docker/
-  only:
-    - dev
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Deploy Dev (Docker Compose)
@@ -396,60 +371,10 @@ security_test_job: # Security Test
     - dev
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Docker Build Test                                                                                                              >> If All Test Is OK 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-docker_build_test_job:
-  stage: docker_build_test
-  image: docker:latest
-  services:
-    - docker:dind
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_DRIVER: overlay2
-  before_script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-  script:
-    - docker build -t my_project:$CI_COMMIT_SHORT_SHA .
-    - docker tag my_project:$CI_COMMIT_SHORT_SHA nexus.example.com/repository/docker-hosted/my_project:$CI_COMMIT_SHORT_SHA
-  artifacts:
-    paths:
-      - docker/
-  only:
-    - test
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Push to Nexus Test
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-push_to_nexus_test_job:
-  stage: push_to_nexus_test
-  image: docker:latest
-  services:
-    - docker:dind
-  script:
-    - docker push nexus.example.com/repository/docker-hosted/my_project:$CI_COMMIT_SHORT_SHA
-  only:
-    - test
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Deploy Test (Docker Compose)
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-deploy_test_job:
-  stage: deploy_test
-  image: docker/compose:latest
-  environment:
-    name: production
-    url: http://your-server-url
-  script:
-    - scp -o StrictHostKeyChecking=no docker-compose.yml user@your-server:/path/to/docker-compose.yml
-    - ssh user@your-server "cd /path/to && docker-compose pull && docker-compose up -d"
-  only:
-    - test
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Docker Build Product                                                                                        >> If Quality Assurance (QA) Test Is OK
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-docker_build_product_job:
-  stage: docker_build_product
+docker_build_job:
+  stage: docker_build
   image: docker:latest
   services:
     - docker:dind
@@ -460,7 +385,7 @@ docker_build_product_job:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
     - docker build -t my_project:$CI_COMMIT_SHORT_SHA .
-    - docker tag my_project:$CI_COMMIT_SHORT_SHA nexus.example.com/repository/docker-hosted/my_project:$CI_COMMIT_SHORT_SHA
+    - docker tag my_project:$CI_COMMIT_SHORT_SHA nexus.elmakchi.ir/repository/docker-hosted/my_project:$CI_COMMIT_SHORT_SHA
   artifacts:
     paths:
       - docker/
@@ -468,15 +393,15 @@ docker_build_product_job:
     - main
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Push to Nexus Product
+# Push to Nexus
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-push_to_nexus_product_job:
-  stage: push_topush_to_nexus_product_nexus
+push_to_nexus_job:
+  stage: push_to_nexus
   image: docker:latest
   services:
     - docker:dind
   script:
-    - docker push nexus.example.com/repository/docker-hosted/my_project:$CI_COMMIT_SHORT_SHA
+    - docker push nexus.elmakchi.ir/repository/docker-hosted/my_project:$CI_COMMIT_SHORT_SHA
   only:
     - main
 
