@@ -197,6 +197,11 @@ ssh-keygen -t rsa -b 4096 -f "$PWD/id_rsa" -N "" && echo "✔️  SSH key genera
 echo "🔐  Setting permissions for id_rsa"
 chmod 600 "$PWD/id_rsa" && echo "✔️  Permissions set to 600 for id_rsa"
 
+# راه‌اندازی SSH Agent و اضافه کردن کلید
+echo "🛠️  Starting SSH agent"
+eval "$(ssh-agent -s)"
+ssh-add "$PWD/id_rsa" && echo "✔️  SSH key added to SSH agent"
+
 # تست اتصال به GitLab با استفاده از SSH
 echo "🔌  Testing SSH connection to GitLab"
 ssh -i "$PWD/id_rsa" -T git@gitlab.com && echo "✔️  SSH connection successful"
