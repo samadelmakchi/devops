@@ -193,9 +193,13 @@ echo "🔑  Generating SSH key"
 rm -f "$PWD/id_rsa" "$PWD/id_rsa.pub"  # حذف کلیدهای قبلی اگر وجود داشته باشند
 ssh-keygen -t rsa -b 4096 -f "$PWD/id_rsa" -N "" && echo "✔️  SSH key generated at $PWD/id_rsa"
 
-# کپی کلید SSH به مسیر پروژه (با جایگزینی در صورت وجود)
-echo "🔑  Copying SSH key to project directory"
-cp -f "$PWD/id_rsa" /path/to/your/project/directory/
+# تغییر دسترسی‌های کلید SSH
+echo "🔐  Setting permissions for id_rsa"
+chmod 600 "$PWD/id_rsa" && echo "✔️  Permissions set to 600 for id_rsa"
+
+# تست اتصال به GitLab با استفاده از SSH
+echo "🔌  Testing SSH connection to GitLab"
+ssh -i "$PWD/id_rsa" -T git@gitlab.com && echo "✔️  SSH connection successful"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 echo "✅  Script execution completed!"
