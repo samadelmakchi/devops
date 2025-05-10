@@ -429,6 +429,16 @@
       when: install_grafana is false and grafana_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Pometheus
+    - name: Copy Prometheus config folder
+      ansible.builtin.copy:
+        src: template/prometheus/
+        dest: tools/prometheus/
+        owner: root
+        group: root
+        mode: '0644'
+      poll: 1
+      when: install_prometheus is true
+
     - name: Generate prometheus.yml from template
       ansible.builtin.template:
         src: template/prometheus.yml.j2
