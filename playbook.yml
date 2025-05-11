@@ -120,7 +120,7 @@
       when: customer_state == 'update'
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ گیت لب
-    # تعریف پروژه‌ها و نام‌های پوشه‌ها
+    # تعریف پروژه‌ها و متادیتای هر کدام
     - name: Define project repositories
       ansible.builtin.set_fact:
         projects:
@@ -143,90 +143,88 @@
             tag_var: "customer_portal_frontend_git_tags"
             compose_file: "docker-compose-portal-frontend.yml.j2"
 
-    # بررسی اینکه آیا دایرکتوری "git" وجود دارد یا خیر
-    - name: Check if 'git' directory exists
+    # بررسی وجود دایرکتوری git
+    - name: Check if shared 'git' directory exists
       ansible.builtin.stat:
         path: "{{ project_path }}/git"
-      register: git_folder_exists
+      register: git_dir_check
 
-    # بررسی اینکه آیا پوشه‌های پروژه مشترک وجود دارند یا خیر
-    - name: Check if all shared project folders exist
-      ansible.builtin.find:
-        paths: "{{ project_path }}/git"
-        file_type: directory
-        patterns: 'gateway|portal|portal-frontend'
-        recurse: false
-      register: found_project_folders
-      when: git_folder_exists.stat.exists
-
-    # اگر دایرکتوری "git" وجود ندارد، ایجاد کنید
-    - name: Create 'git' directory if it doesn't exist
+    # ساخت دایرکتوری git در صورت نیاز
+    - name: Ensure 'git' directory exists
       ansible.builtin.file:
         path: "{{ project_path }}/git"
         state: directory
         mode: '0777'
-      when: not git_folder_exists.stat.exists
 
-    # کلون کردن مخازن به اشتراک گذاشته شده به صورت دستی با استفاده از پوسته (بای پس ماژول git)
-    - name: Clone shared repositories manually using shell (bypass git module)
+    # کلون کردن ریپازیتوری‌ها فقط اگر git هنوز وجود ندارد
+    - name: Clone repositories (first ever deploy)
       ansible.builtin.shell: |
         GIT_SSH_COMMAND="ssh -i {{ playbook_dir }}/id_rsa -o StrictHostKeyChecking=no" \
         git clone -b {{ vars[item.branch_var] | default('master') }} {{ item.repo }} {{ project_path }}/git/{{ item.folder }}
       args:
         creates: "{{ project_path }}/git/{{ item.folder }}"
       loop: "{{ projects }}"
-      when: >
-        (found_project_folders.files | length) < 3
+      when: not git_dir_check.stat.exists and inventory_hostname == 'localhost'
 
-    # بررسی اینکه که آیا پوشه پروژه مشتری وجود دارد یا خیر
-    - name: Check if customer project folder exists
-      ansible.builtin.stat:
-        path: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
-      register: project_folder_stat
+    # Pull کردن آخرین تغییرات اگر git وجود داشته باشد
+    - name: Pull repositories (subsequent runs)
+      ansible.builtin.shell: |
+        cd {{ project_path }}/git/{{ item.folder }}
+        GIT_SSH_COMMAND="ssh -i {{ playbook_dir }}/id_rsa -o StrictHostKeyChecking=no" \
+        git pull origin {{ vars[item.branch_var] | default('master') }}
       loop: "{{ projects }}"
-      loop_control:
-        label: "{{ item.name }}"
-      poll: 1
+      when: git_dir_check.stat.exists and inventory_hostname == 'localhost'
+      register: git_pull_result
+      changed_when: "'Already up to date' not in git_pull_result.stdout"
+
+    # بررسی وجود دایرکتوری مشتری
+    - name: Check if customer base folder exists
+      ansible.builtin.stat:
+        path: "{{ project_path }}/{{ inventory_hostname }}"
+      register: customer_base_dir
       when: customer_state == 'update'
 
-    # در صورت عدم وجود، مخازن مشترک را در پوشه مشتری کپی کنید
-    - name: Copy shared repositories to customer folder if not exists
-      ansible.builtin.copy:
-        src: "{{ project_path }}/git/{{ item.item.folder }}"
-        dest: "{{ project_path }}/{{ inventory_hostname }}/{{ item.item.folder }}"
-        remote_src: true
-        mode: '0755'
-      loop: "{{ project_folder_stat.results }}"
-      poll: 1
-      when: not item.stat.exists and customer_state == 'update'
+    # ساخت دایرکتوری مشتری در صورت نیاز
+    - name: Ensure customer base folder exists
+      ansible.builtin.file:
+        path: "{{ project_path }}/{{ inventory_hostname }}"
+        state: directory
+        mode: '0777'
+      when: customer_state == 'update'
 
-    # تنظیم پرمیشن 0777 برای پوشه کپی شده
+    # کپی تمام ریپازیتوری‌ها از git به مسیر مشتری
+    - name: Copy all repositories from git to customer folder
+      ansible.builtin.synchronize:
+        src: "{{ project_path }}/git/"
+        dest: "{{ project_path }}/{{ inventory_hostname }}/"
+        recursive: true
+      delegate_to: localhost
+      when: customer_state == 'update' and not customer_base_dir.stat.exists
+
+    # تنظیم پرمیشن برای هر پروژه
     - name: Set permissions to 0777 for copied repositories
       ansible.builtin.file:
         path: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
         state: directory
         mode: '0777'
       loop: "{{ projects }}"
-      poll: 1
       when: customer_state == 'update'
 
-    # چک‌اوت کردن تگ خاص برای هر مشتری
-    - name: Checkout the specific tag for each project
+    # Checkout کردن تگ اختصاصی برای هر پروژه
+    - name: Checkout specific tag for each project
       ansible.builtin.shell: |
         cd "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
         git checkout "{{ vars[item.tag_var] }}"
       loop: "{{ projects }}"
-      poll: 1
       when: customer_state == 'update'
       changed_when: false
 
-    # کپی کردن فایل‌های docker-compose به پوشه پروژه‌ها
-    - name: Copy docker-compose files to the project folder
+    # کپی کردن فایل docker-compose اختصاصی
+    - name: Copy docker-compose files to customer project
       ansible.builtin.template:
         src: "template/{{ item.compose_file }}"
         dest: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}/docker/docker-compose.yml"
         mode: '0777'
-      poll: 1
       loop: "{{ projects }}"
       when: customer_state == 'update'
 
