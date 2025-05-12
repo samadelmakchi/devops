@@ -6,7 +6,7 @@ all:
           ansible_connection: local
           customer_name: "تست آلفا"
           customer_gateway_git_branches: "dev"
-          customer_gateway_git_tags: "02.69-dev"
+          customer_gateway_git_tags: "02.70-dev"
           customer_portal_git_branches: "dev"
           customer_portal_git_tags: "01-dev"
           customer_portal_frontend_git_branches: "dev"
@@ -22,7 +22,7 @@ all:
         #   ansible_connection: local
         #   customer_name: "نیکان"
         #   customer_gateway_git_branches: "dev"
-        #   customer_gateway_git_tags: "02.69-dev"
+        #   customer_gateway_git_tags: "02.70-dev"
         #   customer_portal_git_branches: "dev"
         #   customer_portal_git_tags: "01-dev"
         #   customer_portal_frontend_git_branches: "smd-test"
@@ -38,7 +38,7 @@ all:
         #   ansible_connection: local
         #   customer_name: "سیمناد"
         #   customer_gateway_git_branches: "dev"
-        #   customer_gateway_git_tags: "02.69-dev"
+        #   customer_gateway_git_tags: "02.70-dev"
         #   customer_portal_git_branches: "dev"
         #   customer_portal_git_tags: "01-dev"
         #   customer_portal_frontend_git_branches: "smd-test"
