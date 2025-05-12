@@ -177,6 +177,18 @@
       register: git_pull_result
       changed_when: "'Already up to date' not in git_pull_result.stdout"
 
+    # Checkout کردن تگ اختصاصی برای هر پروژه (قبل از کپی کردن)
+    - name: Checkout specific tag for each project in 'git' folder before copying
+      ansible.builtin.shell: |
+        cd "{{ project_path }}/git/{{ item.folder }}"
+        GIT_SSH_COMMAND="ssh -i {{ playbook_dir }}/id_rsa -o StrictHostKeyChecking=no" \
+        git checkout "{{ hostvars[inventory_hostname][item.tag_var] }}"
+      loop: "{{ projects }}"
+      when: customer_state == 'update'
+      delegate_to: localhost
+      run_once: false
+      changed_when: false
+
     # بررسی وجود دایرکتوری مشتری
     - name: Check if customer base folder exists
       ansible.builtin.stat:
@@ -192,14 +204,17 @@
         mode: '0777'
       when: customer_state == 'update'
 
-    # کپی تمام ریپازیتوری‌ها از git به مسیر مشتری
-    - name: Copy all repositories from git to customer folder
-      ansible.builtin.synchronize:
+    # کپی پروژه‌ها از git به مسیر مشتری، بدون .git
+    - name: Copy all repositories for each customer (excluding .git)
+      ansible.posix.synchronize:
         src: "{{ project_path }}/git/"
-        dest: "{{ project_path }}/{{ inventory_hostname }}/"
-        recursive: true
+        dest: "{{ project_path }}/{{ item }}/"
+        mode: push
+        rsync_opts:
+          - "--exclude=.git"
+      loop: "{{ groups['all'] }}"
       delegate_to: localhost
-      when: customer_state == 'update' and not customer_base_dir.stat.exists
+      run_once: false
 
     # تنظیم پرمیشن برای هر پروژه
     - name: Set permissions to 0777 for copied repositories
@@ -209,15 +224,6 @@
         mode: '0777'
       loop: "{{ projects }}"
       when: customer_state == 'update'
-
-    # Checkout کردن تگ اختصاصی برای هر پروژه
-    - name: Checkout specific tag for each project
-      ansible.builtin.shell: |
-        cd "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
-        git checkout "{{ vars[item.tag_var] }}"
-      loop: "{{ projects }}"
-      when: customer_state == 'update'
-      changed_when: false
 
     # کپی کردن فایل docker-compose اختصاصی
     - name: Copy docker-compose files to customer project
