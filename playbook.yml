@@ -193,6 +193,7 @@
         rsync -a --delete "{{ project_path }}/git/" "{{ project_path }}/{{ inventory_hostname }}/"
       delegate_to: localhost
       when: customer_state == 'update'
+      changed_when: false
 
     # حذف فایل lock احتمالی
     - name: Remove git index.lock if exists
