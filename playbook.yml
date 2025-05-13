@@ -202,6 +202,7 @@
         path: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}/.git/index.lock"
         state: absent
       loop: "{{ projects }}"
+      when: customer_state == 'update'
       poll: 1
       delegate_to: localhost
 
@@ -445,6 +446,11 @@
       register: matching_containers_portal_frontend
       changed_when: false
       failed_when: false
+      when: customer_state in ['update', 'down']
+
+    - name: Debug matching_containers_portal_frontend
+      ansible.builtin.debug:
+        var: matching_containers_portal_frontend
       when: customer_state in ['update', 'down']
 
     - name: Stop matching containers for portal-frontend
@@ -761,8 +767,6 @@
             log_json=$(jq -n --arg msg "$message" '{log: $msg}')
             curl -s -X POST -H "Content-Type: application/json" -d "$log_json" "$fluentd_url" > /dev/null
           }
-
-
         dest: "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
         mode: '0777'  # اعطای دسترسی اجرایی به اسکریپت
       when: customer_state == 'update'
