@@ -188,12 +188,9 @@
       when: customer_state == 'update'
 
     # کپی سریع مخازن در پوشه مشتری با استفاده از rsync (با git.)
-    - name: Fast copy repositories to customer folder using synchronize (with .git)
-      ansible.posix.synchronize:
-        src: "{{ project_path }}/git/"
-        dest: "{{ project_path }}/{{ inventory_hostname }}/"
-        mode: push
-        recursive: true
+    - name: Fast rsync using command module
+      ansible.builtin.command: >
+        rsync -a --delete "{{ project_path }}/git/" "{{ project_path }}/{{ inventory_hostname }}/"
       delegate_to: localhost
       when: customer_state == 'update'
 
