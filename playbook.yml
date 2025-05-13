@@ -33,7 +33,6 @@
         path: "{{ item }}"
         state: directory
         mode: '0777'
-      poll: 1  # منتظر بمان تا عملیات کامل شود
       when: customer_state == 'update'
       loop:
         - "{{ project_path }}"
@@ -47,7 +46,6 @@
         path: "{{ project_path }}/{{ inventory_hostname }}"
         state: directory
         mode: '0777'
-      poll: 1
       when: customer_state == 'update'
 
     # ایجاد پوشه مخصوص مشتری در مسیر پشتیبان‌ها
@@ -56,7 +54,6 @@
         path: "{{ backup_path }}/{{ inventory_hostname }}"
         state: directory
         mode: '0777'
-      poll: 1
       when: customer_state == 'update'
 
     # ایجاد پوشه‌های test و backup در log_path
@@ -65,7 +62,6 @@
         path: "{{ log_path }}/{{ item }}"
         state: directory
         mode: '0777'
-      poll: 1
       when: customer_state == 'update'
       loop:
         - "test"
@@ -77,7 +73,6 @@
         path: "{{ info_path }}/{{ item }}"
         state: directory
         mode: '0777'
-      poll: 1
       when: customer_state == 'update'
       loop:
         - "volumes"
@@ -89,7 +84,6 @@
         path: "{{ log_path }}/test/{{ inventory_hostname }}.txt"
         state: touch
         mode: '0777'
-      poll: 1
       when: customer_state == 'update'
 
     # برای هر مشتری یک فایل متنی در پوشه پشتیبان ایجاد کنید
@@ -98,7 +92,6 @@
         path: "{{ log_path }}/backup/{{ inventory_hostname }}.txt"
         state: touch
         mode: '0777'
-      poll: 1
       when: customer_state == 'update'
 
     # برای هر مشتری یک فایل متنی در پوشه volumes ایجاد کنید
@@ -107,7 +100,6 @@
         path: "{{ info_path }}/volumes/{{ inventory_hostname }}.txt"
         state: touch
         mode: '0777'
-      poll: 1
       when: customer_state == 'update'
 
     # برای هر مشتری یک فایل متنی در پوشه پایگاه داده ایجاد کنید
@@ -116,7 +108,6 @@
         path: "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
         state: touch
         mode: '0777'
-      poll: 1
       when: customer_state == 'update'
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ گیت لب
@@ -164,30 +155,22 @@
       args:
         creates: "{{ project_path }}/git/{{ item.folder }}"
       loop: "{{ projects }}"
+      poll: 1
       when: not git_dir_check.stat.exists and inventory_hostname == 'localhost'
 
     # Pull کردن آخرین تغییرات اگر git وجود داشته باشد
     - name: Pull repositories (subsequent runs)
       ansible.builtin.shell: |
         cd {{ project_path }}/git/{{ item.folder }}
+        git config user.email "devops@example.com"
+        git config user.name "CI/CD Bot"
         GIT_SSH_COMMAND="ssh -i {{ playbook_dir }}/id_rsa -o StrictHostKeyChecking=no" \
-        git pull origin {{ vars[item.branch_var] | default('master') }}
+        git pull --no-rebase origin {{ vars[item.branch_var] | default('master') }}
       loop: "{{ projects }}"
       when: git_dir_check.stat.exists and inventory_hostname == 'localhost'
       register: git_pull_result
+      poll: 1
       changed_when: "'Already up to date' not in git_pull_result.stdout"
-
-    # Checkout کردن تگ اختصاصی برای هر پروژه (قبل از کپی کردن)
-    - name: Checkout specific tag for each project in 'git' folder before copying
-      ansible.builtin.shell: |
-        cd "{{ project_path }}/git/{{ item.folder }}"
-        GIT_SSH_COMMAND="ssh -i {{ playbook_dir }}/id_rsa -o StrictHostKeyChecking=no" \
-        git checkout "{{ hostvars[inventory_hostname][item.tag_var] }}"
-      loop: "{{ projects }}"
-      when: customer_state == 'update'
-      delegate_to: localhost
-      run_once: false
-      changed_when: false
 
     # بررسی وجود دایرکتوری مشتری
     - name: Check if customer base folder exists
@@ -204,17 +187,38 @@
         mode: '0777'
       when: customer_state == 'update'
 
-    # کپی پروژه‌ها از git به مسیر مشتری، بدون .git
-    - name: Copy all repositories for each customer (excluding .git)
+    # کپی سریع مخازن در پوشه مشتری با استفاده از rsync (با git.)
+    - name: Fast copy repositories to customer folder using synchronize (with .git)
       ansible.posix.synchronize:
         src: "{{ project_path }}/git/"
-        dest: "{{ project_path }}/{{ item }}/"
+        dest: "{{ project_path }}/{{ inventory_hostname }}/"
         mode: push
-        rsync_opts:
-          - "--exclude=.git"
-      loop: "{{ groups['all'] }}"
+        recursive: true
+      delegate_to: localhost
+      when: customer_state == 'update'
+
+    # حذف فایل lock احتمالی
+    - name: Remove git index.lock if exists
+      ansible.builtin.file:
+        path: "{{ project_path }}/git/{{ item.folder }}/.git/index.lock"
+        state: absent
+      loop: "{{ projects }}"
+      delegate_to: localhost
+
+    # Checkout کردن تگ اختصاصی برای هر پروژه (قبل از کپی کردن)
+    - name: Checkout specific tag or branch for each project
+      ansible.builtin.shell: |
+        cd "{{ project_path }}/git/{{ item.folder }}"
+        GIT_SSH_COMMAND="ssh -i {{ playbook_dir }}/id_rsa -o StrictHostKeyChecking=no" \
+        git fetch --all --tags
+        GIT_SSH_COMMAND="ssh -i {{ playbook_dir }}/id_rsa -o StrictHostKeyChecking=no" \
+        git checkout "{{ hostvars[inventory_hostname][item.tag_var] }}"
+      loop: "{{ projects }}"
+      when: customer_state == 'update'
       delegate_to: localhost
       run_once: false
+      poll: 1
+      changed_when: false
 
     # تنظیم پرمیشن برای هر پروژه
     - name: Set permissions to 0777 for copied repositories
@@ -243,17 +247,14 @@
           const baseUrl = 'http://{{ inventory_hostname }}:{{ customer_portal_ports }}';
           export default baseUrl;
         mode: '0777'
-      poll: 1
       when: customer_state == 'update'
       changed_when: false
-      become: true
 
     # ایجاد فایل .env.local برای portal
     - name: Set variables for .env.local content
       ansible.builtin.set_fact:
         database_url: "mysql://{{ pu }}:{{ pp }}@{{ customer_containers }}-portal-db:3306/{{ pd }}?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
         base_url: "http://{{ inventory_hostname }}:{{ customer_gateway_ports }}"
-      poll: 1
       when: customer_state == 'update'
 
     # ایجاد فایل .env.local برای portal
@@ -266,8 +267,6 @@
         mode: '0777'  # سطح دسترسی مناسب برای فایل
       when: customer_state == 'update'
       changed_when: false
-      poll: 1
-      become: true
 
     # ایجاد فایل my_database.php برای gateway
     - name: Create my_database.php for gateway
@@ -301,8 +300,6 @@
         mode: '0777'
       when: customer_state == 'update'
       changed_when: false
-      poll: 1
-      become: true
 
     # ایجاد فایل my_config.php برای gateway
     - name: Create my_config.php for gateway
@@ -314,8 +311,6 @@
         mode: '0777'
       when: customer_state == 'update'
       changed_when: false
-      poll: 1
-      become: true
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ بکاپ قبل از اجرا و ساخت شبکه
     # چک کردن وجود فایل backup_volumes.sh
@@ -324,7 +319,6 @@
         path: "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
       register: backup_script
       when: customer_state == 'update'
-      poll: 1
 
     # اجرای اسکریپت بکاپ برای دیتابیس‌ها و ولوم‌ها تنها در صورتی که فایل موجود باشد
     - name: Check if backup script exists
@@ -356,14 +350,8 @@
       ansible.builtin.shell: |
         docker ps -a --filter "name={{ customer_containers }}-gateway" --filter "name={{ customer_containers }}-gateway-db" -q
       register: matching_containers_gateway
-      poll: 1
       changed_when: false
       failed_when: false
-      when: customer_state in ['update', 'down']
-
-    - name: Debug the output of matching_containers_gateway for gateway
-      ansible.builtin.debug:
-        var: matching_containers_gateway.stdout
       when: customer_state in ['update', 'down']
 
     - name: Stop matching containers for gateway
@@ -371,7 +359,6 @@
         docker stop {{ matching_containers_gateway.stdout_lines | join(' ') }}
       when: matching_containers_gateway.stdout != "" and customer_state in ['update', 'down']
       register: stop_result
-      poll: 1
       failed_when: stop_result.rc != 0 and '"No such container"' not in stop_result.stderr
       changed_when: stop_result.stdout != ""
 
@@ -380,7 +367,6 @@
         docker kill {{ matching_containers_gateway.stdout_lines | join(' ') }} || true
       when: matching_containers_gateway.stdout != "" and customer_state in ['update', 'down']
       register: kill_result
-      poll: 1
       failed_when: false
       changed_when: "'is not running' not in kill_result.stderr and kill_result.stdout != ''"
 
@@ -391,7 +377,6 @@
       register: rm_result
       failed_when: rm_result.rc != 0 and '"No such container"' not in rm_result.stderr
       changed_when: rm_result.stdout != ""
-      poll: 1
 
     - name: Run docker-compose for gateway
       ansible.builtin.command:
@@ -417,14 +402,8 @@
       ansible.builtin.shell: |
         docker ps -a --filter "name={{ customer_containers }}-portal" --filter "name={{ customer_containers }}-portal-db" -q
       register: matching_containers_portal
-      poll: 1
       changed_when: false
       failed_when: false
-      when: customer_state in ['update', 'down']
-
-    - name: Debug the output of matching_containers_portal for portal
-      ansible.builtin.debug:
-        var: matching_containers_portal.stdout
       when: customer_state in ['update', 'down']
 
     - name: Stop matching containers for portal
@@ -432,7 +411,6 @@
         docker stop {{ matching_containers_portal.stdout_lines | join(' ') }}
       when: matching_containers_portal.stdout != "" and customer_state in ['update', 'down']
       register: stop_result
-      poll: 1
       failed_when: stop_result.rc != 0 and '"No such container"' not in stop_result.stderr
       changed_when: stop_result.stdout != ""
 
@@ -441,7 +419,6 @@
         docker kill {{ matching_containers_portal.stdout_lines | join(' ') }} || true
       when: matching_containers_portal.stdout != "" and customer_state in ['update', 'down']
       register: kill_result
-      poll: 1
       failed_when: false
       changed_when: "'is not running' not in kill_result.stderr and kill_result.stdout != ''"
 
@@ -452,7 +429,6 @@
       register: rm_result
       failed_when: rm_result.rc != 0 and '"No such container"' not in rm_result.stderr
       changed_when: rm_result.stdout != ""
-      poll: 1
 
     - name: Run docker-compose for portal
       ansible.builtin.command:
@@ -467,14 +443,8 @@
       ansible.builtin.shell: |
         docker ps -a --filter "name={{ customer_containers }}-portal-frontend" -q
       register: matching_containers_portal_frontend
-      poll: 1
       changed_when: false
       failed_when: false
-      when: customer_state in ['update', 'down']
-
-    - name: Debug the output of matching_containers_portal_frontend for portal-frontend
-      ansible.builtin.debug:
-        var: matching_containers_portal_frontend.stdout
       when: customer_state in ['update', 'down']
 
     - name: Stop matching containers for portal-frontend
@@ -482,7 +452,6 @@
         docker stop {{ matching_containers_portal_frontend.stdout_lines | join(' ') }}
       when: matching_containers_portal_frontend.stdout != "" and customer_state in ['update', 'down']
       register: stop_result
-      poll: 1
       failed_when: stop_result.rc != 0 and '"No such container"' not in stop_result.stderr
       changed_when: stop_result.stdout != ""
 
@@ -491,7 +460,6 @@
         docker kill {{ matching_containers_portal_frontend.stdout_lines | join(' ') }} || true
       when: matching_containers_portal_frontend.stdout != "" and customer_state in ['update', 'down']
       register: kill_result
-      poll: 1
       failed_when: false
       changed_when: "'is not running' not in kill_result.stderr and kill_result.stdout != ''"
 
@@ -502,7 +470,6 @@
       register: rm_result
       failed_when: rm_result.rc != 0 and '"No such container"' not in rm_result.stderr
       changed_when: rm_result.stdout != ""
-      poll: 1
 
     - name: Run docker-compose for portal-frontend
       ansible.builtin.command:
@@ -615,7 +582,6 @@
         DB_HOST="{{ customer_containers }}-gateway-db"
         echo "$DB_TYPE,$DB_NAME,$DB_USER,$DB_PASSWORD,$DB_HOST" >> "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
       register: db_info_result
-      poll: 1
       when: customer_state == 'update'
       changed_when: false
 
@@ -799,7 +765,6 @@
 
         dest: "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
         mode: '0777'  # اعطای دسترسی اجرایی به اسکریپت
-      poll: 1
       when: customer_state == 'update'
 
     # تنظیم Cron job برای بکاپ
