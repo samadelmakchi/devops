@@ -194,19 +194,21 @@
       delegate_to: localhost
       when: customer_state == 'update'
       changed_when: false
+      poll: 1
 
     # حذف فایل lock احتمالی
     - name: Remove git index.lock if exists
       ansible.builtin.file:
-        path: "{{ project_path }}/git/{{ item.folder }}/.git/index.lock"
+        path: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}/.git/index.lock"
         state: absent
       loop: "{{ projects }}"
+      poll: 1
       delegate_to: localhost
 
     # Checkout کردن تگ اختصاصی برای هر پروژه (قبل از کپی کردن)
     - name: Checkout specific tag or branch for each project
       ansible.builtin.shell: |
-        cd "{{ project_path }}/git/{{ item.folder }}"
+        cd "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
         GIT_SSH_COMMAND="ssh -i {{ playbook_dir }}/id_rsa -o StrictHostKeyChecking=no" \
         git fetch --all --tags
         GIT_SSH_COMMAND="ssh -i {{ playbook_dir }}/id_rsa -o StrictHostKeyChecking=no" \
