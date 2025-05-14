@@ -8,7 +8,7 @@ services:
     image: wordpress:latest
     restart: always
     ports:
-      - 8080:80
+      - 8082:80
     volumes:
       - ./wordpress/wp-content:/var/www/html/wp-content
       - ./wordpress:/var/www/html

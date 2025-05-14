@@ -6,8 +6,8 @@ services:
     restart: unless-stopped
     privileged: true
     ports:
-      - "80:80"
-      - "443:443"
+      - "8085:80"
+      - "8443:443"
     volumes:
       - ./rancher_data:/var/lib/rancher
     labels:

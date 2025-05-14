@@ -49,7 +49,7 @@ Server
 - ⚙️ Portainer (9000) (set user and pass)
 - ⚙️ Bind9 (5353)
 - ⚙️ Mailu (?)
-- ⚙️ Rancher (?)
+- ⚙️ Rancher (8085)
 
 Logs Management
 - 📑 Elasticsearch (-)
@@ -75,7 +75,7 @@ CICD
 
 Develop
 - ✳️ Apprise (8073)
-- ✳️ Nginx (?)
+- ✳️ Nginx (8081)
 - ✳️ RabbitMQ (15672)
 - ✳️ Ceph (?)
 
@@ -84,6 +84,8 @@ Tools
 - 🛠️ Shortcut (5231)
 - 🛠️ Draw.io (8089)
 - 🛠️ DrawDB (3500)
+- 🛠️ Joomla (8083)
+- 🛠️ Wordpress (8082)
 
 ---
 

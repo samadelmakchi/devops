@@ -4,6 +4,8 @@ services:
   nginx-cdn:
     container_name: nginx-cdn-server
     image: nginx:latest
+    ports:
+      - 8081:80
     networks:
       - traefik_reverse_proxy
     labels:

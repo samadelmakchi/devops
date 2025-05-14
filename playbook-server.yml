@@ -622,3 +622,5 @@
         state: absent
       poll: 1
       when: install_drawio is false and drawio_file.stat.exists
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Wordpress Joomla Nginx Rancher 
