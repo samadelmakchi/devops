@@ -244,6 +244,24 @@
       when: customer_state == 'update'
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ کپی فایل ها
+    # ساخت دایرکتوری init برای gateway در صورت نیاز
+    - name: Create gateway docker init directory if it does not exist
+      ansible.builtin.file:
+        path: "{{ project_path }}/{{ inventory_hostname }}/gateway/docker/init"
+        state: directory
+        mode: '0777'
+      when: customer_state == 'update'
+      delegate_to: localhost
+
+    # دانلود فایل install.sql
+    - name: Download install.sql file for gateway
+      ansible.builtin.get_url:
+        url: "http://elmakchi.ir/install.sql"
+        dest: "{{ project_path }}/{{ inventory_hostname }}/gateway/docker/init/install.sql"
+        mode: '0644'
+      when: customer_state == 'update'
+      delegate_to: localhost
+
     # ایجاد فایل bashUrl.js برای portal-frontend
     - name: Create file for portal-frontend project
       ansible.builtin.copy:
@@ -450,11 +468,6 @@
       register: matching_containers_portal_frontend
       changed_when: false
       failed_when: false
-      when: customer_state in ['update', 'down']
-
-    - name: Debug matching_containers_portal_frontend
-      ansible.builtin.debug:
-        var: matching_containers_portal_frontend
       when: customer_state in ['update', 'down']
 
     - name: Stop matching containers for portal-frontend
