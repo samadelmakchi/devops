@@ -25,7 +25,7 @@ services:
   kibana:
     image: docker.elastic.co/kibana/kibana:8.6.0
     ports:
-      - "5601:5601"
+      - "8582:5601"
     volumes:
       - ./kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
       - kb_data:/usr/share/kibana/data
@@ -46,7 +46,7 @@ services:
     image: fluent/fluentd:v1.16-debian
     container_name: fluentd
     ports:
-      - "9880:9880"      # HTTP input
+      - "8581:9880"      # HTTP input
       - "24224:24224"
       - "24224:24224/udp"
     volumes:

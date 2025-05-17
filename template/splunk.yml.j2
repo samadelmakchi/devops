@@ -10,7 +10,7 @@ services:
       SPLUNK_ENABLE_LISTENER: "true"         # فعال‌سازی listener برای دریافت داده‌ها
       SPLUNK_FORWARD_SERVER: "false"         # استفاده از این سرویس به عنوان سرور برای دریافت داده
     ports:
-      - "8000:8000"  # رابط کاربری Splunk
+      - "9093:8000"  # رابط کاربری Splunk
       - "8088:8088"  # HTTP Event Collector
       - "9997:9997"  # پورت پیش‌فرض برای دریافت داده‌ها
     volumes:

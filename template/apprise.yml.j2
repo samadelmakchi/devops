@@ -4,7 +4,7 @@ services:
   apprise:
     image: caronc/apprise:latest
     ports:
-      - 8073:8000
+      - 4013:8000
     volumes:
       - /var/lib/apprise/config:/config
     restart: unless-stopped

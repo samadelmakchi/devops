@@ -7,7 +7,7 @@ services:
     extra_hosts:
       - dockerhost:127.0.0.1
     ports:
-      - 8065:8065
+      - 5232:8065
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.mattermost.rule=Host(`mattermost.{{ domain }}`)"
@@ -20,7 +20,7 @@ services:
   focalboard:
     image: mattermost/focalboard
     ports:
-      - 8000:8000
+      - 5233:8000
     restart: always 
     labels:
       - "traefik.enable=true"

@@ -6,7 +6,7 @@ services:
     container_name: phpmyadmin
     restart: unless-stopped
     ports:
-      - "8083:80"
+      - "9281:80"
     environment:
       - PMA_HOSTS=calibri-crm-database,calibri-gateway-database
       - PMA_PORT=3306

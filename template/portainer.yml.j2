@@ -5,7 +5,7 @@ services:
     container_name: portainer
     image: portainer/portainer-ce:latest
     ports:
-      - '9000:9000'
+      - '4100:9000'
     networks:
       - traefik_reverse_proxy
     environment:

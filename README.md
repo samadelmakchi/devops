@@ -42,50 +42,64 @@ GitLab >> Preferences >> Access tokens >> Add new token
 
 ---
 
-### ✳️ ابزارهای نصب شده
+### 💢 ابزارهای نصب شده
 
 Server
-- ⚙️ Traefik (80) (user: admin - pass: admin)
-- ⚙️ Portainer (9000) (set user and pass)
-- ⚙️ Bind9 (5353)
-- ⚙️ Mailu (?)
-- ⚙️ Rancher (8085)
+- 🛠️ Traefik (80) (user: admin - pass: admin)
+- 🛠️ Bind9 (5353)
 
 Logs Management
+- 📑 Dozzle (8580)
+- 📑 Fluentd (8581)
+- 📑 Kibana (8582)
 - 📑 Elasticsearch (-)
 - 📑 Logstash (-)
 - 📑 Beats (-)
-- 📑 Fluentd (9880)
-- 📑 Kibana (5601)
-- 📑 Dozzle (8080)
 
 Monitoring
 - 🖥️ Prometheus (9090)
-- 🖥️ Zabbix (8082)
-- 🖥️ Grafana (3000)
-- 🖥️ Splunk (8000)
-- 🖥️ Uptime Kuma (3001)
+- 🖥️ Zabbix (9091)
+- 🖥️ Grafana (9092)
+- 🖥️ Splunk (9093)
+- 🖥️ Uptime Kuma (9094)
 
 CICD
-- ♻️ Gitlab (?)
-- ♻️ Jenkins (8081)
-- ♻️ Nexus (8084)
-- ♻️ SonarQube (9001)
-- ♻️ Selenium (4444 - Chrome: 5900 - Firefox: 5901)
-
-Develop
-- ✳️ Apprise (8073)
-- ✳️ Nginx (8081)
-- ✳️ RabbitMQ (15672)
-- ✳️ Ceph (?)
+- ♻️ Gitlab (3001)
+- ♻️ Gitea (3002)
+- ♻️ Jenkins (3003)
+- ♻️ Nexus (3004)
+- ♻️ SonarQube (3005)
+- ♻️ Selenium (3006 - Chrome: 3007 - Firefox: 3008)
 
 Tools
-- 🛠️ phpMyAdmin (8083)
-- 🛠️ Shortcut (5231)
-- 🛠️ Draw.io (8089)
-- 🛠️ DrawDB (3500)
-- 🛠️ Joomla (8083)
-- 🛠️ Wordpress (8082)
+- 📔 Nginx (3972)
+
+- 📕 Apprise (4013)
+- 📕 Mailu (?)
+
+- 📗 Portainer (4100) (set user and pass)
+- 📗 Rancher (4101)
+
+- 📙 Shortcut (5231)
+- 📙 Mattermost (5232)
+- 📙 Focalboard (5233)
+- 📙 Nextcloud (5234)
+- 📙 Nextcloud Office (5235)
+- 📙 n8n (5236)
+
+- 📒 RabbitMQ (6074)
+- 📒 Ceph (6075)
+
+- 📘 Wordpress (7087)
+- 📘 Joomla (7088)
+- 📘 Draw.io (7089)
+
+- 📓 DrawDB (9280)
+- 📓 phpMyAdmin (9281)
+- 📓 pgAdmin (9282)
+- 📓 AdminMongo (9283)
+- 📓 RedisInsight (9284)
+- 📓 SQLiteWeb (9285)
 
 ---
 

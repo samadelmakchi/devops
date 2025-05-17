@@ -20,7 +20,7 @@ services:
     container_name: nextcloud
     restart: always
     ports:
-      - 8070:80
+      - 5234:80
     links:
       - postgres
     volumes:
@@ -50,7 +50,7 @@ services:
       - username=admin
       - password=secret_password
     ports:
-      - 9980:9980
+      - 5235:9980
     restart: always
     depends_on:
       - nextcloud

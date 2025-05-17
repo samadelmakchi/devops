@@ -16,7 +16,7 @@ services:
       - "traefik.http.routers.dozzle.tls.certresolver=myresolver"
       - "traefik.http.services.dozzle.loadbalancer.server.port=80"
     ports:
-      - 8080:8080
+      - 8580:8080
 
 networks:
   traefik_reverse_proxy:

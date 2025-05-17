@@ -10,7 +10,7 @@ services:
     volumes:
       - ./data:/data
     ports:
-      - "8080:8080"
+      - "9285:8080"
     command: --password 6165 --read-only
     networks:
       - traefik_reverse_proxy

@@ -6,7 +6,7 @@ services:
     container_name: jenkins
     restart: unless-stopped
     ports:
-      - "8081:8080"  # پورت برای دسترسی به رابط کاربری Jenkins
+      - "3003:8080"    # پورت برای دسترسی به رابط کاربری Jenkins
       - "50000:50000"  # پورت برای ارتباط با سرورهای جانبی (مثلاً برای اتصال ایجنت‌ها)
     environment:
       - JENKINS_OPTS=--prefix=/jenkins  # تنظیم prefix برای URL Jenkins (در صورت نیاز)

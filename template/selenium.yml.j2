@@ -6,7 +6,7 @@ services:
     container_name: selenium-hub
     restart: always
     ports:
-      - "4444:4444"  # پورت اصلی برای اتصال به Hub
+      - "3006:4444"  # پورت اصلی برای اتصال به Hub
     networks:
       - selenium
       - traefik_reverse_proxy
@@ -26,7 +26,7 @@ services:
     container_name: selenium-node-chrome
     restart: always
     ports:
-      - "5900:5900"  # پورت VNC برای دسترسی به نمایشگر Chrome
+      - "3007:5900"  # پورت VNC برای دسترسی به نمایشگر Chrome
     depends_on:
       - selenium-hub
     networks:
@@ -49,7 +49,7 @@ services:
     container_name: selenium-node-firefox
     restart: always
     ports:
-      - "5901:5901"  # پورت VNC برای دسترسی به نمایشگر Firefox
+      - "3008:5901"  # پورت VNC برای دسترسی به نمایشگر Firefox
     depends_on:
       - selenium-hub
     networks:

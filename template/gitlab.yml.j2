@@ -10,9 +10,9 @@ services:
         external_url 'https://gitlab.{{ domain }}'
         gitlab_rails['gitlab_shell_ssh_port'] = 22
     ports:
-      - "443:443"  # پورت HTTPS
-      - "80:80"    # پورت HTTP
-      - "22:22"    # پورت SSH (برای دسترسی گیت)
+      - "3443:443"   # پورت HTTPS
+      - "3001:80"    # پورت HTTP
+      - "3022:22"    # پورت SSH (برای دسترسی گیت)
     volumes:
       - gitlab_config:/etc/gitlab
       - gitlab_logs:/var/log/gitlab
