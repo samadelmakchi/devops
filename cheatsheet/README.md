@@ -13,7 +13,7 @@
 
 ## 🤖 IaC
 ✅ [Ansible](/cheatsheet/ansible.md)  
-✅ Terraform  
+✅ [Terraform](/cheatsheet/terraform.md)  
 
 ## 🐳 Docker
 ✅ [Docker](/cheatsheet/docker.md)  
@@ -21,7 +21,7 @@
 ✅ [Dockerfile](/cheatsheet/dockerfile.md)  
 
 ## 📜 Kubernetes
-✅ Kubernetes  
+✅ [Kubernetes](/cheatsheet/kubernetes.md)  
 
 ## 🚦 Server
 ✅ [Traefik](/cheatsheet/traefik.md)  
@@ -29,13 +29,12 @@
 ✅ Nginx  
 
 ## ♻️ CI/CD
-✅ Jenkins  
-✅ Webmin  
+✅ Jenkins   
 ✅ [SonarQube](/cheatsheet/sonarqube.md)  
 ✅ Gitlab CI  
 ✅ Github Action  
 
-## ⚙️ ???
+## ⚙️ Git Server
 ✅ Gitlab  
 ✅ Github  
 ✅ Gitea  
