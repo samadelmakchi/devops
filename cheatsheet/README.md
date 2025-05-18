@@ -5,10 +5,6 @@
 ✅ [Bash](/cheatsheet/bash.md)  
 ✅ [Yaml](/cheatsheet/yaml.md)  
 ✅ [Marrkdown](/cheatsheet/marrkdown.md)  
-✅ C  
-✅ C++  
-✅ Go  
-✅ Shell Scripting  
 ✅ Python  
 
 ## 🤖 IaC
@@ -26,10 +22,10 @@
 ## 🚦 Server
 ✅ [Traefik](/cheatsheet/traefik.md)  
 ✅ Bind9  
-✅ Nginx  
+✅ [Nginx](/cheatsheet/nginx.md)  
 
 ## ♻️ CI/CD
-✅ Jenkins   
+✅ [Jenkins](/cheatsheet/jenkins.md)  
 ✅ [SonarQube](/cheatsheet/sonarqube.md)  
 ✅ Gitlab CI  
 ✅ Github Action  
