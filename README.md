@@ -24,15 +24,6 @@ sudo ansible-playbook -i inventory.local.yml playbook.yml
 
 ---
 
-### 🦊 ساخت Token برای اتصال به GitLab
-جهت دریافت توکن در گیت لب به مسیر زیر بروید
-```
-GitLab >> Preferences >> Access tokens >> Add new token
-```
-و توکن بدست امده را در فایل inventory.yml و در متغیر gitlab_token بنویسید
-
----
-
 ### 🔆 سرویس های مشتریان
 📜 Gateway (10101 - ...)
 
