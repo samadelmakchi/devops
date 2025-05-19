@@ -65,7 +65,7 @@
         group: root
         mode: '0644'
       vars:
-        soa_email: "admin.{{ domain | replace('.', '\\.') }}"
+        soa_email: "admin.{{ domain }}."
         ttl: 3600
         ns_record: "ns1.{{ domain }}."
         origin: "{{ domain }}"

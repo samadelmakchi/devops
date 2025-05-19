@@ -95,10 +95,9 @@ echo "   source ~/ansible-venv/bin/activate"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 🐋 بررسی اینکه آیا Docker نصب شده یا نه
-echo "🐋  Checking if Docker is installed"
-docker_check=$(docker --version 2>/dev/null)
-if [ $? -eq 0 ]; then
-  echo "✔️ Docker is already installed: $docker_check"
+echo "🐋 Checking if Docker is installed"
+if command -v docker &> /dev/null; then
+  echo "✔️ Docker is already installed: $(docker --version)"
 else
   echo "⚠️ Docker not found. Installing Docker..."
 
@@ -109,11 +108,11 @@ else
   ARCHITECTURE=$(dpkg --print-architecture)
   echo "$CODENAME $VERSION $ARCHITECTURE"
 
-  # 🐋 دانلود فایل‌های Docker
-  echo "🐋 Downloading Docker .deb files if not already downloaded"
+  # 📂 ساخت پوشه دانلود
   DOWNLOAD_DIR="docker"
   mkdir -p "$DOWNLOAD_DIR"
 
+  # 🌐 آدرس بسته‌ها
   BASE_URL="https://download.docker.com/linux/ubuntu/dists/$CODENAME/pool/stable/$ARCHITECTURE"
   FILES=(
     "containerd.io_1.7.27-1_${ARCHITECTURE}.deb"
@@ -123,35 +122,51 @@ else
     "docker-compose-plugin_2.35.1-1~ubuntu.${VERSION}~${CODENAME}_${ARCHITECTURE}.deb"
   )
 
+  # 📥 دانلود فایل‌ها در صورت نبودن
   for FILE in "${FILES[@]}"; do
     if [ ! -f "$DOWNLOAD_DIR/$FILE" ]; then
+      echo "⬇️ Downloading $FILE"
       wget -O "$DOWNLOAD_DIR/$FILE" "$BASE_URL/$FILE"
+    else
+      echo "✅ $FILE already downloaded"
     fi
   done
 
-  # 🐋 نصب Docker از فایل‌های دانلود شده
-  echo "🐋 Installing Docker packages"
-  sudo dpkg -i $DOWNLOAD_DIR/*.deb
+  # 📦 نصب بسته‌ها
+  echo "📦 Installing Docker packages"
+  sudo dpkg -i $DOWNLOAD_DIR/*.deb || true
 
-  # 🐋 رفع مشکلات احتمالی وابستگی‌ها
-  echo "🐋 Fixing dependencies"
+  # 🛠️ رفع وابستگی‌ها
+  echo "🛠️ Fixing dependencies"
   sudo apt install -f -y
 
-  # 🐋 شروع و فعال‌سازی سرویس Docker
-  echo "🐋 Starting Docker service"
+  # ▶️ فعال‌سازی و شروع سرویس Docker
+  echo "▶️ Starting and enabling Docker service"
   sudo systemctl start docker
   sudo systemctl enable docker
+
+  # 👤 افزودن کاربر فعلی به گروه docker
+  echo "👤 Adding user '$USER' to 'docker' group"
+  sudo usermod -aG docker $USER
+
+  # 🔄 فعال‌سازی گروه جدید در همین نشست
+  echo "🔄 Reloading group membership"
+  exec sg docker newgrp `id -gn`
+
+  # 🧪 تست نهایی
+  if command -v docker &> /dev/null; then
+    echo "✅ Docker installed successfully: $(docker --version)"
+  else
+    echo "❌ Docker installation failed. Please check logs above."
+    exit 1
+  fi
 fi
 
-# 🐋 چک کردن نسخه داکر
-echo "🐋 Checking Docker version"
-docker_version=$(docker --version)
-echo "🐋 Docker version: $docker_version"
+# 🐋 چک کردن نسخه Docker
+echo "🐋 Docker version: $(docker --version)"
 
-# 🐋 چک کردن نسخه داکر کامپوز
-echo "🐋 Checking Docker Compose version"
-docker_compose_version=$(docker compose version)
-echo "🐋 Docker Compose version: $docker_compose_version"
+# 🐋 چک کردن نسخه Docker Compose
+echo "🐋 Docker Compose version: $(docker compose version || echo '❌ Not found')"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 🐍 چک کنید آیا ماژول docker در پایتون نصب شده است
