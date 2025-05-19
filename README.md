@@ -9,7 +9,7 @@ git clone --depth=1 https://github.com/samadelmakchi/devops.git
 ``` bash
 cd devops
 
-./setup.sh
+bash -x setup.sh
 ```
 
 ### 🤖 نصب ابزارهای دواپس

@@ -62,6 +62,15 @@ python3 -m venv ~/ansible-venv
 echo "🐍 Activating the virtual environment..."
 source ~/ansible-venv/bin/activate
 
+# 🧼 پاک کردن نسخه معیوب pyOpenSSL و نصب نسخه سازگار
+echo "🧼 Removing problematic pyOpenSSL version and installing compatible one"
+pip uninstall -y pyOpenSSL
+pip install pyOpenSSL==23.2.0
+
+# 🥪 تست صحت pyOpenSSL
+echo "🥪 Testing pyOpenSSL module"
+python -c "from OpenSSL import crypto; print('✅ pyOpenSSL is working')"
+
 # 📦 به‌روزرسانی pip در محیط مجازی
 echo "📦 Upgrading pip inside virtual environment..."
 pip install --upgrade pip
@@ -171,20 +180,18 @@ echo "🐋 Docker Compose version: $(docker compose version || echo '❌ Not fou
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 🐍 چک کنید آیا ماژول docker در پایتون نصب شده است
 echo "🐍  Checking if Python Docker module is installed"
-docker_module_status=$(python3 -c "import docker" >/dev/null 2>&1 && echo OK || echo FAIL)
-if [ "$docker_module_status" != "OK" ]; then
+if ! python -c "import docker" &> /dev/null; then
   echo "⚠️  Python Docker module not found. Installing it..."
-  sudo pip3 install docker
+  pip install docker
 else
   echo "✔️  Python Docker module is already installed"
 fi
 
 # 🐍 نصب docker-compose اگر نصب نباشد
 echo "🐍  Checking if Docker Compose is installed"
-docker_compose_installed=$(pip3 show docker-compose)
-if [ -z "$docker_compose_installed" ]; then
+if ! pip show docker-compose > /dev/null 2>&1; then
   echo "⚠️  Docker Compose not found. Installing it..."
-  sudo pip3 install docker-compose
+  pip install docker-compose
 else
   echo "✔️  Docker Compose is already installed"
 fi
@@ -210,23 +217,27 @@ echo "🐳 Restarting Docker service"
 sudo systemctl restart docker
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 🔑 ایجاد کلید SSH (با جایگزینی در صورت وجود)
+# 🔑 حذف کلید قبلی و ساخت کلید جدید
 echo "🔑 Generating SSH key"
-rm -f "$PWD/id_rsa" "$PWD/id_rsa.pub"  # حذف کلیدهای قبلی اگر وجود داشته باشند
-ssh-keygen -t rsa -b 4096 -f "$PWD/id_rsa" -N "" && echo "✔️  SSH key generated at $PWD/id_rsa"
+rm -f "$PWD/id_rsa" "$PWD/id_rsa.pub"
+ssh-keygen -t rsa -b 4096 -f "$PWD/id_rsa" -N ""
+echo "✔️  SSH key generated at $PWD/id_rsa"
 
 # 🔐 تغییر دسترسی‌های کلید SSH
 echo "🔐 Setting permissions for id_rsa"
-chmod 600 "$PWD/id_rsa" && echo "✔️  Permissions set to 600 for id_rsa"
+chmod 600 "$PWD/id_rsa"
+echo "✔️  Permissions set to 600 for id_rsa"
 
 # 🛠️ راه‌اندازی SSH Agent و اضافه کردن کلید
 echo "🛠️ Starting SSH agent"
 eval "$(ssh-agent -s)"
-ssh-add "$PWD/id_rsa" && echo "✔️  SSH key added to SSH agent"
+ssh-add "$PWD/id_rsa"
+echo "✔️  SSH key added to SSH agent"
 
 # 🔌 تست اتصال به GitLab با استفاده از SSH
 echo "🔌 Testing SSH connection to GitLab"
-ssh -i "$PWD/id_rsa" -T git@gitlab.com && echo "✔️  SSH connection successful"
+ssh -o StrictHostKeyChecking=no -i "$PWD/id_rsa" -T git@gitlab.com
+echo "✔️  SSH connection successful"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 echo "✅  Script execution completed!"
