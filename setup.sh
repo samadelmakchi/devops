@@ -66,9 +66,9 @@ source ~/ansible-venv/bin/activate
 echo "📦 Upgrading pip inside virtual environment..."
 pip install --upgrade pip
 
-# 🤖 نصب آخرین نسخه Ansible در محیط مجازی
-echo "🤖 Installing the latest version of Ansible..."
-pip install ansible
+# 🤖 نصب نسخه مشخص Ansible (۲.۱۶)
+echo "🤖 Installing Ansible version 2.16.x..."
+pip install "ansible>=2.16,<2.17"
 
 # 🧹 نصب ابزار بررسی lint برای کدهای انسیبل
 echo "🧹 Installing ansible-lint for checking best practices..."
@@ -89,7 +89,7 @@ ansible-galaxy collection install community.docker
 
 # ✅ پیام نهایی
 echo ""
-echo "✅ Done. Ansible is installed inside virtualenv at ~/ansible-venv"
+echo "✅ Done. Ansible 2.16 is installed inside virtualenv at ~/ansible-venv"
 echo "ℹ️ To activate it later, run:"
 echo "   source ~/ansible-venv/bin/activate"
 
