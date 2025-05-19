@@ -1,25 +1,28 @@
 # DevOps
 
-### ⚙️ نصب و کانفیگ سرور
-این مخزن شامل تنظیمات دواپس برای پروژه‌های شما است. لطفاً پیش از اجرای هر پلی بوک، مراحل راه‌اندازی زیر را انجام دهید.
+### 🔽 دانلود فایل ها
 ``` bash
 git clone --depth=1 https://github.com/samadelmakchi/devops.git
+```
 
+### ⚙️ نصب و کانفیگ سرور
+``` bash
 cd devops
 
 ./setup.sh
 ```
 
-### 🤖 اجرای پلی بوک های آنسیبل
+### 🤖 نصب ابزارهای دواپس
 
-اجرای پلی بوک آنسیبل و کانفیگ سرور
 ```bash
-sudo ansible-playbook -i inventory-server.local.yml playbook-server.yml
+source ~/ansible-venv/bin/activate
+ansible-playbook -i inventory-server.local.yml playbook-server.yml
 ```
 
-اجرای پلی بوک آنسیبل و نصب سرویس ها برای مشتریان
+### 📦 نصب پروژه های مشتریان
 ```bash
-sudo ansible-playbook -i inventory.local.yml playbook.yml
+source ~/ansible-venv/bin/activate
+ansible-playbook -i inventory.local.yml playbook.yml
 ```
 
 ---
@@ -33,7 +36,7 @@ sudo ansible-playbook -i inventory.local.yml playbook.yml
 
 ---
 
-### 💢 ابزارهای نصب شده
+### 💢 ابزارهای دواپس
 
 Server
 - 🛠️ Traefik (80) (user: admin - pass: admin)

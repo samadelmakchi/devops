@@ -7,8 +7,8 @@ all:
     install_gitlab: false
     install_jenkins: false
     install_nexus: false
-    install_selenium: true
-    install_sonarqube: true
+    install_selenium: false
+    install_sonarqube: false
     # Install Develop
     install_apprise: false
     install_rabbitmq: false
@@ -16,13 +16,13 @@ all:
     install_ceph: false
     # Install Logs
     install_dozzle: true
-    install_elk: true
-    install_fluentd: true
+    install_elk: false
+    install_fluentd: false
     # Install Monitor
     install_uptime_kuma: true
-    install_grafana: true
-    install_splunk: true
-    install_prometheus: true
+    install_grafana: false
+    install_splunk: false
+    install_prometheus: false
     install_zabbix: false
     # Install Server
     install_portainer: true
