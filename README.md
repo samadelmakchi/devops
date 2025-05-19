@@ -16,13 +16,13 @@ cd devops
 
 ```bash
 source ~/ansible-venv/bin/activate
-ansible-playbook -i inventory-server.local.yml playbook-server.yml
+ansible-playbook -i inventory-server.local.yml playbook-server.yml --ask-become-pass
 ```
 
 ### 📦 نصب پروژه های مشتریان
 ```bash
 source ~/ansible-venv/bin/activate
-ansible-playbook -i inventory.local.yml playbook.yml
+ansible-playbook -i inventory.local.yml playbook.yml --ask-become-pass
 ```
 
 ---
