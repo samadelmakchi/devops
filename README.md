@@ -2,7 +2,7 @@
 
 ### 🔽 دانلود فایل ها
 ``` bash
-git clone --depth=1 https://github.com/samadelmakchi/devops.git
+git clone https://github.com/samadelmakchi/devops.git
 ```
 
 ### ⚙️ نصب و کانفیگ سرور
