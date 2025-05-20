@@ -410,15 +410,6 @@
       register: docker_compose_job
       changed_when: false
 
-    - name: Wait for docker-compose to finish
-      ansible.builtin.async_status:
-        jid: "{{ docker_compose_job.ansible_job_id }}"
-      register: docker_compose_result
-      until: docker_compose_result.finished
-      retries: 100
-      delay: 10
-      when: customer_state == 'update'
-
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر portal
     # چک کردن وضعیت و اجرای docker-compose برای portal
     - name: Find all matching containers for portal
