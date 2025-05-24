@@ -3,46 +3,47 @@ all:
     domain: elmakchi.ir
     email: samd.elmakchi@gmail.com
 
-    # Install CICD
-    install_gitlab: false
-    install_jenkins: false
-    install_nexus: false
-    install_selenium: false
-    install_sonarqube: false
-    # Install Develop
-    install_apprise: false
-    install_rabbitmq: false
-    install_nginx: false
-    install_ceph: false
-    # Install Logs
-    install_dozzle: true
+    #Install Logs
+    install_dozzle: false
     install_elk: false
     install_fluentd: false
-    # Install Monitor
-    install_uptime_kuma: true
+
+    #Install Monitor
+    install_uptime_kuma: false
     install_grafana: false
     install_splunk: false
     install_prometheus: false
     install_zabbix: false
-    # Install Server
+
+    #Install CICD
+    install_gitlab: false
+    install_gitea: false
+    install_jenkins: false
+    install_nexus: false
+    install_sonarqube: false
+    install_selenium: false
+
+    #Install Tools
+    install_nginx: false
+    install_apprise: false
+    install_mailserver: false
     install_portainer: true
-    install_mailu: false
     install_rancher: false
-    # Install Tools
-    install_adminmongo: false
-    install_drawdb: false
-    install_drawio: false
-    install_joomla: false
-    install_mattermost: false
-    install_n8n: false
-    install_nextcloud: false
-    install_pgadmin: false
-    install_phpmyadmin: false
-    install_redis_insight: false
     install_shortcut: false
-    install_sqlite_web: false
+    install_mattermost: false
+    install_nextcloud: false
+    install_n8n: false
+    install_rabbitmq: false
+    install_ceph: false
     install_wordpress: false
-    install_vscode: false
+    install_joomla: false
+    install_drawio: false
+    install_drawdb: false
+    install_phpmyadmin: false
+    install_pgadmin: false
+    install_adminmongo: false
+    install_redis_insight: false
+    install_sqlite_web: false
 
   children:
     bind_hosts:
@@ -52,15 +53,82 @@ all:
 
     dns_entries:
       hosts:
-        dozzle:
-          ansible_host: 127.0.0.1
-        portainer:
-          ansible_host: 127.0.0.1
+        # Install Server
         traefik:
           ansible_host: 127.0.0.1
-        sonarqube:
+
+        # Install Logs
+        dozzle:
+          ansible_host: 127.0.0.1
+        elk:
+          ansible_host: 127.0.0.1
+        fluentd:
+          ansible_host: 127.0.0.1
+
+        # Install Monitor
+        uptime_kuma:
+          ansible_host: 127.0.0.1
+        grafana:
+          ansible_host: 127.0.0.1
+        splunk:
+          ansible_host: 127.0.0.1
+        prometheus:
+          ansible_host: 127.0.0.1
+        zabbix:
+          ansible_host: 127.0.0.1
+
+        # Install CICD
+        gitlab:
+          ansible_host: 127.0.0.1
+        gitea:
+          ansible_host: 127.0.0.1
+        jenkins:
           ansible_host: 127.0.0.1
         nexus:
           ansible_host: 127.0.0.1
-        uptime:
+        sonarqube:
+          ansible_host: 127.0.0.1
+        selenium:
+          ansible_host: 127.0.0.1
+
+        # Install Tools
+        nginx:
+          ansible_host: 127.0.0.1
+        apprise:
+          ansible_host: 127.0.0.1
+        mailserver:
+          ansible_host: 127.0.0.1
+        portainer:
+          ansible_host: 127.0.0.1
+        rancher:
+          ansible_host: 127.0.0.1
+        shortcut:
+          ansible_host: 127.0.0.1
+        mattermost:
+          ansible_host: 127.0.0.1
+        nextcloud:
+          ansible_host: 127.0.0.1
+        n8n:
+          ansible_host: 127.0.0.1
+        rabbitmq:
+          ansible_host: 127.0.0.1
+        ceph:
+          ansible_host: 127.0.0.1
+        wordpress:
+          ansible_host: 127.0.0.1
+        joomla:
+          ansible_host: 127.0.0.1
+        drawio:
+          ansible_host: 127.0.0.1
+        drawdb:
+          ansible_host: 127.0.0.1
+        phpmyadmin:
+          ansible_host: 127.0.0.1
+        pgadmin:
+          ansible_host: 127.0.0.1
+        adminmongo:
+          ansible_host: 127.0.0.1
+        redis_insight:
+          ansible_host: 127.0.0.1
+        sqlite_web:
           ansible_host: 127.0.0.1

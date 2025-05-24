@@ -15,7 +15,7 @@ services:
       JOOMLA_ADMIN_USER: Samad Elmakchi
       JOOMLA_ADMIN_USERNAME: admin
       JOOMLA_ADMIN_PASSWORD: 61656165
-      JOOMLA_ADMIN_EMAIL: samad.elmakchi@gmail.com
+      JOOMLA_ADMIN_EMAIL: {{ email }}
     volumes:
       - ./joomla_data:/var/www/html
     networks:

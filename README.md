@@ -22,6 +22,7 @@ bash -x setup.sh
 6. در پایان، روی گزینه `Add key` کلیک کنید.
 
 ### 🤖 نصب ابزارهای دواپس
+لطفاً قبل از اجرای فرآیند نصب، فایل تنظیمات `inventory-server.local.yml` را در پوشه اصلی باز کرده و مطابق نیازهای خود، تغییرات لازم را در آن اعمال کنید.
 
 ```bash
 source ~/ansible-venv/bin/activate
@@ -29,6 +30,8 @@ ansible-playbook -i inventory-server.local.yml playbook-server.yml --ask-become-
 ```
 
 ### 📦 نصب پروژه های مشتریان
+لطفاً فایل `inventory.local.yml` را باز کرده و اطلاعات مربوط به مشتریان را در آن وارد نمایید.
+
 ```bash
 source ~/ansible-venv/bin/activate
 ansible-playbook -i inventory.local.yml playbook.yml --ask-become-pass
@@ -78,7 +81,7 @@ ansible-playbook -i inventory.local.yml playbook.yml --ask-become-pass
 - 📔 Nginx (3972)
 <br><br>
 - 📕 Apprise (4013)
-- 📕 Mailu (?)
+- 📕 Mailserver (?)
 <br><br>
 - 📗 Portainer (4100) (set user and pass)
 - 📗 Rancher (4101)
