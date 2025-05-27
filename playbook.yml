@@ -267,7 +267,7 @@
       ansible.builtin.copy:
         dest: "{{ project_path }}/{{ inventory_hostname }}/portal-frontend/baseUrl.js"
         content: |
-          const baseUrl = 'http://{{ inventory_hostname }}:{{ customer_portal_ports }}';
+          const baseUrl = 'http://{{ customer_url }}:{{ customer_portal_ports }}';
           export default baseUrl;
         mode: '0777'
       when: customer_state == 'update'
@@ -277,7 +277,7 @@
     - name: Set variables for .env.local content
       ansible.builtin.set_fact:
         database_url: "mysql://{{ pu }}:{{ pp }}@{{ customer_containers }}-portal-db:3306/{{ pd }}?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
-        base_url: "http://{{ inventory_hostname }}:{{ customer_gateway_ports }}"
+        base_url: "http://{{ customer_url }}:{{ customer_gateway_ports }}"
       when: customer_state == 'update'
 
     # ایجاد فایل .env.local برای portal
@@ -330,7 +330,7 @@
         dest: "{{ project_path }}/{{ inventory_hostname }}/gateway/admin/application/config/my_config.php"
         content: |
           <?php defined('BASEPATH') OR exit('No direct script access allowed');
-          $config['base_url'] = "http://{{ inventory_hostname }}:{{ customer_gateway_ports }}";
+          $config['base_url'] = "http://{{ customer_url }}:{{ customer_gateway_ports }}";
         mode: '0777'
       when: customer_state == 'update'
       changed_when: false

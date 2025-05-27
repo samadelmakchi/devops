@@ -3,27 +3,20 @@ all:
     domain: elmakchi.ir
     email: samd.elmakchi@gmail.com
 
-    #Install Logs
     install_dozzle: false
     install_elk: false
     install_fluentd: false
-
-    #Install Monitor
     install_uptime_kuma: false
     install_grafana: false
     install_splunk: false
     install_prometheus: false
     install_zabbix: false
-
-    #Install CICD
     install_gitlab: false
     install_gitea: false
     install_jenkins: false
     install_nexus: false
     install_sonarqube: false
     install_selenium: false
-
-    #Install Tools
     install_nginx: false
     install_apprise: false
     install_mailserver: false
@@ -53,19 +46,14 @@ all:
 
     dns_entries:
       hosts:
-        # Install Server
         traefik:
           ansible_host: 127.0.0.1
-
-        # Install Logs
         dozzle:
           ansible_host: 127.0.0.1
         elk:
           ansible_host: 127.0.0.1
         fluentd:
           ansible_host: 127.0.0.1
-
-        # Install Monitor
         uptime_kuma:
           ansible_host: 127.0.0.1
         grafana:
@@ -76,8 +64,6 @@ all:
           ansible_host: 127.0.0.1
         zabbix:
           ansible_host: 127.0.0.1
-
-        # Install CICD
         gitlab:
           ansible_host: 127.0.0.1
         gitea:
@@ -90,8 +76,6 @@ all:
           ansible_host: 127.0.0.1
         selenium:
           ansible_host: 127.0.0.1
-
-        # Install Tools
         nginx:
           ansible_host: 127.0.0.1
         apprise:
