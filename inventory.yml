@@ -2,7 +2,7 @@ all:
   children:
     local:
       hosts:
-        localhost:
+        simnad:
           ansible_connection: local
           customer_name: "سیمناد"
           customer_gateway_git_branches: "dev"
@@ -15,7 +15,7 @@ all:
           customer_portal_ports: 10201
           customer_portal_frontend_ports: 10301
           customer_network_names: "simnad_network"
-          customer_url: "127.0.0.1"
+          customer_url: "192.168.122.95"
           customer_containers: "simnad_container"
           customer_state: "update"
 
@@ -32,13 +32,13 @@ all:
         #   customer_portal_ports: 10202
         #   customer_portal_frontend_ports: 10302
         #   customer_network_names: "nikan_network"
-        #   customer_url: "127.0.0.1"
+        #   customer_url: "192.168.122.95"
         #   customer_containers: "nikan_container"
         #   customer_state: "update"
 
-        # simnad:
+        # test:
         #   ansible_connection: local
-        #   customer_name: "تست آلفا"
+        #   customer_name: "تست"
         #   customer_gateway_git_branches: "dev"
         #   customer_gateway_git_tags: "02.69-dev"
         #   customer_portal_git_branches: "dev"
@@ -48,13 +48,12 @@ all:
         #   customer_gateway_ports: 10103
         #   customer_portal_ports: 10203
         #   customer_portal_frontend_ports: 10303
-        #   customer_network_names: "test_alfa_network"
-        #   customer_url: "127.0.0.1"
-        #   customer_containers: "test_alfa_container"
+        #   customer_network_names: "test_network"
+        #   customer_url: "192.168.122.95"
+        #   customer_containers: "test_container"
         #   customer_state: "update"
 
   vars:
-    # SSH
     ansible_ssh_private_key_file: "id_rsa"
 
 # customer_state : update - no_update - down
