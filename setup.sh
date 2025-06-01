@@ -55,9 +55,9 @@ sudo systemctl restart systemd-resolved
 echo "🔅 Creating symbolic link for /etc/resolv.conf"
 sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
-# 🔅 تست DNS با استفاده از دستور dig
-echo "🔅 Testing DNS with dig"
-dig shecan.ir
+# # 🔅 تست DNS با استفاده از دستور dig
+# echo "🔅 Testing DNS with dig"
+# dig shecan.ir
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # نصب ابزارهای ضروری
