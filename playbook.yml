@@ -253,10 +253,17 @@
       when: customer_state == 'update'
       delegate_to: localhost
 
-    # دانلود فایل install.sql
-    - name: Download install.sql file for gateway
-      ansible.builtin.get_url:
-        url: "http://elmakchi.ir/install.sql"
+    # بررسی کنید که آیا فایل SQL خاصی وجود دارد یا خیر
+    - name: Check if specific SQL file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/sql/{{ inventory_hostname }}.sql"
+      register: sql_file_check
+      delegate_to: localhost
+
+    # فایل SQL مناسب را کپی کنید
+    - name: Copy the appropriate SQL file
+      ansible.builtin.copy:
+        src: "{{ sql_file_check.stat.exists | ternary(playbook_dir + '/sql/' + inventory_hostname + '.sql', playbook_dir + '/sql/default.sql') }}"
         dest: "{{ project_path }}/{{ inventory_hostname }}/gateway/docker/init/install.sql"
         mode: '0644'
       when: customer_state == 'update'
