@@ -22,7 +22,7 @@ fi
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 🔅 تنظیم DNS برای Shecan و پیکربندی systemd-resolved
 echo "🔅 Setting DNS for Shecan and configuring systemd-resolved"
-sudo sed -i 's/^#DNS=.*/DNS=185.51.200.2 185.51.200.3/' /etc/systemd/resolved.conf
+sudo sed -i 's/^#DNS=.*/DNS=185.51.200.2 178.22.122.100/' /etc/systemd/resolved.conf
 sudo sed -i 's/^#FallbackDNS=.*/FallbackDNS=8.8.8.8 1.1.1.1/' /etc/systemd/resolved.conf
 
 # 🔅 ریستارت کردن سرویس systemd-resolved
