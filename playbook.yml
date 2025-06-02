@@ -111,8 +111,8 @@
       when: customer_state == 'update'
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ گیت لب
-    # تعریف پروژه‌ها و متادیتای هر کدام
-    - name: Define project repositories
+    # 🗂️ تعریف پروژه‌ها و متادیتای هر کدام
+    - name: "🗂️ Define project repositories"
       ansible.builtin.set_fact:
         projects:
           - name: "gateway"
@@ -137,14 +137,14 @@
             tag_var: "customer_portal_frontend_git_tags"
             compose_file: "docker-compose-portal-frontend.yml.j2"
 
-    # بررسی وجود دایرکتوری مشتری
-    - name: Check if customer base folder exists
+    # 🔍 بررسی وجود دایرکتوری مشتری
+    - name: "🛠️ Check if customer base folder exists"
       ansible.builtin.stat:
         path: "{{ project_path }}/{{ inventory_hostname }}"
       register: customer_base_dir
       when: customer_state == 'update'
 
-    # ساخت دایرکتوری مشتری در صورت نیاز
+    # 🛠️ ساخت دایرکتوری مشتری در صورت نیاز
     - name: Create a customer directory if needed
       ansible.builtin.file:
         path: "{{ project_path }}/{{ inventory_hostname }}"
@@ -152,8 +152,8 @@
         mode: '0777'
       when: customer_state == 'update'
 
-    # ساخت دایرکتوری مشتری برای هر پروژه در صورت نیاز
-    - name: Create a customer directory for each project if needed
+    # 📂 ساخت دایرکتوری مشتری برای هر پروژه در صورت نیاز
+    - name: "📂 Create a customer directory for each project if needed"
       ansible.builtin.file:
         path: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
         state: directory
@@ -161,8 +161,8 @@
       loop: "{{ projects }}"
       when: customer_state == 'update'
 
-    # بررسی وجود پوشه مخزن مشتری (برای هر پروژه)
-    - name: Check if customer project repository exists
+    # 🧐 بررسی وجود پوشه مخزن مشتری (برای هر پروژه)
+    - name: "🧐 Check if customer project repository exists"
       ansible.builtin.stat:
         path: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}/.git"
       register: customer_repo_check_results
@@ -170,15 +170,15 @@
       when: customer_state == 'update'
       delegate_to: localhost
 
-    # واقعیت customer_repo_check را به عنوان یک فرهنگ لغت تنظیم کنید
-    - name: Set customer_repo_check fact as a dictionary
+    # 📦 واقعیت customer_repo_check را به عنوان یک فرهنگ لغت تنظیم کنید
+    - name: "📦 Set customer_repo_check fact as a dictionary"
       ansible.builtin.set_fact:
         customer_repo_check: "{{ dict(customer_repo_check_results.results | map(attribute='item.folder') | list | zip(customer_repo_check_results.results)) }}"
       when: customer_state == 'update'
       delegate_to: localhost
 
-    # کلون کردن ریپازیتوری‌ها فقط اگر git هنوز وجود ندارد
-    - name: Clone repositories (first ever deploy)
+    # 🌱 کلون کردن ریپازیتوری‌ها فقط اگر git هنوز وجود ندارد
+    - name: "🌱 Clone repositories (first ever deploy)"
       ansible.builtin.shell: |
         GIT_SSH_COMMAND="ssh -i {{ playbook_dir }}/id_rsa -o StrictHostKeyChecking=no" \
         git clone -b {{ vars[item.branch_var] | default('master') }} {{ item.repo }} {{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}
@@ -189,11 +189,11 @@
       when: customer_state == 'update' and not customer_repo_check[item.folder].stat.exists
       register: clone_result
 
-    # Pull کردن آخرین تغییرات اگر git وجود داشته باشد
-    - name: Pull repositories (subsequent runs)
+    # 🔄 Pull کردن آخرین تغییرات اگر git وجود داشته باشد
+    - name: "🔄 Pull repositories (subsequent runs)"
       ansible.builtin.shell: |
         cd {{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}
-        git config user.email "devops@example.com"
+        git config user.email "samad.elmakchi@gmail.com"
         git config user.name "CI/CD Bot"
         GIT_SSH_COMMAND="ssh -i {{ playbook_dir }}/id_rsa -o StrictHostKeyChecking=no" \
         git pull --no-rebase origin {{ vars[item.branch_var] | default('master') }}
@@ -203,8 +203,8 @@
       poll: 1
       changed_when: "'Already up to date' not in git_pull_result.stdout"
 
-    # حذف فایل lock احتمالی
-    - name: Remove git index.lock if exists in customer folder
+    # 🗑️ حذف فایل lock احتمالی
+    - name: "🗑️ Remove git index.lock if exists in customer folder"
       ansible.builtin.file:
         path: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}/.git/index.lock"
         state: absent
@@ -213,14 +213,36 @@
       poll: 1
       delegate_to: localhost
 
-    # Checkout کردن تگ اختصاصی برای هر پروژه (قبل از کپی کردن)
-    - name: Checkout specific tag or branch for each project
+    # ⚙️ مرحله نرمال‌سازی برنچ‌های نامعتبر
+    - name: "⚙️ Normalize branch names if invalid"
+      ansible.builtin.set_fact:
+        normalized_branches: >-
+          {{
+            dict(
+              projects | map(attribute='branch_var') | list |
+              zip(
+                projects
+                | map(attribute='branch_var')
+                | map('extract', hostvars[inventory_hostname])
+                | map('regex_search', '^(dev|test|main)$')
+                | map('default', 'main')
+              )
+            )
+          }}
+
+    # 🚦 مرحله checkout: اگر tag مشخص شده بود، tag؛ در غیر اینصورت از normalized_branches استفاده کن
+    - name: "🚦 Checkout specific tag or branch for each project"
       ansible.builtin.shell: |
         cd "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
         GIT_SSH_COMMAND="ssh -i {{ playbook_dir }}/id_rsa -o StrictHostKeyChecking=no" \
         git fetch --all --tags
+        {% if hostvars[inventory_hostname][item.tag_var] | length > 0 %}
         GIT_SSH_COMMAND="ssh -i {{ playbook_dir }}/id_rsa -o StrictHostKeyChecking=no" \
         git checkout "{{ hostvars[inventory_hostname][item.tag_var] }}"
+        {% else %}
+        GIT_SSH_COMMAND="ssh -i {{ playbook_dir }}/id_rsa -o StrictHostKeyChecking=no" \
+        git checkout "{{ normalized_branches[item.branch_var] }}"
+        {% endif %}
       loop: "{{ projects }}"
       when: customer_state == 'update'
       delegate_to: localhost
@@ -228,8 +250,8 @@
       poll: 1
       changed_when: false
 
-    # تنظیم پرمیشن برای هر پروژه
-    - name: Set permissions to 0777 for cloned repositories
+    # 🔐 تنظیم پرمیشن برای هر پروژه
+    - name: "🔐 Set permissions to 0777 for cloned repositories"
       ansible.builtin.file:
         path: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}"
         state: directory
@@ -237,8 +259,8 @@
       loop: "{{ projects }}"
       when: customer_state == 'update'
 
-    # کپی کردن فایل docker-compose اختصاصی
-    - name: Copy docker-compose files to customer project
+    # 📋 کپی کردن فایل docker-compose اختصاصی
+    - name: "📋 Copy docker-compose files to customer project"
       ansible.builtin.template:
         src: "template/{{ item.compose_file }}"
         dest: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}/docker/docker-compose.yml"
