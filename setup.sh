@@ -20,44 +20,43 @@ else
 fi
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# # 🔅 تنظیم DNS برای Shecan و پیکربندی systemd-resolved
-# echo "🔅 Setting DNS for Shecan and configuring systemd-resolved"
-# sudo sed -i 's/^#DNS=.*/DNS=185.51.200.2 178.22.122.100/' /etc/systemd/resolved.conf
-# sudo sed -i 's/^#FallbackDNS=.*/FallbackDNS=8.8.8.8 1.1.1.1/' /etc/systemd/resolved.conf
+# echo "🔅 Writing full resolved.conf with Shecan DNS and defaults"
+# sudo bash -c 'cat > /etc/systemd/resolved.conf <<EOF
+# #  This file is part of systemd.
+# #
+# #  systemd is free software; you can redistribute it and/or modify it
+# #  under the terms of the GNU Lesser General Public License as published by
+# #  the Free Software Foundation; either version 2.1 of the License, or
+# #  (at your option) any later version.
 
-echo "🔅 Writing full resolved.conf with Shecan DNS and defaults"
-sudo bash -c 'cat > /etc/systemd/resolved.conf <<EOF
-#  This file is part of systemd.
-#
-#  systemd is free software; you can redistribute it and/or modify it
-#  under the terms of the GNU Lesser General Public License as published by
-#  the Free Software Foundation; either version 2.1 of the License, or
-#  (at your option) any later version.
+# [Resolve]
+# DNS=178.22.122.100 185.51.200.2
+# FallbackDNS=8.8.8.8
+# #Domains=
+# #LLMNR=yes
+# #MulticastDNS=yes
+# #DNSSEC=no
+# #DNSOverTLS=no
+# #Cache=yes
+# #DNSStubListener=yes
+# #ReadEtcHosts=yes
+# EOF'
 
-[Resolve]
-DNS=185.51.200.2 178.22.122.100
-FallbackDNS=8.8.8.8 1.1.1.1
-#Domains=
-#LLMNR=yes
-#MulticastDNS=yes
-#DNSSEC=no
-#DNSOverTLS=no
-#Cache=yes
-#DNSStubListener=yes
-#ReadEtcHosts=yes
-EOF'
+# # 🔅 ریستارت کردن سرویس systemd-resolved
+# echo "🔅 Restarting systemd-resolved service"
+# sudo systemctl restart systemd-resolved
 
-# 🔅 ریستارت کردن سرویس systemd-resolved
-echo "🔅 Restarting systemd-resolved service"
-sudo systemctl restart systemd-resolved
+# # 🔅 ایجاد لینک سمبلیک برای resolv.conf
+# echo "🔅 Creating symbolic link for /etc/resolv.conf"
+# sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
-# 🔅 ایجاد لینک سمبلیک برای resolv.conf
-echo "🔅 Creating symbolic link for /etc/resolv.conf"
-sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
-# 🔅 تست DNS با استفاده از دستور dig
-echo "🔅 Testing DNS with dig"
-dig shecan.ir
+# echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" > /etc/resolv.conf
+
+# curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+# echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu focal stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # نصب ابزارهای ضروری
