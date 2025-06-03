@@ -55,5 +55,6 @@ all:
 
   vars:
     ansible_ssh_private_key_file: "id_rsa"
+    repo_source: "github"   # یا "gitlab"
 
 # customer_state : update - no_update - down

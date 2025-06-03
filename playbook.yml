@@ -1,5 +1,5 @@
-# استقرار پروژه با Docker Compose، تنظیم دسترسی‌ها و اجرای درخواست‌ها
-- name: Deploy project with Docker Compose, set permissions, and send requests
+# 🚀 استقرار پروژه با Docker Compose، تنظیم دسترسی‌ها و اجرای درخواست‌ها
+- name: "🚀 Deploy project with Docker Compose, set permissions, and send requests"
   hosts: all
   become: true
 
@@ -27,8 +27,8 @@
 
   tasks:
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ایجاد پوشه‌ها و فایل‌ها
-    # ایجاد پوشه‌ها و فایل‌ها برای هر مشتری
-    - name: Ensure main directories exist
+    # ⚙️ ایجاد پوشه‌ها و فایل‌ها برای هر مشتری
+    - name: "⚙️ Ensure main directories exist"
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory
@@ -40,24 +40,24 @@
         - "{{ info_path }}"
         - "{{ log_path }}"
 
-    # ایجاد پوشه مخصوص هر مشتری در مسیر پروژه‌ها
-    - name: Ensure customer-specific directories exist in project_path
+    # 🏗️ ایجاد پوشه مخصوص هر مشتری در مسیر پروژه‌ها
+    - name: "🏗️ Ensure customer-specific directories exist in project_path"
       ansible.builtin.file:
         path: "{{ project_path }}/{{ inventory_hostname }}"
         state: directory
         mode: '0777'
       when: customer_state == 'update'
 
-    # ایجاد پوشه مخصوص مشتری در مسیر پشتیبان‌ها
-    - name: Ensure customer directories in backup_path exist
+    # 🗄️ ایجاد پوشه مخصوص مشتری در مسیر پشتیبان‌ها
+    - name: "🗄️ Ensure customer directories in backup_path exist"
       ansible.builtin.file:
         path: "{{ backup_path }}/{{ inventory_hostname }}"
         state: directory
         mode: '0777'
       when: customer_state == 'update'
 
-    # ایجاد پوشه‌های test و backup در log_path
-    - name: Ensure directories for test and backup in log_path exist
+    # 🗃️ ایجاد پوشه‌های test و backup در log_path
+    - name: "🗃️ Ensure directories for test and backup in log_path exist"
       ansible.builtin.file:
         path: "{{ log_path }}/{{ item }}"
         state: directory
@@ -67,8 +67,8 @@
         - "test"
         - "backup"
 
-    # ایجاد پوشه‌های volumes و databases در info_path
-    - name: Ensure directories for volumes and databases in info_path exist
+    # 📦 ایجاد پوشه‌های volumes و databases در info_path
+    - name: "📦 Ensure directories for volumes and databases in info_path exist"
       ansible.builtin.file:
         path: "{{ info_path }}/{{ item }}"
         state: directory
@@ -78,32 +78,32 @@
         - "volumes"
         - "databases"
 
-    # برای هر مشتری یک فایل متنی در پوشه تست ایجاد کنید
-    - name: Create a text file in test folder for each customer
+    # 🧪 برای هر مشتری یک فایل متنی در پوشه تست ایجاد کنید
+    - name: "🧪 Create a text file in test folder for each customer"
       ansible.builtin.file:
         path: "{{ log_path }}/test/{{ inventory_hostname }}.txt"
         state: touch
         mode: '0777'
       when: customer_state == 'update'
 
-    # برای هر مشتری یک فایل متنی در پوشه پشتیبان ایجاد کنید
-    - name: Create a text file in backup folder for each customer
+    # 🛡️ برای هر مشتری یک فایل متنی در پوشه پشتیبان ایجاد کنید
+    - name: "🛡️ Create a text file in backup folder for each customer"
       ansible.builtin.file:
         path: "{{ log_path }}/backup/{{ inventory_hostname }}.txt"
         state: touch
         mode: '0777'
       when: customer_state == 'update'
 
-    # برای هر مشتری یک فایل متنی در پوشه volumes ایجاد کنید
-    - name: Create a text file in volumes folder for each customer
+    # 📁 برای هر مشتری یک فایل متنی در پوشه volumes ایجاد کنید
+    - name: "📁 Create a text file in volumes folder for each customer"
       ansible.builtin.file:
         path: "{{ info_path }}/volumes/{{ inventory_hostname }}.txt"
         state: touch
         mode: '0777'
       when: customer_state == 'update'
 
-    # برای هر مشتری یک فایل متنی در پوشه پایگاه داده ایجاد کنید
-    - name: Create a text file in databases folder for each customer
+    # 📝 برای هر مشتری یک فایل متنی در پوشه پایگاه داده ایجاد کنید
+    - name: "📝 Create a text file in databases folder for each customer"
       ansible.builtin.file:
         path: "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
         state: touch
@@ -111,27 +111,31 @@
       when: customer_state == 'update'
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ گیت لب
-    # 🗂️ تعریف پروژه‌ها و متادیتای هر کدام
     - name: "🗂️ Define project repositories"
       ansible.builtin.set_fact:
         projects:
           - name: "gateway"
-            # repo: "git@gitlab.com:nasser-man/calibri.git"
-            repo: "git@github.com:samadelmakchi/calibri.git"
+            repo: >-
+              {{ "git@gitlab.com:nasser-man/calibri.git" if repo_source == "gitlab"
+                else "git@github.com:samadelmakchi/calibri.git" }}
             folder: "gateway"
             branch_var: "customer_gateway_git_branches"
             tag_var: "customer_gateway_git_tags"
             compose_file: "docker-compose-gateway.yml.j2"
+
           - name: "portal"
-            # repo: "git@gitlab.com:nasser-man/calibri-portal.git"
-            repo: "git@github.com:samadelmakchi/calibri-portal.git"
+            repo: >-
+              {{ "git@gitlab.com:nasser-man/calibri-portal.git" if repo_source == "gitlab"
+                else "git@github.com:samadelmakchi/calibri-portal.git" }}
             folder: "portal"
             branch_var: "customer_portal_git_branches"
             tag_var: "customer_portal_git_tags"
             compose_file: "docker-compose-portal.yml.j2"
+
           - name: "portal-frontend"
-            # repo: "git@gitlab.com:nasser-man/calibri-portal-frontend.git"
-            repo: "git@github.com:samadelmakchi/calibri-portal-frontend.git"
+            repo: >-
+              {{ "git@gitlab.com:nasser-man/calibri-portal-frontend.git" if repo_source == "gitlab"
+                else "git@github.com:samadelmakchi/calibri-portal-frontend.git" }}
             folder: "portal-frontend"
             branch_var: "customer_portal_frontend_git_branches"
             tag_var: "customer_portal_frontend_git_tags"
@@ -269,8 +273,8 @@
       when: customer_state == 'update'
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ کپی فایل ها
-    # ساخت دایرکتوری init برای gateway در صورت نیاز
-    - name: Create gateway docker init directory if it does not exist
+    # 📂 ساخت دایرکتوری init برای gateway در صورت نیاز
+    - name: "📂 Create gateway docker init directory if it does not exist"
       ansible.builtin.file:
         path: "{{ project_path }}/{{ inventory_hostname }}/gateway/docker/init"
         state: directory
@@ -278,15 +282,15 @@
       when: customer_state == 'update'
       delegate_to: localhost
 
-    # بررسی کنید که آیا فایل SQL خاصی وجود دارد یا خیر
-    - name: Check if specific SQL file exists
+    # 🔎 بررسی کنید که آیا فایل SQL خاصی وجود دارد یا خیر
+    - name: "🔎 Check if specific SQL file exists"
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/sql/{{ inventory_hostname }}.sql"
       register: sql_file_check
       delegate_to: localhost
 
-    # فایل SQL مناسب را کپی کنید
-    - name: Copy the appropriate SQL file
+    # 📤 فایل SQL مناسب را کپی کنید
+    - name: "📤 Copy the appropriate SQL file"
       ansible.builtin.copy:
         src: "{{ sql_file_check.stat.exists | ternary(playbook_dir + '/sql/' + inventory_hostname + '.sql', playbook_dir + '/sql/default.sql') }}"
         dest: "{{ project_path }}/{{ inventory_hostname }}/gateway/docker/init/install.sql"
@@ -294,8 +298,8 @@
       when: customer_state == 'update'
       delegate_to: localhost
 
-    # ایجاد فایل bashUrl.js برای portal-frontend
-    - name: Create file for portal-frontend project
+    # 🧾 ایجاد فایل bashUrl.js برای portal-frontend
+    - name: "🧾 Create file for portal-frontend project"
       ansible.builtin.copy:
         dest: "{{ project_path }}/{{ inventory_hostname }}/portal-frontend/baseUrl.js"
         content: |
@@ -305,15 +309,15 @@
       when: customer_state == 'update'
       changed_when: false
 
-    # ایجاد فایل .env.local برای portal
-    - name: Set variables for .env.local content
+    # ⚙️ متغیرها را برای محتوای .env.local تنظیم کنید
+    - name: "⚙️ Set variables for .env.local content"
       ansible.builtin.set_fact:
         database_url: "mysql://{{ pu }}:{{ pp }}@{{ customer_containers }}-portal-db:3306/{{ pd }}?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
         base_url: "http://{{ customer_url }}:{{ customer_gateway_ports }}"
       when: customer_state == 'update'
 
-    # ایجاد فایل .env.local برای portal
-    - name: Create file for portal project
+    # 🌐 ایجاد فایل .env.local برای portal
+    - name: "🌐 Create file for portal project"
       ansible.builtin.copy:
         dest: "{{ project_path }}/{{ inventory_hostname }}/portal/.env.local"
         content: |
@@ -323,8 +327,8 @@
       when: customer_state == 'update'
       changed_when: false
 
-    # ایجاد فایل my_database.php برای gateway
-    - name: Create my_database.php for gateway
+    # 📝 ایجاد فایل my_database.php برای gateway
+    - name: "📝 Create my_database.php for gateway"
       ansible.builtin.copy:
         dest: "{{ project_path }}/{{ inventory_hostname }}/gateway/admin/application/config/my_database.php"
         content: |
@@ -356,8 +360,8 @@
       when: customer_state == 'update'
       changed_when: false
 
-    # ایجاد فایل my_config.php برای gateway
-    - name: Create my_config.php for gateway
+    # 🧷 ایجاد فایل my_config.php برای gateway
+    - name: "🧷 Create my_config.php for gateway"
       ansible.builtin.copy:
         dest: "{{ project_path }}/{{ inventory_hostname }}/gateway/admin/application/config/my_config.php"
         content: |
@@ -368,21 +372,22 @@
       changed_when: false
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ بکاپ قبل از اجرا و ساخت شبکه
-    # چک کردن وجود فایل backup_volumes.sh
-    - name: Check if backup_volumes.sh exists
+    # 🕵️ چک کردن وجود فایل backup_volumes.sh
+    - name: "🕵️ Check if backup_volumes.sh exists"
       ansible.builtin.stat:
         path: "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
       register: backup_script
       when: customer_state == 'update'
 
-    # اجرای اسکریپت بکاپ برای دیتابیس‌ها و ولوم‌ها تنها در صورتی که فایل موجود باشد
-    - name: Check if backup script exists
+    # ▶️ اجرای اسکریپت بکاپ برای دیتابیس‌ها و ولوم‌ها تنها در صورتی که فایل موجود باشد
+    - name: ▶️ heck if backup script exists
       ansible.builtin.stat:
         path: "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
       register: backup_script
       when: customer_state == 'update'
 
-    - name: Run backup script for volumes and databases
+    # 💾 اجرای اسکریپت پشتیبان برای حجم ها و پایگاه های داده
+    - name: "💾 Run backup script for volumes and databases"
       ansible.builtin.shell: |
         bash "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
       register: backup_result
@@ -391,8 +396,8 @@
       when: backup_script.stat.exists and customer_state == 'update'
       changed_when: true
 
-    # ساخت شبکه مخصوص به هر مشتری
-    - name: Create Docker network for each customer
+    # 🌐 ساخت شبکه مخصوص به هر مشتری
+    - name: "🌐 Create Docker network for each customer"
       community.docker.docker_network:
         name: "{{ customer_network_names }}"
         state: present

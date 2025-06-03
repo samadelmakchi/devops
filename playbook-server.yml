@@ -5,8 +5,8 @@
 
   tasks:
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ساخت پوشه برنامه
-    # ایجاد پوشه project_path اگر وجود نداشت
-    - name: Ensure project_path directory exists
+    # 📁 ایجاد پوشه project_path اگر وجود نداشت
+    - name: "📁 Ensure project_path directory exists"
       ansible.builtin.file:
         path: "{{ project_path }}"
         state: directory
@@ -14,13 +14,15 @@
       poll: 1
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Bind9
-    - name: Ensure group 'bind' exists
+    # 👥 اطمینان حاصل کنید که گروه 'bind' وجود دارد
+    - name: "👥 Ensure group 'bind' exists"
       ansible.builtin.group:
         name: bind
         state: present
       poll: 1
 
-    - name: Ensure user 'bind' exists
+    # 👤 از وجود 'bind' کاربر اطمینان حاصل کنید
+    - name: "👤 Ensure user 'bind' exists"
       ansible.builtin.user:
         name: bind
         group: bind
@@ -29,14 +31,16 @@
         state: present
       poll: 1
 
-    - name: Ensure Bind9 config directory exists
+    # 🗃️ از وجود فهرست پیکربندی Bind9 اطمینان حاصل کنید
+    - name: "🗃️ Ensure Bind9 config directory exists"
       ansible.builtin.file:
         path: "tools/etc/bind"
         state: directory
         mode: '0755'
       poll: 1
 
-    - name: Ensure Bind9 cache and lib directories exist
+    # 🗄️ از وجود دایرکتوری های کش Bind9 و lib اطمینان حاصل کنید
+    - name: "🗄️ Ensure Bind9 cache and lib directories exist"
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory
