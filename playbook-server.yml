@@ -627,4 +627,138 @@
       poll: 1
       when: install_drawio is false and drawio_file.stat.exists
 
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Wordpress Joomla Nginx Rancher 
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Mattermost
+    - name: Generate mattermost.yml from template
+      ansible.builtin.template:
+        src: template/mattermost.yml.j2
+        dest: tools/mattermost.yml
+        owner: root
+        group: root
+        mode: '0644'
+      poll: 1
+      when: install_mattermost is true
+
+    - name: Set up Mattermost using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - mattermost.yml
+        state: present
+        pull: always
+        recreate: auto
+      poll: 1
+      when: install_mattermost is true
+
+    - name: Check if mattermost.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/mattermost.yml"
+      register: mattermost_file
+      poll: 1
+
+    - name: Tear down Mattermost container if install_mattermost is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - mattermost.yml
+        state: absent
+      poll: 1
+      when: install_mattermost is false and mattermost_file.stat.exists
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Selenium
+    - name: Copy Selenium config folder
+      ansible.builtin.copy:
+        src: template/selenium/
+        dest: tools/selenium/
+        owner: root
+        group: root
+        mode: '0644'
+      poll: 1
+      when: install_selenium is true
+
+    - name: Generate selenium.yml from template
+      ansible.builtin.template:
+        src: template/selenium.yml.j2
+        dest: tools/selenium.yml
+        owner: root
+        group: root
+        mode: '0644'
+      poll: 1
+      when: install_selenium is true
+
+    - name: Set up Selenium using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - selenium.yml
+        state: present
+        pull: always
+        recreate: auto
+      poll: 1
+      when: install_selenium is true
+
+    - name: Check if selenium.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/selenium.yml"
+      register: selenium_file
+      poll: 1
+
+    - name: Tear down Selenium container if install_selenium is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - selenium.yml
+        state: absent
+      poll: 1
+      when: install_selenium is false and selenium_file.stat.exists
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Mailserver
+    - name: Copy Mailserver config folder
+      ansible.builtin.copy:
+        src: template/mailserver/
+        dest: tools/mailserver/
+        owner: root
+        group: root
+        mode: '0644'
+      poll: 1
+      when: install_mailserver is true
+
+    - name: Generate mailserver.yml from template
+      ansible.builtin.template:
+        src: template/mailserver.yml.j2
+        dest: tools/mailserver.yml
+        owner: root
+        group: root
+        mode: '0644'
+      poll: 1
+      when: install_mailserver is true
+
+    - name: Set up Mailserver using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - mailserver.yml
+        state: present
+        pull: always
+        recreate: auto
+      poll: 1
+      when: install_mailserver is true
+
+    - name: Check if mailserver.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/mailserver.yml"
+      register: mailserver_file
+      poll: 1
+
+    - name: Tear down Mailserver container if install_mailserver is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - mailserver.yml
+        state: absent
+      poll: 1
+      when: install_mailserver is false and mailserver_file.stat.exists
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    # Wordpress Joomla Nginx Rancher 
+    # ELK Fluentd Zabbix Gitlab Gitea Jenkins Nextcloud n8n Ceph 
+    # PhpMyAdmin PgAdmin AdminMongo RedisInsight SQLiteWeb

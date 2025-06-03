@@ -1,12 +1,10 @@
-version: '3.8'
-
 services:
   selenium-hub:
-    image: selenium/hub:4.0.0-20220114
+    image: selenium/hub:4.19.1
     container_name: selenium-hub
     restart: always
     ports:
-      - "3006:4444"  # پورت اصلی برای اتصال به Hub
+      - "4444:4444"
     networks:
       - selenium
       - traefik_reverse_proxy
@@ -22,11 +20,11 @@ services:
       - "traefik.http.services.selenium-hub.loadbalancer.server.port=4444"
 
   chrome:
-    image: selenium/node-chrome:4.0.0-20220114
+    image: selenium/node-chrome:4.19.1
     container_name: selenium-node-chrome
     restart: always
     ports:
-      - "3007:5900"  # پورت VNC برای دسترسی به نمایشگر Chrome
+      - "5900:5900"
     depends_on:
       - selenium-hub
     networks:
@@ -34,22 +32,17 @@ services:
       - traefik_reverse_proxy
     environment:
       - SE_EVENT_BUS_HOST=selenium-hub
-      - SE_EVENT_BUS_PORT=4444
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
       - SE_NODE_MAX_SESSIONS=5
       - SE_NODE_PORT=5555
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.selenium-node-chrome.rule=Host(`chrome.selenium.{{ domain }}`)"
-      - "traefik.http.routers.selenium-node-chrome.entrypoints=websecure"
-      - "traefik.http.routers.selenium-node-chrome.tls.certresolver=myresolver"
-      - "traefik.http.services.selenium-node-chrome.loadbalancer.server.port=5900"
 
   firefox:
-    image: selenium/node-firefox:4.0.0-20220114
+    image: selenium/node-firefox:4.19.1
     container_name: selenium-node-firefox
     restart: always
     ports:
-      - "3008:5901"  # پورت VNC برای دسترسی به نمایشگر Firefox
+      - "5901:5901"
     depends_on:
       - selenium-hub
     networks:
@@ -57,15 +50,184 @@ services:
       - traefik_reverse_proxy
     environment:
       - SE_EVENT_BUS_HOST=selenium-hub
-      - SE_EVENT_BUS_PORT=4444
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
       - SE_NODE_MAX_SESSIONS=5
       - SE_NODE_PORT=5555
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.selenium-node-firefox.rule=Host(`firefox.selenium.{{ domain }}`)"
-      - "traefik.http.routers.selenium-node-firefox.entrypoints=websecure"
-      - "traefik.http.routers.selenium-node-firefox.tls.certresolver=myresolver"
-      - "traefik.http.services.selenium-node-firefox.loadbalancer.server.port=5901"
+
+  edge:
+    image: selenium/node-edge:4.19.1
+    container_name: selenium-node-edge
+    restart: always
+    depends_on:
+      - selenium-hub
+    networks:
+      - selenium
+      - traefik_reverse_proxy
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_SESSIONS=5
+      - SE_NODE_PORT=5555
+    ports:
+      - "5902:5902"
+
+  brave:
+    build:
+      context: ./selenium/brave
+    container_name: selenium-node-brave
+    restart: always
+    depends_on:
+      - selenium-hub
+    networks:
+      - selenium
+      - traefik_reverse_proxy
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_SESSIONS=2
+      - SE_NODE_PORT=5555
+
+  vivaldi:
+    build:
+      context: ./selenium/vivaldi
+    container_name: selenium-node-vivaldi
+    restart: always
+    depends_on:
+      - selenium-hub
+    networks:
+      - selenium
+      - traefik_reverse_proxy
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_SESSIONS=2
+      - SE_NODE_PORT=5555
+
+  opera:
+    build:
+      context: ./selenium/opera
+    container_name: selenium-node-opera
+    restart: always
+    depends_on:
+      - selenium-hub
+    networks:
+      - selenium
+      - traefik_reverse_proxy
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_NODE_MAX_SESSIONS=1
+      - SE_NODE_PORT=5555
+
+  # selenium-chromium:
+  #   build:
+  #     context: ./selenium/chromium
+  #   container_name: selenium-chromium
+  #   networks:
+  #     - traefik_reverse_proxy
+  #   shm_size: 2gb
+  #   environment:
+  #     - SE_EVENT_BUS_HOST=selenium-hub
+  #     - SE_EVENT_BUS_PUBLISH_PORT=4442
+  #     - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+  #     - SE_NODE_MAX_SESSIONS=1
+  #     - SE_NODE_SESSION_TIMEOUT=300
+  #     - START_XVFB=true
+  #   depends_on:
+  #     - selenium-hub
+
+  headless-chrome:
+    build:
+      context: ./selenium/headless/chrome
+    container_name: selenium-headless-chrome
+    restart: always
+    depends_on:
+      - selenium-hub
+    networks:
+      - selenium
+      - traefik_reverse_proxy
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_NODE_MAX_SESSIONS=2
+      - SE_NODE_PORT=5555
+
+  headless-firefox:
+    build:
+      context: ./selenium/headless/firefox
+    container_name: selenium-headless-firefox
+    restart: always
+    depends_on:
+      - selenium-hub
+    networks:
+      - selenium
+      - traefik_reverse_proxy
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_NODE_MAX_SESSIONS=2
+      - SE_NODE_PORT=5555
+
+  headless-edge:
+    build:
+      context: ./selenium/headless/edge
+    container_name: selenium-headless-edge
+    restart: always
+    depends_on:
+      - selenium-hub
+    networks:
+      - selenium
+      - traefik_reverse_proxy
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_NODE_MAX_SESSIONS=2
+      - SE_NODE_PORT=5555
+
+  # electron:
+  #   build:
+  #     context: ./selenium/electron
+  #   container_name: selenium-node-electron
+  #   restart: always
+  #   depends_on:
+  #     - selenium-hub
+  #   networks:
+  #     - selenium
+  #     - traefik_reverse_proxy
+  #   environment:
+  #     - SE_EVENT_BUS_HOST=selenium-hub
+  #     - SE_NODE_MAX_SESSIONS=1
+  #     - SE_NODE_PORT=5555
+
+  appium-server-android:
+    image: appium/appium
+    container_name: appium-server-android
+    command: >
+      appium server --nodeconfig /appium/nodeconfig-android.json --relaxed-security --port 4723
+    volumes:
+      - ./selenium/nodeconfig-android.json:/appium/nodeconfig-android.json
+    ports:
+      - "4723:4723"
+    networks:
+      - selenium
+      - traefik_reverse_proxy
+    depends_on:
+      - selenium-hub
+
+  appium-server-ios:
+    image: appium/appium
+    container_name: appium-server-ios
+    command: >
+      appium server --nodeconfig /appium/nodeconfig-ios.json --relaxed-security --port 4725
+    volumes:
+      - ./selenium/nodeconfig-ios.json:/appium/nodeconfig-ios.json
+    ports:
+      - "4725:4725"
+    networks:
+      - selenium
+      - traefik_reverse_proxy
+    depends_on:
+      - selenium-hub
 
 networks:
   selenium:
