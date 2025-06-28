@@ -12,6 +12,7 @@ services:
       - jenkins_home:/var/jenkins_home  # داده‌ها و پیکربندی‌های Jenkins در این حجم ذخیره می‌شود
     networks:
       - jenkins_network
+      - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.jenkins.rule=Host(`jenkins.{{ domain }}`)"
@@ -27,4 +28,3 @@ networks:
     driver: bridge
   traefik_reverse_proxy:
     external: true
-

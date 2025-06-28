@@ -203,6 +203,43 @@
       poll: 1
       when: install_sonarqube is false and sonarqube_file.stat.exists
 
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Jenkins
+    - name: Generate jenkins.yml from template
+      ansible.builtin.template:
+        src: template/jenkins.yml.j2
+        dest: tools/jenkins.yml
+        owner: root
+        group: root
+        mode: '0644'
+      poll: 1
+      when: install_jenkins is true
+
+    - name: Set up Jenkins using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - jenkins.yml
+        state: present
+        pull: always
+        recreate: auto
+      poll: 1
+      when: install_jenkins is true
+
+    - name: Check if jenkins.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/jenkins.yml"
+      register: jenkins_file
+      poll: 1
+
+    - name: Tear down Jenkins container if install_jenkins is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - jenkins.yml
+        state: absent
+      poll: 1
+      when: install_jenkins is false and jenkins_file.stat.exists
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Nexus
     - name: Generate nexus.yml from template
       ansible.builtin.template:
@@ -479,191 +516,6 @@
       poll: 1
       when: install_prometheus is false and prometheus_file.stat.exists
 
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dozzle
-    - name: Generate dozzle.yml from template
-      ansible.builtin.template:
-        src: template/dozzle.yml.j2
-        dest: tools/dozzle.yml
-        owner: root
-        group: root
-        mode: '0644'
-      poll: 1
-      when: install_dozzle is true
-
-    - name: Set up Dozzle using Docker Compose
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - dozzle.yml
-        state: present
-        pull: always
-        recreate: auto
-      poll: 1
-      when: install_dozzle is true
-
-    - name: Check if dozzle.yml file exists
-      ansible.builtin.stat:
-        path: "{{ playbook_dir }}/tools/dozzle.yml"
-      register: dozzle_file
-      poll: 1
-
-    - name: Tear down Dozzle container if install_dozzle is false
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - dozzle.yml
-        state: absent
-      poll: 1
-      when: install_dozzle is false and dozzle_file.stat.exists
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Shortcut
-    - name: Generate shortcut.yml from template
-      ansible.builtin.template:
-        src: template/shortcut.yml.j2
-        dest: tools/shortcut.yml
-        owner: root
-        group: root
-        mode: '0644'
-      poll: 1
-      when: install_shortcut is true
-
-    - name: Set up Shortcut using Docker Compose
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - shortcut.yml
-        state: present
-        pull: always
-        recreate: auto
-      poll: 1
-      when: install_shortcut is true
-
-    - name: Check if shortcut.yml file exists
-      ansible.builtin.stat:
-        path: "{{ playbook_dir }}/tools/shortcut.yml"
-      register: shortcut_file
-      poll: 1
-
-    - name: Tear down Shortcut container if install_shortcut is false
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - shortcut.yml
-        state: absent
-      poll: 1
-      when: install_shortcut is false and shortcut_file.stat.exists
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DrawDB
-    - name: Generate drawdb.yml from template
-      ansible.builtin.template:
-        src: template/drawdb.yml.j2
-        dest: tools/drawdb.yml
-        owner: root
-        group: root
-        mode: '0644'
-      poll: 1
-      when: install_drawdb is true
-
-    - name: Set up DrawDB using Docker Compose
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - drawdb.yml
-        state: present
-        pull: always
-        recreate: auto
-      poll: 1
-      when: install_drawdb is true
-
-    - name: Check if drawdb.yml file exists
-      ansible.builtin.stat:
-        path: "{{ playbook_dir }}/tools/drawdb.yml"
-      register: drawdb_file
-      poll: 1
-
-    - name: Tear down DrawDB container if install_drawdb is false
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - drawdb.yml
-        state: absent
-      poll: 1
-      when: install_drawdb is false and drawdb_file.stat.exists
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Draw.io
-    - name: Generate drawio.yml from template
-      ansible.builtin.template:
-        src: template/drawio.yml.j2
-        dest: tools/drawio.yml
-        owner: root
-        group: root
-        mode: '0644'
-      poll: 1
-      when: install_drawio is true
-
-    - name: Set up Draw.io using Docker Compose
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - drawio.yml
-        state: present
-        pull: always
-        recreate: auto
-      poll: 1
-      when: install_drawio is true
-
-    - name: Check if drawio.yml file exists
-      ansible.builtin.stat:
-        path: "{{ playbook_dir }}/tools/drawio.yml"
-      register: drawio_file
-      poll: 1
-
-    - name: Tear down Draw.io container if install_drawio is false
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - drawio.yml
-        state: absent
-      poll: 1
-      when: install_drawio is false and drawio_file.stat.exists
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Mattermost
-    - name: Generate mattermost.yml from template
-      ansible.builtin.template:
-        src: template/mattermost.yml.j2
-        dest: tools/mattermost.yml
-        owner: root
-        group: root
-        mode: '0644'
-      poll: 1
-      when: install_mattermost is true
-
-    - name: Set up Mattermost using Docker Compose
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - mattermost.yml
-        state: present
-        pull: always
-        recreate: auto
-      poll: 1
-      when: install_mattermost is true
-
-    - name: Check if mattermost.yml file exists
-      ansible.builtin.stat:
-        path: "{{ playbook_dir }}/tools/mattermost.yml"
-      register: mattermost_file
-      poll: 1
-
-    - name: Tear down Mattermost container if install_mattermost is false
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - mattermost.yml
-        state: absent
-      poll: 1
-      when: install_mattermost is false and mattermost_file.stat.exists
-
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Selenium
     - name: Copy Selenium config folder
       ansible.builtin.copy:
@@ -758,7 +610,125 @@
       poll: 1
       when: install_mailserver is false and mailserver_file.stat.exists
 
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Nginx
+    - name: Copy Nginx config folder
+      ansible.builtin.copy:
+        src: template/nginx/
+        dest: tools/nginx/
+        owner: root
+        group: root
+        mode: '0644'
+      poll: 1
+      when: install_nginx is true
+
+    - name: Generate nginx.yml from template
+      ansible.builtin.template:
+        src: template/nginx.yml.j2
+        dest: tools/nginx.yml
+        owner: root
+        group: root
+        mode: '0644'
+      poll: 1
+      when: install_nginx is true
+
+    - name: Set up Nginx using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - nginx.yml
+        state: present
+        pull: always
+        recreate: auto
+      poll: 1
+      when: install_nginx is true
+
+    - name: Check if nginx.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/nginx.yml"
+      register: nginx_file
+      poll: 1
+
+    - name: Tear down nginx container if install_nginx is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - nginx.yml
+        state: absent
+      poll: 1
+      when: install_nginx is false and nginx_file.stat.exists
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ phpMyAdmin
+    - name: Generate phpmyadmin.yml from template
+      ansible.builtin.template:
+        src: template/phpmyadmin.yml.j2
+        dest: tools/phpmyadmin.yml
+        owner: root
+        group: root
+        mode: '0644'
+      poll: 1
+      when: install_phpmyadmin is true
+
+    - name: Set up phpMyAdmin using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - phpmyadmin.yml
+        state: present
+        pull: always
+        recreate: auto
+      poll: 1
+      when: install_phpmyadmin is true
+
+    - name: Check if phpmyadmin.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/phpmyadmin.yml"
+      register: phpmyadmin_file
+      poll: 1
+
+    - name: Tear down phpMyAdmin container if install_phpmyadmin is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - phpmyadmin.yml
+        state: absent
+      poll: 1
+      when: install_phpmyadmin is false and phpmyadmin_file.stat.exists
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PgAdmin
+    - name: Generate pgadmin.yml from template
+      ansible.builtin.template:
+        src: template/pgadmin.yml.j2
+        dest: tools/pgadmin.yml
+        owner: root
+        group: root
+        mode: '0644'
+      poll: 1
+      when: install_pgadmin is true
+
+    - name: Set up PgAdmin using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - pgadmin.yml
+        state: present
+        pull: always
+        recreate: auto
+      poll: 1
+      when: install_pgadmin is true
+
+    - name: Check if pgadmin.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/pgadmin.yml"
+      register: pgadmin_file
+      poll: 1
+
+    - name: Tear down PgAdmin container if install_pgadmin is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - pgadmin.yml
+        state: absent
+      poll: 1
+      when: install_pgadmin is false and pgadmin_file.stat.exists
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-    # Wordpress Joomla Nginx Rancher 
-    # ELK Fluentd Zabbix Gitlab Gitea Jenkins Nextcloud n8n Ceph 
-    # PhpMyAdmin PgAdmin AdminMongo RedisInsight SQLiteWeb
+    #  ELK            elk, , , 

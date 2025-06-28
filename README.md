@@ -61,7 +61,7 @@ ansible-playbook -i inventory.local.yml playbook.yml --ask-become-pass
 - 🛠️ Bind9 (5353)
 
 ### Logs Management
-- 📑 Dozzle (8580)
+- 🖥️ Splunk (8580)
 - 📑 Fluentd (8581)
 - 📑 Kibana (8582)
 - 📑 Elasticsearch (-)
@@ -70,14 +70,10 @@ ansible-playbook -i inventory.local.yml playbook.yml --ask-become-pass
 
 ### Monitoring
 - 🖥️ Prometheus (9090)
-- 🖥️ Zabbix (9091)
 - 🖥️ Grafana (9092)
-- 🖥️ Splunk (9093)
 - 🖥️ Uptime Kuma (9094)
 
 ### CICD
-- ♻️ Gitlab (3001)
-- ♻️ Gitea (3002)
 - ♻️ Jenkins (3003)
 - ♻️ Nexus (3004)
 - ♻️ SonarQube (3005)
@@ -85,30 +81,9 @@ ansible-playbook -i inventory.local.yml playbook.yml --ask-become-pass
 
 ### Tools
 - 📔 Nginx (3972)
-<br><br>
 - 📕 Apprise (4013)
 - 📕 Mailserver (?)
-<br><br>
 - 📗 Portainer (4100) (set user and pass)
-- 📗 Rancher (4101)
-<br><br>
-- 📙 Shortcut (5231)
-- 📙 Mattermost (5232)
-- 📙 Focalboard (5233)
-- 📙 Nextcloud (5234)
-- 📙 Nextcloud Office (5235)
-- 📙 n8n (5236)
-<br><br>
 - 📒 RabbitMQ (6074)
-- 📒 Ceph (6075)
-<br><br>
-- 📘 Wordpress (7087)
-- 📘 Joomla (7088)
-- 📘 Draw.io (7089)
-<br><br>
-- 📓 DrawDB (9280)
 - 📓 phpMyAdmin (9281)
 - 📓 pgAdmin (9282)
-- 📓 AdminMongo (9283)
-- 📓 RedisInsight (9284)
-- 📓 SQLiteWeb (9285)

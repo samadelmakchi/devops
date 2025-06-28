@@ -675,14 +675,14 @@
 
           # فایل گزارش
           BACKUP_LOG="{{ log_path }}/backup/{{ inventory_hostname }}.txt"
-          log_to_fluentd "🚀 Backup started at $(date)"
+          save_log "🚀 Backup started at $(date)"
 
           # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           # بررسی فضای دیسک
           REQUIRED_SPACE_MB=100
           AVAILABLE_SPACE_MB=$(df "$BACKUP_DIR" | awk 'NR==2 {print int($4/1024)}')
           if (( AVAILABLE_SPACE_MB < REQUIRED_SPACE_MB )); then
-            log_to_fluentd "🖴❌ Not enough disk space. Required: ${REQUIRED_SPACE_MB}MB, Available: ${AVAILABLE_SPACE_MB}MB"
+            save_log "🖴❌ Not enough disk space. Required: ${REQUIRED_SPACE_MB}MB, Available: ${AVAILABLE_SPACE_MB}MB"
             exit 1
           fi
 
@@ -700,7 +700,7 @@
 
             # اطمینان از وجود پوشه
             if [ ! -d "$FULL_VOLUME_PATH" ]; then
-              log_to_fluentd "📁❌ Volume $FULL_VOLUME_PATH does not exist!"
+              save_log "📁❌ Volume $FULL_VOLUME_PATH does not exist!"
               continue
             fi
 
@@ -709,19 +709,19 @@
 
             # بررسی دوباره وجود فایل بکاپ
             if [ -f "$BACKUP_FILE" ]; then
-              log_to_fluentd "📁❌ Backup file $BACKUP_FILE already exists. Skipping."
+              save_log "📁❌ Backup file $BACKUP_FILE already exists. Skipping."
               continue
             fi
 
             # گرفتن بکاپ از پوشه با دستور tar
-            log_to_fluentd "📁 Starting backup for volume $FULL_VOLUME_PATH..."
+            save_log "📁 Starting backup for volume $FULL_VOLUME_PATH..."
             tar czf "$BACKUP_FILE" -C "$FULL_VOLUME_PATH" .
 
             # بررسی موفقیت آمیز بودن عملیات tar
             if [ $? -eq 0 ]; then
-              log_to_fluentd "📁✅ Backup for volume $FULL_VOLUME_PATH completed successfully at $(date)"
+              save_log "📁✅ Backup for volume $FULL_VOLUME_PATH completed successfully at $(date)"
             else
-              log_to_fluentd "📁❌ Error during backup of volume $FULL_VOLUME_PATH"
+              save_log "📁❌ Error during backup of volume $FULL_VOLUME_PATH"
             fi
           done
 
@@ -732,37 +732,37 @@
           while IFS=',' read -r DB_TYPE DB_NAME DB_USER DB_PASSWORD DB_CONTAINER; do
             if [[ "$DB_TYPE" == "mysql" ]]; then
               BACKUP_FILE="$BACKUP_DIR/${DB_NAME}-mysql.sql.gz"
-              log_to_fluentd "🛢️ Backing up MySQL database $DB_NAME..."
+              save_log "🛢️ Backing up MySQL database $DB_NAME..."
 
               # استفاده از docker exec برای انجام عملیات در داخل کانتینر MySQL
               docker exec $DB_CONTAINER mysqldump -u "$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" 2>>"$BACKUP_LOG" | gzip > "$BACKUP_FILE"
 
               if [[ $? -eq 0 ]]; then
                 chmod 0777 "$BACKUP_FILE"
-                log_to_fluentd "🛢️✅ MySQL backup for $DB_NAME completed at $(date)"
+                save_log "🛢️✅ MySQL backup for $DB_NAME completed at $(date)"
               else
-                log_to_fluentd "🛢️❌ Error backing up MySQL database $DB_NAME"
+                save_log "🛢️❌ Error backing up MySQL database $DB_NAME"
               fi
 
             elif [[ "$DB_TYPE" == "postgresql" ]]; then
               BACKUP_FILE="$BACKUP_DIR/${DB_NAME}-postgresql.sql.gz"
-              log_to_fluentd "🐘 Backing up PostgreSQL database $DB_NAME..."
+              save_log "🐘 Backing up PostgreSQL database $DB_NAME..."
 
               # استفاده از docker exec برای انجام عملیات در داخل کانتینر PostgreSQL
               docker exec $DB_CONTAINER pg_dump -U "$DB_USER" -h "$DB_HOST" -d "$DB_NAME" 2>>"$BACKUP_LOG" | gzip > "$BACKUP_FILE"
 
               if [[ $? -eq 0 ]]; then
                 chmod 0777 "$BACKUP_FILE"
-                log_to_fluentd "🐘✅ PostgreSQL backup for $DB_NAME completed at $(date)"
+                save_log "🐘✅ PostgreSQL backup for $DB_NAME completed at $(date)"
               else
-                log_to_fluentd "🐘❌ Error backing up PostgreSQL database $DB_NAME"
+                save_log "🐘❌ Error backing up PostgreSQL database $DB_NAME"
               fi
             fi
           done < "$DATABASES"
 
           # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           # ارسال فایل بکاپ به تلگرام
-          # log_to_fluentd "📤 Sending backup files to Telegram..."
+          # save_log "📤 Sending backup files to Telegram..."
           # TELEGRAM_TOKEN="8104111863:AAG1Lic90mVzbFKbfOonWjh4oBZtEmCBQmY"
           # CHAT_ID="-1002529041410"
           # for FILE in "$BACKUP_DIR"/*.gz; do
@@ -771,16 +771,16 @@
           #       -F document=@"$FILE" \
           #       -F chat_id="$CHAT_ID")
           #     if [[ "$RESPONSE" == *'"ok":true'* ]]; then
-          #       log_to_fluentd "📤✅ Sent $FILE to Telegram"
+          #       save_log "📤✅ Sent $FILE to Telegram"
           #     else
-          #       log_to_fluentd "📤❌ Failed to send $FILE to Telegram"
+          #       save_log "📤❌ Failed to send $FILE to Telegram"
           #     fi
           #   fi
           # done
 
           # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           # ارسال فایل به FTP
-          # log_to_fluentd "🌐 Sending backup files to FTP..."
+          # save_log "🌐 Sending backup files to FTP..."
           # FTP_SERVER="ftp.example.com"
           # FTP_USER="ftp_username"
           # FTP_PASSWORD="ftp_password"
@@ -789,19 +789,19 @@
           #   if [ -f "$FILE" ]; then
           #     curl -s -T "$FILE" ftp://$FTP_SERVER$FTP_PATH/ --user "$FTP_USER:$FTP_PASSWORD"
           #     if [[ $? -eq 0 ]]; then
-          #       log_to_fluentd "🌐✅ Sent $FILE to FTP at $(date)"log_to_fluentd "
+          #       save_log "🌐✅ Sent $FILE to FTP at $(date)"save_log "
           #     else
-          #       log_to_fluentd "🌐❌ Error sending $FILE to FTP"
+          #       save_log "🌐❌ Error sending $FILE to FTP"
           #     fi
           #   fi
           # done
 
           # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-          log_to_fluentd "🏁 Backup completed at $(date)"
-          log_to_fluentd "----------------------------------------------------------------------------------"
+          save_log "🏁 Backup completed at $(date)"
+          save_log "----------------------------------------------------------------------------------"
 
           # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-          log_to_fluentd() {
+          save_log() {
             local message="$1"
             local tag="${2:-backup.log}"  # تگ Fluentd (پیش‌فرض: backup.log)
             local fluentd_url="${3:-http://fluentd:9880/$tag}"

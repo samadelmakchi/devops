@@ -1,42 +1,25 @@
 all:
   vars:
     domain: elmakchi.ir
+    ip: http://185.255.89.160
     email: samd.elmakchi@gmail.com
 
-    install_dozzle: false
-    install_elk: false
-    install_fluentd: false
-    install_uptime_kuma: false
-    install_grafana: false
-    install_splunk: false
-    install_prometheus: false
-    install_zabbix: false
-    install_gitlab: false
-    install_gitea: false
-    install_jenkins: false
-    install_nexus: false
-    install_sonarqube: false
-    install_selenium: false
-    install_nginx: false
-    install_apprise: false
-    install_mailserver: false
     install_portainer: true
-    install_rancher: false
-    install_shortcut: false
-    install_mattermost: false
-    install_nextcloud: false
-    install_n8n: false
+    install_sonarqube: false
+    install_nexus: false
     install_rabbitmq: false
-    install_ceph: false
-    install_wordpress: false
-    install_joomla: false
-    install_drawio: false
-    install_drawdb: false
+    install_apprise: false
+    install_uptime_kuma: false
+    install_splunk: false
+    install_grafana: false
+    install_prometheus: false
+    install_selenium: false
+    install_mailserver: false
+    install_elk: false
+    install_jenkins: false
+    install_nginx: false
     install_phpmyadmin: false
     install_pgadmin: false
-    install_adminmongo: false
-    install_redis_insight: false
-    install_sqlite_web: false
 
   children:
     bind_hosts:
@@ -48,71 +31,35 @@ all:
       hosts:
         traefik:
           ansible_host: 127.0.0.1
-        dozzle:
-          ansible_host: 127.0.0.1
-        elk:
-          ansible_host: 127.0.0.1
-        fluentd:
-          ansible_host: 127.0.0.1
-        uptime_kuma:
-          ansible_host: 127.0.0.1
-        grafana:
-          ansible_host: 127.0.0.1
-        splunk:
-          ansible_host: 127.0.0.1
-        prometheus:
-          ansible_host: 127.0.0.1
-        zabbix:
-          ansible_host: 127.0.0.1
-        gitlab:
-          ansible_host: 127.0.0.1
-        gitea:
-          ansible_host: 127.0.0.1
-        jenkins:
-          ansible_host: 127.0.0.1
-        nexus:
+        portainer:
           ansible_host: 127.0.0.1
         sonarqube:
           ansible_host: 127.0.0.1
-        selenium:
-          ansible_host: 127.0.0.1
-        nginx:
-          ansible_host: 127.0.0.1
-        apprise:
-          ansible_host: 127.0.0.1
-        mailserver:
-          ansible_host: 127.0.0.1
-        portainer:
-          ansible_host: 127.0.0.1
-        rancher:
-          ansible_host: 127.0.0.1
-        shortcut:
-          ansible_host: 127.0.0.1
-        mattermost:
-          ansible_host: 127.0.0.1
-        nextcloud:
-          ansible_host: 127.0.0.1
-        n8n:
+        nexus:
           ansible_host: 127.0.0.1
         rabbitmq:
           ansible_host: 127.0.0.1
-        ceph:
+        apprise:
           ansible_host: 127.0.0.1
-        wordpress:
+        uptime_kuma:
           ansible_host: 127.0.0.1
-        joomla:
+        splunk:
           ansible_host: 127.0.0.1
-        drawio:
+        grafana:
           ansible_host: 127.0.0.1
-        drawdb:
+        prometheus:
+          ansible_host: 127.0.0.1
+        selenium:
+          ansible_host: 127.0.0.1
+        mailserver:
+          ansible_host: 127.0.0.1
+        elk:
+          ansible_host: 127.0.0.1
+        jenkins:
+          ansible_host: 127.0.0.1
+        nginx:
           ansible_host: 127.0.0.1
         phpmyadmin:
           ansible_host: 127.0.0.1
         pgadmin:
-          ansible_host: 127.0.0.1
-        adminmongo:
-          ansible_host: 127.0.0.1
-        redis_insight:
-          ansible_host: 127.0.0.1
-        sqlite_web:
           ansible_host: 127.0.0.1
