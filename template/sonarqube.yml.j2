@@ -16,7 +16,7 @@ services:
       - sonarqube_logs:/opt/sonarqube/logs
       - sonarqube_temp:/opt/sonarqube/temp
     ports:
-      - "3005:9000"
+      - "4443:9000"
     networks:
       - ${NETWORK_TYPE:-ipv4}
       - traefik_reverse_proxy

@@ -58,10 +58,9 @@ ansible-playbook -i inventory.local.yml playbook.yml --ask-become-pass
 
 ### Server
 - 🛠️ Traefik (80) (user: admin - pass: admin)
-- 🛠️ Bind9 (5353)
 
 ### Logs Management
-- 🖥️ Splunk (8580)
+- 📑 Splunk (8580)
 - 📑 Fluentd (8581)
 - 📑 Kibana (8582)
 - 📑 Elasticsearch (-)
@@ -70,20 +69,20 @@ ansible-playbook -i inventory.local.yml playbook.yml --ask-become-pass
 
 ### Monitoring
 - 🖥️ Prometheus (9090)
-- 🖥️ Grafana (9092)
-- 🖥️ Uptime Kuma (9094)
+- 🖥️ Grafana (9091)
+- 🖥️ Uptime Kuma (9092)
 
 ### CICD
-- ♻️ Jenkins (3003)
-- ♻️ Nexus (3004)
-- ♻️ SonarQube (3005)
-- ♻️ Selenium (3006 - Chrome: 3007 - Firefox: 3008)
+- ♻️ Jenkins (4441)
+- ♻️ Nexus (4442)
+- ♻️ SonarQube (4443)
+- ♻️ Selenium (4444)
 
 ### Tools
-- 📔 Nginx (3972)
-- 📕 Apprise (4013)
-- 📕 Mailserver (?)
 - 📗 Portainer (4100) (set user and pass)
-- 📒 RabbitMQ (6074)
+- 📔 Nginx (4101)
+- 📒 RabbitMQ (4102)
+- 📕 Apprise (4103)
+- 📕 Mailserver (?)
 - 📓 phpMyAdmin (9281)
 - 📓 pgAdmin (9282)
