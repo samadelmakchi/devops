@@ -22,8 +22,8 @@
       poll: 1
       when: install_bind9 is true
 
-    # 👤 از وجود 'bind' کاربر اطمینان حاصل کنید
-    - name: "👤 Ensure user 'bind' exists"
+    # از وجود 'bind' کاربر اطمینان حاصل کنید
+    - name: Ensure user 'bind' exists
       ansible.builtin.user:
         name: bind
         group: bind
