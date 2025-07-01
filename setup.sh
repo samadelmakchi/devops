@@ -20,43 +20,70 @@ else
 fi
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# echo "🔅 Writing full resolved.conf with Shecan DNS and defaults"
-# sudo bash -c 'cat > /etc/systemd/resolved.conf <<EOF
-# #  This file is part of systemd.
-# #
-# #  systemd is free software; you can redistribute it and/or modify it
-# #  under the terms of the GNU Lesser General Public License as published by
-# #  the Free Software Foundation; either version 2.1 of the License, or
-# #  (at your option) any later version.
 
-# [Resolve]
-# DNS=178.22.122.100 185.51.200.2
-# FallbackDNS=8.8.8.8
-# #Domains=
-# #LLMNR=yes
-# #MulticastDNS=yes
-# #DNSSEC=no
-# #DNSOverTLS=no
-# #Cache=yes
-# #DNSStubListener=yes
-# #ReadEtcHosts=yes
-# EOF'
+# متغیر برای تعیین استفاده از سرویس شکن
+USE_SHECAN=true
 
-# # 🔅 ریستارت کردن سرویس systemd-resolved
-# echo "🔅 Restarting systemd-resolved service"
-# sudo systemctl restart systemd-resolved
+# تنظیمات DNS بر اساس متغیر
+if [ "$USE_SHECAN" = "true" ]; then
+  echo "🔅 Writing full resolved.conf with Shecan DNS"
+  sudo bash -c 'cat > /etc/systemd/resolved.conf <<EOF
+#  This file is part of systemd.
+#
+#  systemd is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU Lesser General Public License as published by
+#  the Free Software Foundation; either version 2.1 of the License, or
+#  (at your option) any later version.
 
-# # 🔅 ایجاد لینک سمبلیک برای resolv.conf
-# echo "🔅 Creating symbolic link for /etc/resolv.conf"
-# sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+[Resolve]
+DNS=178.22.122.100 185.51.200.2
+FallbackDNS=8.8.8.8
+#Domains=
+#LLMNR=yes
+#MulticastDNS=yes
+#DNSSEC=no
+#DNSOverTLS=no
+#Cache=yes
+#DNSStubListener=yes
+#ReadEtcHosts=yes
+EOF'
+else
+  echo "🔅 Writing resolved.conf with default DNS (Google/Cloudflare)"
+  sudo bash -c 'cat > /etc/systemd/resolved.conf <<EOF
+#  This file is part of systemd.
+#
+#  systemd is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU Lesser General Public License as published by
+#  the Free Software Foundation; either version 2.1 of the License, or
+#  (at your option) any later version.
 
+[Resolve]
+DNS=8.8.8.8 1.1.1.1
+#Domains=
+#LLMNR=yes
+#MulticastDNS=yes
+#DNSSEC=no
+#DNSOverTLS=no
+#Cache=yes
+#DNSStubListener=yes
+#ReadEtcHosts=yes
+EOF'
+fi
 
-# echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" > /etc/resolv.conf
+# ریستارت کردن سرویس systemd-resolved
+echo "🔅 Restarting systemd-resolved service"
+sudo systemctl restart systemd-resolved
 
-# curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-# echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu focal stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+# ایجاد لینک سمبلیک برای resolv.conf
+echo "🔅 Creating symbolic link for /etc/resolv.conf"
+sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
-
+# تنظیم دستی resolv.conf
+if [ "$USE_SHECAN" = "true" ]; then
+    echo -e "nameserver 178.22.122.100\nnameserver 185.51.200.2" | sudo tee /etc/resolv.conf
+else
+    echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" | sudo tee /etc/resolv.conf
+fi
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # نصب ابزارهای ضروری
@@ -101,7 +128,7 @@ echo "🤖 Installing the latest stable version of Ansible..."
 pip install ansible
 
 # 🧹 نصب ابزار بررسی lint برای کدهای انسیبل
-echo "🧹 Installing ansible-lint for checking best practices..."
+echo "🧹 Installing ansible-lint for16:54 AM +04 on Tuesday, July 01, 2025 for checking best practices..."
 pip install ansible-lint
 
 # 🔌 نصب وابستگی‌های لازم برای community.docker (مثل requests و docker)
@@ -255,10 +282,37 @@ eval "$(ssh-agent -s)"
 ssh-add "$PWD/id_rsa"
 echo "✔️  SSH key added to SSH agent"
 
-# 🔌 تست اتصال به GitLab با استفاده از SSH
-echo "🔌 Testing SSH connection to GitLab"
-ssh -o StrictHostKeyChecking=no -i "$PWD/id_rsa" -T git@gitlab.com
-echo "✔️  SSH connection successful"
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# غیرفعال کردن سرویس شکن در صورت فعال بودن
+if [ "$USE_SHECAN" = "true" ]; then
+    echo "🔅 Disabling Shecan DNS and reverting to default DNS"
+    sudo bash -c 'cat > /etc/systemd/resolved.conf <<EOF
+#  This file is part of systemd.
+#
+#  systemd is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU Lesser General Public License as published by
+#  the Free Software Foundation; either version 2.1 of the License, or
+#  (at your option) any later version.
+
+[Resolve]
+DNS=8.8.8.8 1.1.1.1
+#Domains=
+#LLMNR=yes
+#MulticastDNS=yes
+#DNSSEC=no
+#DNSOverTLS=no
+#Cache=yes
+#DNSStubListener=yes
+#ReadEtcHosts=yes
+EOF'
+
+    # تنظیم دستی resolv.conf با DNSهای پیش‌فرض
+    echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" | sudo tee /etc/resolv.conf
+
+    # ریستارت کردن سرویس systemd-resolved
+    echo "🔅 Restarting systemd-resolved service to apply default DNS"
+    sudo systemctl restart systemd-resolved
+fi
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 echo "✅  Script execution completed!"

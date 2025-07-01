@@ -20,6 +20,7 @@
         name: bind
         state: present
       poll: 1
+      when: install_bind9 is true
 
     # 👤 از وجود 'bind' کاربر اطمینان حاصل کنید
     - name: "👤 Ensure user 'bind' exists"
@@ -30,6 +31,7 @@
         system: true
         state: present
       poll: 1
+      when: install_bind9 is true
 
     # 🗃️ از وجود فهرست پیکربندی Bind9 اطمینان حاصل کنید
     - name: "🗃️ Ensure Bind9 config directory exists"
@@ -38,6 +40,7 @@
         state: directory
         mode: '0755'
       poll: 1
+      when: install_bind9 is true
 
     # 🗄️ از وجود دایرکتوری های کش Bind9 و lib اطمینان حاصل کنید
     - name: "🗄️ Ensure Bind9 cache and lib directories exist"
@@ -49,6 +52,7 @@
         - "tools/var/cache/bind"
         - "tools/var/lib/bind"
       poll: 1
+      when: install_bind9 is true
 
     - name: Set proper ownership for Bind9 directories
       ansible.builtin.file:
@@ -60,6 +64,7 @@
         - "tools/var/cache/bind"
         - "tools/var/lib/bind"
       poll: 1
+      when: install_bind9 is true
 
     - name: Generate Bind9 zone file from template
       ansible.builtin.template:
@@ -74,6 +79,7 @@
         ns_record: "ns1.{{ domain }}."
         origin: "{{ domain }}"
       poll: 1
+      when: install_bind9 is true
 
     - name: Template Bind9 named.conf
       ansible.builtin.template:
@@ -83,6 +89,7 @@
         group: root
         mode: '0644'
       poll: 1
+      when: install_bind9 is true
 
     - name: Generate bind9.yml from template
       ansible.builtin.template:
@@ -92,6 +99,7 @@
         group: root
         mode: '0644'
       poll: 1
+      when: install_bind9 is true
 
     - name: Set up Bind9 using Docker Compose
       community.docker.docker_compose_v2:
@@ -102,6 +110,7 @@
         pull: always
         recreate: auto
       poll: 1
+      when: install_bind9 is true
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Traefik
     - name: Create traefik_reverse_proxy Docker network
@@ -109,6 +118,7 @@
         name: traefik_reverse_proxy
         state: present
       poll: 1
+      when: install_traefik is true
 
     - name: Generate traefik.yml from template
       ansible.builtin.template:
@@ -118,6 +128,7 @@
         group: root
         mode: '0644'
       poll: 1
+      when: install_traefik is true
 
     - name: Set up Traefik using Docker Compose
       community.docker.docker_compose_v2:
@@ -128,6 +139,22 @@
         pull: always
         recreate: auto
       poll: 1
+      when: install_traefik is true
+
+    - name: Check if traefik.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/traefik.yml"
+      poll: 1
+      register: traefik_file
+
+    - name: Tear down traefik container if install_traefik is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - traefik.yml
+        state: absent
+      poll: 1
+      when: install_traefik is false and traefik_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Portainer
     - name: Generate portainer.yml from template
@@ -730,5 +757,43 @@
         state: absent
       poll: 1
       when: install_pgadmin is false and pgadmin_file.stat.exists
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-    #  ELK            elk, , , 
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ELK
+    - name: Generate elk.yml from template
+      ansible.builtin.template:
+        src: template/elk.yml.j2
+        dest: tools/elk.yml
+        owner: root
+        group: root
+        mode: '0644'
+      poll: 1
+      when: install_elk is true
+
+    - name: Set up PgAdmin using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - elk.yml
+        state: present
+        pull: always
+        recreate: auto
+      poll: 1
+      when: install_elk is true
+
+    - name: Check if elk.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/elk.yml"
+      register: elk_file
+      poll: 1
+
+    - name: Tear down PgAdmin container if install_elk is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - elk.yml
+        state: absent
+      poll: 1
+      when: install_elk is false and elk_file.stat.exists
+
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+

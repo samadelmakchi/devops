@@ -4,6 +4,8 @@ all:
     ip: http://185.255.89.160
     email: samd.elmakchi@gmail.com
 
+    install_bind9: false
+    install_traefik: true
     install_portainer: true
     install_sonarqube: false
     install_nexus: false
