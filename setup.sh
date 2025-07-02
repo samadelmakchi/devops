@@ -22,7 +22,7 @@ fi
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # متغیر برای تعیین استفاده از سرویس شکن
-USE_SHECAN=true
+USE_SHECAN=false
 
 # تنظیمات DNS بر اساس متغیر
 if [ "$USE_SHECAN" = "true" ]; then
@@ -143,12 +143,6 @@ which ansible
 # 🐳 نصب کالکشن community.docker برای استفاده از ماژول‌های Docker
 echo "🐳 Installing 'community.docker' collection from Ansible Galaxy..."
 ansible-galaxy collection install community.docker
-
-# ✅ پیام نهایی
-echo ""
-echo "✅ Done. Ansible is installed inside virtualenv at ~/ansible-venv"
-echo "ℹ️ To activate it later, run:"
-echo "   source ~/ansible-venv/bin/activate"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 🐋 بررسی اینکه آیا Docker نصب شده یا نه

@@ -34,6 +34,7 @@
         state: directory
         mode: '0777'
       when: customer_state == 'update'
+      poll: 1
       loop:
         - "{{ project_path }}"
         - "{{ backup_path }}"
@@ -47,6 +48,7 @@
         state: directory
         mode: '0777'
       when: customer_state == 'update'
+      poll: 1
 
     # 🗄️ ایجاد پوشه مخصوص مشتری در مسیر پشتیبان‌ها
     - name: "🗄️ Ensure customer directories in backup_path exist"
@@ -55,6 +57,7 @@
         state: directory
         mode: '0777'
       when: customer_state == 'update'
+      poll: 1
 
     # 🗃️ ایجاد پوشه‌های test و backup در log_path
     - name: "🗃️ Ensure directories for test and backup in log_path exist"
@@ -63,6 +66,7 @@
         state: directory
         mode: '0777'
       when: customer_state == 'update'
+      poll: 1
       loop:
         - "test"
         - "backup"
@@ -74,6 +78,7 @@
         state: directory
         mode: '0777'
       when: customer_state == 'update'
+      poll: 1
       loop:
         - "volumes"
         - "databases"
@@ -85,6 +90,7 @@
         state: touch
         mode: '0777'
       when: customer_state == 'update'
+      poll: 1
 
     # 🛡️ برای هر مشتری یک فایل متنی در پوشه پشتیبان ایجاد کنید
     - name: "🛡️ Create a text file in backup folder for each customer"
@@ -93,6 +99,7 @@
         state: touch
         mode: '0777'
       when: customer_state == 'update'
+      poll: 1
 
     # 📁 برای هر مشتری یک فایل متنی در پوشه volumes ایجاد کنید
     - name: "📁 Create a text file in volumes folder for each customer"
@@ -101,6 +108,7 @@
         state: touch
         mode: '0777'
       when: customer_state == 'update'
+      poll: 1
 
     # 📝 برای هر مشتری یک فایل متنی در پوشه پایگاه داده ایجاد کنید
     - name: "📝 Create a text file in databases folder for each customer"
@@ -109,6 +117,7 @@
         state: touch
         mode: '0777'
       when: customer_state == 'update'
+      poll: 1
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ مدیریت شکن برای گیت‌لب
     # 🌐 پیکربندی DNS سرویس Shecan در resolved.conf اگر منبع ریپو gitlab باشد
@@ -136,7 +145,7 @@
         dest: /etc/systemd/resolved.conf
         mode: '0644'
       when: repo_source == "gitlab" and customer_state == 'update'
-      become: true
+      poll: 1
 
     # 🔄 ریستارت سرویس systemd-resolved در صورت استفاده از GitLab
     - name: "🔄 Restart systemd-resolved service if repo_source is gitlab"
@@ -144,7 +153,7 @@
         name: systemd-resolved
         state: restarted
       when: repo_source == "gitlab" and customer_state == 'update'
-      become: true
+      poll: 1
 
     # 🔗 ایجاد لینک سمبلیک برای /etc/resolv.conf به /run/systemd/resolve/resolv.conf
     - name: "🔗 Create symbolic link for /etc/resolv.conf if repo_source is gitlab"
@@ -154,7 +163,7 @@
         state: link
         force: true
       when: repo_source == "gitlab" and customer_state == 'update'
-      become: true
+      poll: 1
 
     # 🛠 تنظیم دستی DNSهای Shecan در /etc/resolv.conf (در صورت نیاز)
     - name: "🛠 Manually set Shecan DNS in /etc/resolv.conf if repo_source is gitlab"
@@ -165,7 +174,7 @@
         dest: /etc/resolv.conf
         mode: '0644'
       when: repo_source == "gitlab" and customer_state == 'update'
-      become: true
+      poll: 1
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ گیت
     # 🗂️ تعریف مخازن پروژه
@@ -204,6 +213,7 @@
       ansible.builtin.stat:
         path: "{{ project_path }}/{{ inventory_hostname }}"
       register: customer_base_dir
+      poll: 1
       when: customer_state == 'update'
 
     # 🛠️ ساخت دایرکتوری مشتری در صورت نیاز
@@ -213,6 +223,7 @@
         state: directory
         mode: '0777'
       when: customer_state == 'update'
+      poll: 1
 
     # 📂 ساخت دایرکتوری مشتری برای هر پروژه در صورت نیاز
     - name: "📂 Create a customer directory for each project if needed"
@@ -222,6 +233,7 @@
         mode: '0777'
       loop: "{{ projects }}"
       when: customer_state == 'update'
+      poll: 1
 
     # 🧐 بررسی وجود پوشه مخزن مشتری (برای هر پروژه)
     - name: "🧐 Check if customer project repository exists"
@@ -230,6 +242,7 @@
       register: customer_repo_check_results
       loop: "{{ projects }}"
       when: customer_state == 'update'
+      poll: 1
       delegate_to: localhost
 
     # 📦 واقعیت customer_repo_check را به عنوان یک فرهنگ لغت تنظیم کنید
@@ -237,6 +250,7 @@
       ansible.builtin.set_fact:
         customer_repo_check: "{{ dict(customer_repo_check_results.results | map(attribute='item.folder') | list | zip(customer_repo_check_results.results)) }}"
       when: customer_state == 'update'
+      poll: 1
       delegate_to: localhost
 
     # 🌱 کلون کردن ریپازیتوری‌ها فقط اگر git هنوز وجود ندارد
@@ -291,6 +305,7 @@
               )
             )
           }}
+      poll: 1
 
     # 🚦 مرحله checkout: اگر tag مشخص شده بود، tag؛ در غیر اینصورت از normalized_branches استفاده کن
     - name: "🚦 Checkout specific tag or branch for each project"
@@ -319,6 +334,7 @@
         state: directory
         mode: '0777'
       loop: "{{ projects }}"
+      poll: 1
       when: customer_state == 'update'
 
     # 📋 کپی کردن فایل docker-compose اختصاصی
@@ -328,6 +344,7 @@
         dest: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}/docker/docker-compose.yml"
         mode: '0777'
       loop: "{{ projects }}"
+      poll: 1
       when: customer_state == 'update'
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ غیر فعال کردن شکن برای گیت لب
@@ -355,6 +372,7 @@
         dest: /etc/systemd/resolved.conf
         mode: '0644'
       when: repo_source == "gitlab" and customer_state == 'update'
+      poll: 1
       become: true
 
     # 🔄 اگر repo_source روی gitlab باشد، سرویس systemd-resolved را پس از بازیابی DNS پیش‌فرض، مجدداً راه‌اندازی کنید.
@@ -363,6 +381,7 @@
         name: systemd-resolved
         state: restarted
       when: repo_source == "gitlab" and customer_state == 'update'
+      poll: 1
       become: true
 
     # 🔗 اگر repo_source برابر با gitlab باشد، پس از بازیابی DNS پیش‌فرض، لینک نمادین برای /etc/resolv.conf ایجاد کنید.
@@ -373,6 +392,7 @@
         state: link
         force: true
       when: repo_source == "gitlab" and customer_state == 'update'
+      poll: 1
       become: true
 
     # 🛠 اگر repo_source روی gitlab است، DNS پیش‌فرض را به صورت دستی در /etc/resolv.conf تنظیم کنید
@@ -384,6 +404,7 @@
         dest: /etc/resolv.conf
         mode: '0644'
       when: repo_source == "gitlab" and customer_state == 'update'
+      poll: 1
       become: true
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ کپی فایل ها
@@ -394,6 +415,7 @@
         state: directory
         mode: '0777'
       when: customer_state == 'update'
+      poll: 1
       delegate_to: localhost
 
     # 🔎 بررسی کنید که آیا فایل SQL خاصی وجود دارد یا خیر
@@ -401,6 +423,7 @@
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/sql/{{ inventory_hostname }}.sql"
       register: sql_file_check
+      poll: 1
       delegate_to: localhost
 
     # 📤 فایل SQL مناسب را کپی کنید
@@ -410,6 +433,7 @@
         dest: "{{ project_path }}/{{ inventory_hostname }}/gateway/docker/init/install.sql"
         mode: '0644'
       when: customer_state == 'update'
+      poll: 1
       delegate_to: localhost
 
     # 🧩 بررسی وجود فایل ZIP مخصوص مشتری
@@ -417,6 +441,7 @@
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/sql/{{ inventory_hostname }}.zip"
       register: zip_file_check
+      poll: 1
       delegate_to: localhost
 
     # 📦 اگر فایل ZIP وجود داشت، آن را اکسترکت کن
@@ -428,6 +453,7 @@
       when:
         - zip_file_check.stat.exists
         - customer_state == 'update'
+      poll: 1
       delegate_to: localhost
 
     # 🧾 ایجاد فایل bashUrl.js برای portal-frontend
@@ -439,6 +465,7 @@
           export default baseUrl;
         mode: '0777'
       when: customer_state == 'update'
+      poll: 1
       changed_when: false
 
     # ⚙️ متغیرها را برای محتوای .env.local تنظیم کنید
@@ -446,6 +473,7 @@
       ansible.builtin.set_fact:
         database_url: "mysql://{{ pu }}:{{ pp }}@{{ customer_containers }}-portal-db:3306/{{ pd }}?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
         base_url: "http://{{ customer_url }}:{{ customer_gateway_ports }}"
+      poll: 1
       when: customer_state == 'update'
 
     # 🌐 ایجاد فایل .env.local برای portal
@@ -457,6 +485,7 @@
           BASE_URL="{{ base_url }}"
         mode: '0777'  # سطح دسترسی مناسب برای فایل
       when: customer_state == 'update'
+      poll: 1
       changed_when: false
 
     # 📝 ایجاد فایل my_database.php برای gateway
@@ -490,6 +519,7 @@
           );
         mode: '0777'
       when: customer_state == 'update'
+      poll: 1
       changed_when: false
 
     # 🧷 ایجاد فایل my_config.php برای gateway
@@ -501,6 +531,7 @@
           $config['base_url'] = "http://{{ customer_url }}:{{ customer_gateway_ports }}";
         mode: '0777'
       when: customer_state == 'update'
+      poll: 1
       changed_when: false
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ بکاپ قبل از اجرا و ساخت شبکه
@@ -509,6 +540,7 @@
       ansible.builtin.stat:
         path: "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
       register: backup_script
+      poll: 1
       when: customer_state == 'update'
 
     # ▶️ اجرای اسکریپت بکاپ برای دیتابیس‌ها و ولوم‌ها تنها در صورتی که فایل موجود باشد
@@ -516,6 +548,7 @@
       ansible.builtin.stat:
         path: "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
       register: backup_script
+      poll: 1
       when: customer_state == 'update'
 
     # 💾 اجرای اسکریپت پشتیبان برای حجم ها و پایگاه های داده
@@ -544,6 +577,7 @@
       register: matching_containers_gateway
       changed_when: false
       failed_when: false
+      poll: 1
       when: customer_state in ['update', 'down']
 
     # 🛑 توقف کانتینرهای مرتبط با سرویس gateway
@@ -552,6 +586,7 @@
         docker stop {{ matching_containers_gateway.stdout_lines | join(' ') }}
       when: matching_containers_gateway.stdout != "" and customer_state in ['update', 'down']
       register: stop_result
+      poll: 1
       failed_when: stop_result.rc != 0 and '"No such container"' not in stop_result.stderr
       changed_when: stop_result.stdout != ""
 
@@ -562,6 +597,7 @@
       when: matching_containers_gateway.stdout != "" and customer_state in ['update', 'down']
       register: kill_result
       failed_when: false
+      poll: 1
       changed_when: "'is not running' not in kill_result.stderr and kill_result.stdout != ''"
 
     # 🧹 حذف کانتینرهای مرتبط با سرویس gateway
@@ -570,6 +606,7 @@
         docker rm {{ matching_containers_gateway.stdout_lines | join(' ') }}
       when: matching_containers_gateway.stdout != "" and customer_state in ['update', 'down']
       register: rm_result
+      poll: 1
       failed_when: rm_result.rc != 0 and '"No such container"' not in rm_result.stderr
       changed_when: rm_result.stdout != ""
 
@@ -577,8 +614,8 @@
     - name: "🚀 Run docker-compose for gateway"
       ansible.builtin.command:
         cmd: docker compose -p {{ customer_containers }}-gateway -f "{{ project_path }}/{{ inventory_hostname }}/gateway/docker/docker-compose.yml" up -d
-      async: 1200
-      poll: 0
+      # async: 1200
+      poll: 1
       when: customer_state == 'update'
       register: docker_compose_job
       changed_when: false
@@ -592,6 +629,7 @@
       changed_when: false
       failed_when: false
       when: customer_state in ['update', 'down']
+      poll: 1
 
     # 🛑 توقف کانتینرهای مرتبط با سرویس portal
     - name: "🛑 Stop matching containers for portal"
@@ -600,6 +638,7 @@
       when: matching_containers_portal.stdout != "" and customer_state in ['update', 'down']
       register: stop_result
       failed_when: stop_result.rc != 0 and '"No such container"' not in stop_result.stderr
+      poll: 1
       changed_when: stop_result.stdout != ""
 
     # ❌ کشتن کانتینرهای باقی‌مانده (در صورت توقف نشدن) برای portal
@@ -609,6 +648,7 @@
       when: matching_containers_portal.stdout != "" and customer_state in ['update', 'down']
       register: kill_result
       failed_when: false
+      poll: 1
       changed_when: "'is not running' not in kill_result.stderr and kill_result.stdout != ''"
 
     # 🧹 حذف کانتینرهای مرتبط با سرویس portal
@@ -618,6 +658,7 @@
       when: matching_containers_portal.stdout != "" and customer_state in ['update', 'down']
       register: rm_result
       failed_when: rm_result.rc != 0 and '"No such container"' not in rm_result.stderr
+      poll: 1
       changed_when: rm_result.stdout != ""
 
     # 🚀 اجرای docker-compose برای سرویس portal
@@ -635,6 +676,7 @@
         docker ps -a --filter "name={{ customer_containers }}-portal-frontend" -q
       register: matching_containers_portal_frontend
       changed_when: false
+      poll: 1
       failed_when: false
       when: customer_state in ['update', 'down']
 
@@ -645,6 +687,7 @@
       when: matching_containers_portal_frontend.stdout != "" and customer_state in ['update', 'down']
       register: stop_result
       failed_when: stop_result.rc != 0 and '"No such container"' not in stop_result.stderr
+      poll: 1
       changed_when: stop_result.stdout != ""
 
     # ❌ کشتن کانتینرهای باقی‌مانده (در صورت توقف نشدن) برای portal-frontend
@@ -654,6 +697,7 @@
       when: matching_containers_portal_frontend.stdout != "" and customer_state in ['update', 'down']
       register: kill_result
       failed_when: false
+      poll: 1
       changed_when: "'is not running' not in kill_result.stderr and kill_result.stdout != ''"
 
     # 🧹 حذف کانتینرهای مرتبط با سرویس portal-frontend
@@ -663,6 +707,7 @@
       when: matching_containers_portal_frontend.stdout != "" and customer_state in ['update', 'down']
       register: rm_result
       failed_when: rm_result.rc != 0 and '"No such container"' not in rm_result.stderr
+      poll: 1
       changed_when: rm_result.stdout != ""
 
     # 🚀 اجرای docker-compose برای سرویس portal-frontend
@@ -683,6 +728,7 @@
         container: "{{ customer_containers }}-portal"
         command: composer install
       register: composer_output
+      poll: 1
       when: customer_state == 'update'
 
     # 📜 نمایش خروجی اج"رای composer install
@@ -694,12 +740,14 @@
           STDERR:
           {{ composer_output.stderr }}
       when: customer_state == 'update'
+      poll: 1
 
     # 🩺 بررسی وضعیت اجرای کانتینر دیتابیس
     - name: "🩺 Check if DB container is running"
       community.docker.docker_container_info:
         name: "{{ customer_containers }}-portal-db"
       register: db_container_info
+      poll: 1
       when: customer_state == 'update'
 
     # 🔼 راه‌اندازی کانتینر دیتابیس در صورت اجرا نشدن
@@ -708,6 +756,7 @@
         name: "{{ customer_containers }}-portal-db"
         state: started
       when: not db_container_info.container.State.Running | default(false) and customer_state == 'update'
+      poll: 1
 
     # 🛠 تلاش برای ایجاد دیتابیس در صورت عدم وجود
     - name: "🛠 Try to create database if it does not exist"
@@ -716,6 +765,7 @@
         command: php bin/console doctrine:database:create --env=prod --if-not-exists
       register: db_create_result
       ignore_errors: true
+      poll: 1
       when: customer_state == 'update'
 
     # 🧬 اجرای مهاجرت‌های پایگاه‌داده اگر ساخت دیتابیس موفق بود یا نیاز نبود
@@ -724,6 +774,7 @@
         container: "{{ customer_containers }}-portal"
         command: php bin/console doctrine:migrations:migrate --no-interaction --env=prod
       when: customer_state == 'update' and db_create_result is not failed
+      poll: 1
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ سایر
     # 📄 نوشتن لیست حجم‌های ایستا (Static Volumes) در فایل
@@ -737,6 +788,7 @@
           portal-frontend
         dest: "{{ info_path }}/volumes/{{ inventory_hostname }}.txt"
         mode: '0777'
+      poll: 1
       when: customer_state == 'update'
 
     # 🟢 اطمینان از در حال اجرا بودن کانتینر
@@ -785,6 +837,7 @@
         echo "$DB_TYPE,$DB_NAME,$DB_USER,$DB_PASSWORD,$DB_HOST" >> "{{ info_path }}/databases/{{ inventory_hostname }}.txt"
       register: db_info_result
       when: customer_state == 'update'
+      poll: 1
       changed_when: false
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ تست ها
@@ -966,6 +1019,7 @@
         dest: "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
         mode: '0777'  # اعطای دسترسی اجرایی به اسکریپت
       when: customer_state == 'update'
+      poll: 1
 
     # ⏰ تنظیم زمان‌بندی اجرای بکاپ با استفاده از cron
     - name: "⏰ Set up cron job for backup"
