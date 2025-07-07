@@ -15,7 +15,7 @@ services:
       INSTANCE_NAME: {{ customer_containers }}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.gateway-{{ inventory_hostname }}.rule=Host(`gateway.{{ inventory_hostname }}`)"
+      - "traefik.http.routers.gateway-{{ inventory_hostname }}.rule=Host(`{{ customer_subdomain_gateway }}.{{ customer_domain }}`)"
       - "traefik.http.routers.gateway-{{ inventory_hostname }}.entrypoints=websecure"
       - "traefik.http.routers.gateway-{{ inventory_hostname }}.tls.certresolver=myresolver"
       - "traefik.http.services.gateway-{{ inventory_hostname }}.loadbalancer.server.port=80"

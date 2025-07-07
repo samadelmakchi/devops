@@ -15,8 +15,11 @@ all:
           customer_portal_ports: 10201
           customer_portal_frontend_ports: 10301
           customer_network_names: "simnad_network"
-          customer_url: "192.168.122.95"
           customer_containers: "simnad_container"
+          customer_url: "185.255.89.160"
+          customer_domain: "pardazeshafza.com"
+          customer_subdomain_gateway: "admin"
+          customer_subdomain_portal: "portal"
           customer_state: "update"
 
         # nikan:
@@ -32,8 +35,11 @@ all:
         #   customer_portal_ports: 10202
         #   customer_portal_frontend_ports: 10302
         #   customer_network_names: "nikan_network"
-        #   customer_url: "192.168.122.95"
         #   customer_containers: "nikan_container"
+        #   customer_url: "185.255.89.160"
+        #   customer_domain: "pardazeshafza.com"
+        #   customer_subdomain_gateway: "calibri"
+        #   customer_subdomain_portal: "portal"
         #   customer_state: "update"
 
         # test:
@@ -49,8 +55,11 @@ all:
         #   customer_portal_ports: 10203
         #   customer_portal_frontend_ports: 10303
         #   customer_network_names: "test_network"
-        #   customer_url: "192.168.122.95"
         #   customer_containers: "test_container"
+        #   customer_url: "185.255.89.160"
+        #   customer_domain: "pardazeshafza.com"
+        #   customer_subdomain_gateway: "calibri"
+        #   customer_subdomain_portal: "portal"
         #   customer_state: "update"
 
   vars:

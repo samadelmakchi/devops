@@ -1,10 +1,8 @@
 all:
   vars:
-    domain: elmakchi.ir
-    ip: http://185.255.89.160
+    domain: pardazeshafza.com
     email: samd.elmakchi@gmail.com
 
-    install_bind9: false
     install_traefik: true
     install_portainer: true
     install_sonarqube: false
@@ -22,46 +20,3 @@ all:
     install_nginx: false
     install_phpmyadmin: false
     install_pgadmin: false
-
-  children:
-    bind_hosts:
-      hosts:
-        dns1:
-          ansible_host: 127.0.0.1
-
-    dns_entries:
-      hosts:
-        traefik:
-          ansible_host: 127.0.0.1
-        portainer:
-          ansible_host: 127.0.0.1
-        sonarqube:
-          ansible_host: 127.0.0.1
-        nexus:
-          ansible_host: 127.0.0.1
-        rabbitmq:
-          ansible_host: 127.0.0.1
-        apprise:
-          ansible_host: 127.0.0.1
-        uptime_kuma:
-          ansible_host: 127.0.0.1
-        splunk:
-          ansible_host: 127.0.0.1
-        grafana:
-          ansible_host: 127.0.0.1
-        prometheus:
-          ansible_host: 127.0.0.1
-        selenium:
-          ansible_host: 127.0.0.1
-        mailserver:
-          ansible_host: 127.0.0.1
-        elk:
-          ansible_host: 127.0.0.1
-        jenkins:
-          ansible_host: 127.0.0.1
-        nginx:
-          ansible_host: 127.0.0.1
-        phpmyadmin:
-          ansible_host: 127.0.0.1
-        pgadmin:
-          ansible_host: 127.0.0.1
