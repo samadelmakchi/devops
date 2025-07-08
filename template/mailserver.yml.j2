@@ -25,7 +25,7 @@ services:
     container_name: roundcube
     restart: always
     ports:
-      - "8080:80"
+      - "4104:80"
     environment:
       ROUNDCUBEMAIL_DEFAULT_HOST: mailserver
       ROUNDCUBEMAIL_SMTP_SERVER: mailserver
@@ -34,13 +34,18 @@ services:
       - mailserver
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.webmail.rule=Host(`webmail.{{ domain }}`)"
-      - "traefik.http.routers.webmail.entrypoints=websecure"
-      - "traefik.http.routers.webmail.tls.certresolver=myresolver"
-      - "traefik.http.services.webmail.loadbalancer.server.port=80"
+      - "traefik.http.routers.roundcube.rule=Host(`roundcube.{{ domain }}`)"
+      - "traefik.http.routers.roundcube.entrypoints=websecure"
+      - "traefik.http.routers.roundcube.tls.certresolver=myresolver"
+      - "traefik.http.services.roundcube.loadbalancer.server.port=80"
     networks:
       - traefik_reverse_proxy
 
 networks:
   traefik_reverse_proxy:
     external: true
+
+volumes:
+  maildata: 
+  mailstate: 
+  maillogs: 

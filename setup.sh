@@ -19,8 +19,53 @@ else
   echo "⚠️ inventory-server.local.yml already exists. Skipping."
 fi
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# بررسی وجود requirements.txt و ایجاد نمونه در صورت نبود
+if [ ! -f requirements.txt ]; then
+  echo "✔️ Creating requirements.txt from template"
+  cat > requirements.txt <<EOF
+pytest
+requests
+selenium
+locust
+pytest-axe
+pact-python
+pytest-html
+EOF
+else
+  echo "⚠️ requirements.txt already exists. Skipping."
+fi
 
+# بررسی وجود locustfile.py و ایجاد نمونه در صورت نبود
+if [ ! -f locustfile.py ]; then
+  echo "✔️ Creating locustfile.py from template"
+  cat > locustfile.py <<EOF
+from locust import HttpUser, task, between
+
+class WebsiteUser(HttpUser):
+    wait_time = between(1, 5)
+
+    @task
+    def index(self):
+        self.client.get("/")
+
+    @task
+    def about(self):
+        self.client.get("/about")
+EOF
+else
+  echo "⚠️ locustfile.py already exists. Skipping."
+fi
+
+# ایجاد دایرکتوری‌های تست
+echo "📁 Creating test directories"
+mkdir -p tests/unit tests/integration tests/api tests/ui tests/smoke tests/regression tests/security tests/contract tests/accessibility
+
+# تنظیم دسترسی‌های دایرکتوری پروژه
+echo "🔐 Setting permissions for project directory"
+chmod -R 755 tests
+chmod 644 requirements.txt locustfile.py
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # متغیر برای تعیین استفاده از سرویس شکن
 USE_SHECAN=false
 
@@ -28,13 +73,6 @@ USE_SHECAN=false
 if [ "$USE_SHECAN" = "true" ]; then
   echo "🔅 Writing full resolved.conf with Shecan DNS"
   sudo bash -c 'cat > /etc/systemd/resolved.conf <<EOF
-#  This file is part of systemd.
-#
-#  systemd is free software; you can redistribute it and/or modify it
-#  under the terms of the GNU Lesser General Public License as published by
-#  the Free Software Foundation; either version 2.1 of the License, or
-#  (at your option) any later version.
-
 [Resolve]
 DNS=178.22.122.100 185.51.200.2
 FallbackDNS=8.8.8.8
@@ -50,13 +88,6 @@ EOF'
 else
   echo "🔅 Writing resolved.conf with default DNS (Google/Cloudflare)"
   sudo bash -c 'cat > /etc/systemd/resolved.conf <<EOF
-#  This file is part of systemd.
-#
-#  systemd is free software; you can redistribute it and/or modify it
-#  under the terms of the GNU Lesser General Public License as published by
-#  the Free Software Foundation; either version 2.1 of the License, or
-#  (at your option) any later version.
-
 [Resolve]
 DNS=8.8.8.8 1.1.1.1
 #Domains=
@@ -112,7 +143,7 @@ source ~/ansible-venv/bin/activate
 
 # 🧼 پاک کردن نسخه معیوب pyOpenSSL و نصب نسخه سازگار
 echo "🧼 Removing problematic pyOpenSSL version and installing compatible one"
-pip uninstall -y pyOpenSSL
+pip uninstall -y pyOpenSSL || true
 pip install pyOpenSSL==23.2.0
 
 # 🥪 تست صحت pyOpenSSL
@@ -128,12 +159,25 @@ echo "🤖 Installing the latest stable version of Ansible..."
 pip install ansible
 
 # 🧹 نصب ابزار بررسی lint برای کدهای انسیبل
-echo "🧹 Installing ansible-lint for16:54 AM +04 on Tuesday, July 01, 2025 for checking best practices..."
+echo "🧹 Installing ansible-lint for checking best practices..."
 pip install ansible-lint
 
 # 🔌 نصب وابستگی‌های لازم برای community.docker (مثل requests و docker)
 echo "🔌 Installing Python dependencies for Docker modules (requests, docker)..."
 pip install requests docker
+
+# نصب پکیج‌های تست در محیط مجازی پروژه
+echo "🔌 Installing test dependencies from requirements.txt..."
+if [ -f requirements.txt ]; then
+  python3 -m venv ./venv
+  source ./venv/bin/activate
+  pip install --upgrade pip
+  pip install -r requirements.txt
+  deactivate
+else
+  echo "❌ requirements.txt not found. Please ensure it exists."
+  exit 1
+fi
 
 # 🧪 بررسی صحت نصب Ansible
 echo "🧪 Verifying Ansible installation..."
@@ -221,21 +265,21 @@ echo "🐋 Docker Compose version: $(docker compose version || echo '❌ Not fou
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 🐍 چک کنید آیا ماژول docker در پایتون نصب شده است
-echo "🐍  Checking if Python Docker module is installed"
+echo "🐍 Checking if Python Docker module is installed"
 if ! python -c "import docker" &> /dev/null; then
-  echo "⚠️  Python Docker module not found. Installing it..."
+  echo "⚠️ Python Docker module not found. Installing it..."
   pip install docker
 else
-  echo "✔️  Python Docker module is already installed"
+  echo "✔️ Python Docker module is already installed"
 fi
 
 # 🐍 نصب docker-compose اگر نصب نباشد
-echo "🐍  Checking if Docker Compose is installed"
+echo "🐍 Checking if Docker Compose is installed"
 if ! pip show docker-compose > /dev/null 2>&1; then
-  echo "⚠️  Docker Compose not found. Installing it..."
+  echo "⚠️ Docker Compose not found. Installing it..."
   pip install docker-compose
 else
-  echo "✔️  Docker Compose is already installed"
+  echo "✔️ Docker Compose is already installed"
 fi
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -263,31 +307,24 @@ sudo systemctl restart docker
 echo "🔑 Generating SSH key"
 rm -f "$PWD/id_rsa" "$PWD/id_rsa.pub"
 ssh-keygen -t rsa -b 4096 -f "$PWD/id_rsa" -N ""
-echo "✔️  SSH key generated at $PWD/id_rsa"
+echo "✔️ SSH key generated at $PWD/id_rsa"
 
 # 🔐 تغییر دسترسی‌های کلید SSH
 echo "🔐 Setting permissions for id_rsa"
 chmod 600 "$PWD/id_rsa"
-echo "✔️  Permissions set to 600 for id_rsa"
+echo "✔️ Permissions set to 600 for id_rsa"
 
 # 🛠️ راه‌اندازی SSH Agent و اضافه کردن کلید
 echo "🛠️ Starting SSH agent"
 eval "$(ssh-agent -s)"
 ssh-add "$PWD/id_rsa"
-echo "✔️  SSH key added to SSH agent"
+echo "✔️ SSH key added to SSH agent"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # غیرفعال کردن سرویس شکن در صورت فعال بودن
 if [ "$USE_SHECAN" = "true" ]; then
     echo "🔅 Disabling Shecan DNS and reverting to default DNS"
     sudo bash -c 'cat > /etc/systemd/resolved.conf <<EOF
-#  This file is part of systemd.
-#
-#  systemd is free software; you can redistribute it and/or modify it
-#  under the terms of the GNU Lesser General Public License as published by
-#  the Free Software Foundation; either version 2.1 of the License, or
-#  (at your option) any later version.
-
 [Resolve]
 DNS=8.8.8.8 1.1.1.1
 #Domains=
@@ -309,4 +346,4 @@ EOF'
 fi
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-echo "✅  Script execution completed!"
+echo "✅ Script execution completed!"

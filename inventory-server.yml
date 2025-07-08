@@ -5,17 +5,13 @@ all:
 
     install_traefik: true
     install_portainer: true
-    install_sonarqube: false
-    install_nexus: false
     install_rabbitmq: false
     install_apprise: false
     install_uptime_kuma: false
     install_splunk: false
     install_grafana: false
     install_prometheus: false
-    install_selenium: false
     install_mailserver: false
-    install_elk: false
     install_jenkins: false
     install_nginx: false
     install_phpmyadmin: false

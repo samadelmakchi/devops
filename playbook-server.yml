@@ -102,43 +102,6 @@
       poll: 1
       when: install_portainer is false and portainer_file.stat.exists
 
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ SonarQube
-    - name: Generate sonarqube.yml from template
-      ansible.builtin.template:
-        src: template/sonarqube.yml.j2
-        dest: tools/sonarqube.yml
-        owner: root
-        group: root
-        mode: '0644'
-      poll: 1
-      when: install_sonarqube is true
-
-    - name: Set up SonarQube using Docker Compose
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - sonarqube.yml
-        state: present
-        pull: always
-        recreate: auto
-      poll: 1
-      when: install_sonarqube is true
-
-    - name: Check if sonarqube.yml file exists
-      ansible.builtin.stat:
-        path: "{{ playbook_dir }}/tools/sonarqube.yml"
-      poll: 1
-      register: sonarqube_file
-
-    - name: Tear down SonarQube container if install_sonarqube is false
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - sonarqube.yml
-        state: absent
-      poll: 1
-      when: install_sonarqube is false and sonarqube_file.stat.exists
-
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Jenkins
     - name: Generate jenkins.yml from template
       ansible.builtin.template:
@@ -175,43 +138,6 @@
         state: absent
       poll: 1
       when: install_jenkins is false and jenkins_file.stat.exists
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Nexus
-    - name: Generate nexus.yml from template
-      ansible.builtin.template:
-        src: template/nexus.yml.j2
-        dest: tools/nexus.yml
-        owner: root
-        group: root
-        mode: '0644'
-      poll: 1
-      when: install_nexus is true
-
-    - name: Set up Nexus using Docker Compose
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - nexus.yml
-        state: present
-        pull: always
-        recreate: auto
-      poll: 1
-      when: install_nexus is true
-
-    - name: Check if nexus.yml file exists
-      ansible.builtin.stat:
-        path: "{{ playbook_dir }}/tools/nexus.yml"
-      register: nexus_file
-      poll: 1
-
-    - name: Tear down Nexus container if install_nexus is false
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - nexus.yml
-        state: absent
-      poll: 1
-      when: install_nexus is false and nexus_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RabbitMQ
     - name: Generate rabbitmq.yml from template
@@ -452,53 +378,6 @@
       poll: 1
       when: install_prometheus is false and prometheus_file.stat.exists
 
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Selenium
-    - name: Copy Selenium config folder
-      ansible.builtin.copy:
-        src: template/selenium/
-        dest: tools/selenium/
-        owner: root
-        group: root
-        mode: '0644'
-      poll: 1
-      when: install_selenium is true
-
-    - name: Generate selenium.yml from template
-      ansible.builtin.template:
-        src: template/selenium.yml.j2
-        dest: tools/selenium.yml
-        owner: root
-        group: root
-        mode: '0644'
-      poll: 1
-      when: install_selenium is true
-
-    - name: Set up Selenium using Docker Compose
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - selenium.yml
-        state: present
-        pull: always
-        recreate: auto
-      poll: 1
-      when: install_selenium is true
-
-    - name: Check if selenium.yml file exists
-      ansible.builtin.stat:
-        path: "{{ playbook_dir }}/tools/selenium.yml"
-      register: selenium_file
-      poll: 1
-
-    - name: Tear down Selenium container if install_selenium is false
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - selenium.yml
-        state: absent
-      poll: 1
-      when: install_selenium is false and selenium_file.stat.exists
-
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Mailserver
     - name: Copy Mailserver config folder
       ansible.builtin.copy:
@@ -666,43 +545,6 @@
         state: absent
       poll: 1
       when: install_pgadmin is false and pgadmin_file.stat.exists
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ELK
-    - name: Generate elk.yml from template
-      ansible.builtin.template:
-        src: template/elk.yml.j2
-        dest: tools/elk.yml
-        owner: root
-        group: root
-        mode: '0644'
-      poll: 1
-      when: install_elk is true
-
-    - name: Set up PgAdmin using Docker Compose
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - elk.yml
-        state: present
-        pull: always
-        recreate: auto
-      poll: 1
-      when: install_elk is true
-
-    - name: Check if elk.yml file exists
-      ansible.builtin.stat:
-        path: "{{ playbook_dir }}/tools/elk.yml"
-      register: elk_file
-      poll: 1
-
-    - name: Tear down PgAdmin container if install_elk is false
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - elk.yml
-        state: absent
-      poll: 1
-      when: install_elk is false and elk_file.stat.exists
 
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

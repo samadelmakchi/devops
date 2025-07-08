@@ -1,0 +1,209 @@
+---
+- name: Run all automated tests for each customer
+  hosts: local
+  vars:
+    project_dir: "{{ playbook_dir }}"
+    test_dirs:
+      locust_file: "{{ project_dir }}/locustfile.py"
+      unit: "{{ project_dir }}/tests/unit"
+      integration: "{{ project_dir }}/tests/integration"
+      api: "{{ project_dir }}/tests/api"
+      ui: "{{ project_dir }}/tests/ui"
+      smoke: "{{ project_dir }}/tests/smoke"
+      regression: "{{ project_dir }}/tests/regression"
+      security: "{{ project_dir }}/tests/security"
+      contract: "{{ project_dir }}/tests/contract"
+      accessibility: "{{ project_dir }}/tests/accessibility"
+    reports_dir: "{{ project_dir }}/reports/{{ inventory_hostname | lower }}"
+
+  tasks:
+    # Create reports directory for each customer
+    - name: Create reports directory for customer
+      file:
+        path: "{{ reports_dir }}"
+        state: directory
+        mode: '0755'
+      when: inventory_hostname is defined
+
+    # Install Python dependencies
+    - name: Install Python dependencies
+      pip:
+        requirements: "{{ project_dir }}/requirements.txt"
+        virtualenv: "{{ project_dir }}/venv"
+      register: pip_install
+      ignore_errors: true
+
+    # Start Selenium container for UI and Accessibility tests
+    - name: Start Selenium container
+      docker_container:
+        name: "selenium_{{ inventory_hostname | lower }}"
+        image: selenium/standalone-chrome
+        state: started
+        ports:
+          - "{{ customer_portal_ports + 1 }}:4444"
+        detach: true
+      when: pip_install is success and inventory_hostname is defined
+
+    # Start Locust master container for performance and load tests
+    - name: Start Locust master container
+      docker_container:
+        name: "locust_master_{{ inventory_hostname | lower }}"
+        image: locustio/locust
+        state: started
+        ports:
+          - "{{ customer_portal_ports + 2 }}:8089"
+        volumes:
+          - "{{ test_dirs.locust_file }}:/locust/locustfile.py"
+        command: "--master"
+        detach: true
+      when: pip_install is success and inventory_hostname is defined
+
+    # Start Locust worker container
+    - name: Start Locust worker container
+      docker_container:
+        name: "locust_worker_{{ inventory_hostname | lower }}"
+        image: locustio/locust
+        state: started
+        command: "--worker --master-host=locust_master_{{ inventory_hostname | lower }}"
+        detach: true
+      when: pip_install is success and inventory_hostname is defined
+
+    # Run Unit Tests
+    - name: Run Unit Tests
+      command: "{{ project_dir }}/venv/bin/pytest {{ test_dirs.unit }} -v --html={{ reports_dir }}/unit_report.html"
+      args:
+        chdir: "{{ project_dir }}"
+      register: unit_test_result
+      ignore_errors: true
+      when: pip_install is success and inventory_hostname is defined
+
+    # Run Integration Tests
+    - name: Run Integration Tests
+      command: "{{ project_dir }}/venv/bin/pytest {{ test_dirs.integration }} -v --html={{ reports_dir }}/integration_report.html"
+      args:
+        chdir: "{{ project_dir }}"
+      register: integration_test_result
+      ignore_errors: true
+      when: pip_install is success and inventory_hostname is defined
+
+    # Run API Tests
+    - name: Run API Tests
+      command: "{{ project_dir }}/venv/bin/pytest {{ test_dirs.api }} -v --html={{ reports_dir }}/api_report.html"
+      args:
+        chdir: "{{ project_dir }}"
+      register: api_test_result
+      ignore_errors: true
+      when: pip_install is success and inventory_hostname is defined
+
+    # Run UI Tests
+    - name: Run UI Tests
+      command: "{{ project_dir }}/venv/bin/pytest {{ test_dirs.ui }} -v --html={{ reports_dir }}/ui_report.html"
+      args:
+        chdir: "{{ project_dir }}"
+      environment:
+        SELENIUM_HUB_URL: "http://localhost:{{ customer_portal_ports + 1 }}/wd/hub"
+        APP_URL: "http://{{ customer_url }}:{{ customer_portal_ports }}"
+      register: ui_test_result
+      ignore_errors: true
+      when: pip_install is success and inventory_hostname is defined
+
+    # Run Smoke Tests
+    - name: Run Smoke Tests
+      command: "{{ project_dir }}/venv/bin/pytest {{ test_dirs.smoke }} -v --html={{ reports_dir }}/smoke_report.html"
+      args:
+        chdir: "{{ project_dir }}"
+      environment:
+        APP_URL: "http://{{ customer_url }}:{{ customer_portal_ports }}"
+      register: smoke_test_result
+      ignore_errors: true
+      when: pip_install is success and inventory_hostname is defined
+
+    # Run Regression Tests
+    - name: Run Regression Tests
+      command: "{{ project_dir }}/venv/bin/pytest {{ test_dirs.regression }} -v --html={{ reports_dir }}/regression_report.html"
+      args:
+        chdir: "{{ project_dir }}"
+      environment:
+        APP_URL: "http://{{ customer_url }}:{{ customer_portal_ports }}"
+      register: regression_test_result
+      ignore_errors: true
+      when: pip_install is success and inventory_hostname is defined
+
+    # Run Security Tests (basic)
+    - name: Run Security Tests
+      command: "{{ project_dir }}/venv/bin/pytest {{ test_dirs.security }} -v --html={{ reports_dir }}/security_report.html"
+      args:
+        chdir: "{{ project_dir }}"
+      environment:
+        APP_URL: "http://{{ customer_url }}:{{ customer_portal_ports }}"
+      register: security_test_result
+      ignore_errors: true
+      when: pip_install is success and inventory_hostname is defined
+
+    # Run Contract Tests
+    - name: Run Contract Tests
+      command: "{{ project_dir }}/venv/bin/pytest {{ test_dirs.contract }} -v --html={{ reports_dir }}/contract_report.html"
+      args:
+        chdir: "{{ project_dir }}"
+      environment:
+        APP_URL: "http://{{ customer_url }}:{{ customer_portal_ports }}"
+      register: contract_test_result
+      ignore_errors: true
+      when: pip_install is success and inventory_hostname is defined
+
+    # Run Accessibility Tests
+    - name: Run Accessibility Tests
+      command: "{{ project_dir }}/venv/bin/pytest {{ test_dirs.accessibility }} -v --html={{ reports_dir }}/accessibility_report.html"
+      args:
+        chdir: "{{ project_dir }}"
+      environment:
+        SELENIUM_HUB_URL: "http://localhost:{{ customer_portal_ports + 1 }}/wd/hub"
+        APP_URL: "http://{{ customer_url }}:{{ customer_portal_ports }}"
+      register: accessibility_test_result
+      ignore_errors: true
+      when: pip_install is success and inventory_hostname is defined
+
+    # Run Performance and Load Tests with Locust
+    - name: Run Locust Performance and Load Tests
+      command: "{{ project_dir }}/venv/bin/locust -f {{ test_dirs.locust_file }} --headless --users 100 --spawn-rate 10 --run-time 1m --host http://{{ customer_url }}:{{ customer_portal_ports }} --html {{ reports_dir }}/locust_report.html"
+      args:
+        chdir: "{{ project_dir }}"
+      register: locust_test_result
+      ignore_errors: true
+      when: pip_install is success and inventory_hostname is defined
+
+    # Stop Selenium container
+    - name: Stop Selenium container
+      docker_container:
+        name: "selenium_{{ inventory_hostname | lower }}"
+        state: stopped
+      when: pip_install is success and inventory_hostname is defined
+
+    # Stop Locust containers
+    - name: Stop Locust master container
+      docker_container:
+        name: "locust_master_{{ inventory_hostname | lower }}"
+        state: stopped
+      when: pip_install is success and inventory_hostname is defined
+
+    - name: Stop Locust worker container
+      docker_container:
+        name: "locust_worker_{{ inventory_hostname | lower }}"
+        state: stopped
+      when: pip_install is success and inventory_hostname is defined
+
+    # Report test results
+    - name: Display test results for {{ inventory_hostname }}
+      debug:
+        msg:
+          - "Unit Tests: {{ 'Passed' if unit_test_result.rc == 0 else 'Failed' }}"
+          - "Integration Tests: {{ 'Passed' if integration_test_result.rc == 0 else 'Failed' }}"
+          - "API Tests: {{ 'Passed' if api_test_result.rc == 0 else 'Failed' }}"
+          - "UI Tests: {{ 'Passed' if ui_test_result.rc == 0 else 'Failed' }}"
+          - "Smoke Tests: {{ 'Passed' if smoke_test_result.rc == 0 else 'Failed' }}"
+          - "Regression Tests: {{ 'Passed' if regression_test_result.rc == 0 else 'Failed' }}"
+          - "Security Tests: {{ 'Passed' if security_test_result.rc == 0 else 'Failed' }}"
+          - "Contract Tests: {{ 'Passed' if contract_test_result.rc == 0 else 'Failed' }}"
+          - "Accessibility Tests: {{ 'Passed' if accessibility_test_result.rc == 0 else 'Failed' }}"
+          - "Performance/Load Tests: {{ 'Passed' if locust_test_result.rc == 0 else 'Failed' }}"
+      when: pip_install is success and inventory_hostname is defined

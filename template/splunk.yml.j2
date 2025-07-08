@@ -15,7 +15,6 @@ services:
       - splunk_data:/opt/splunk/var
     restart: always
     networks:
-      - splunk_network
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
@@ -25,8 +24,6 @@ services:
       - "traefik.http.services.splunk.loadbalancer.server.port=8000"
 
 networks:
-  splunk_network:
-    driver: bridge
   traefik_reverse_proxy:
     external: true 
 

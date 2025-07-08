@@ -45,6 +45,15 @@ ansible-playbook -i inventory.local.yml playbook.yml --ask-become-pass
 
 ---
 
+### 🧪 انجام تست های اتوماتیک
+
+```bash
+source ~/ansible-venv/bin/activate
+ansible-playbook -i inventory.local.yml playbook-test.yml --ask-become-pass
+```
+
+---
+
 ### 🌐 راهنمای حرفه‌ای اختصاص ساب‌دامین به سرویس‌ها
 
 #### **روش اول: استفاده از پنل DirectAdmin**
@@ -74,43 +83,40 @@ ansible-playbook -i inventory.local.yml playbook.yml --ask-become-pass
 ---
 
 ### 🔆 سرویس های مشتریان
-📜 Gateway (10101 - ...)
 
-📜 Portal Backend (10201 - ...)
+📜 Gateway (8061 - ...)
 
-📜 Portal Frontend (10301 - ...)
+📜 Portal Backend (7061 - ...)
+
+📜 Portal Frontend (6061 - ...)
 
 ---
 
 ### 💢 ابزارهای دواپس
 
-### Server
-- 🛠️ Traefik (80) (user: admin - pass: admin)
+🛣️ Traefik (80) (user: admin - pass: admin)
 
-### Logs Management
-- 📑 Splunk (8580)
-- 📑 Fluentd (8581)
-- 📑 Kibana (8582)
-- 📑 Elasticsearch (-)
-- 📑 Logstash (-)
-- 📑 Beats (-)
+📊 Splunk (8580)
 
-### Monitoring
-- 🖥️ Prometheus (9090)
-- 🖥️ Grafana (9091)
-- 🖥️ Uptime Kuma (9092)
+🔥 Prometheus (9090)
 
-### CICD
-- ♻️ Jenkins (4441)
-- ♻️ Nexus (4442)
-- ♻️ SonarQube (4443)
-- ♻️ Selenium (4444)
+📈 Grafana (9091)
 
-### Tools
-- 📗 Portainer (4100) (set user and pass)
-- 📔 Nginx (4101)
-- 📒 RabbitMQ (4102)
-- 📕 Apprise (4103)
-- 📕 Mailserver (?)
-- 📓 phpMyAdmin (9281)
-- 📓 pgAdmin (9282)
+⏰ Uptime Kuma (9092)
+
+♻️ Jenkins (4441)
+
+🐳 Portainer (4100) (set user and pass)
+
+🌐 Nginx (4101)
+
+🐰 RabbitMQ (4102)
+
+📬 Apprise (4103)
+
+✉️ Mailserver (4104)
+
+🗄️ phpMyAdmin (9281)
+
+🐘 pgAdmin (9282)
+
