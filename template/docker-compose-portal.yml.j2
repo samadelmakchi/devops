@@ -14,7 +14,7 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.portal-{{ inventory_hostname }}.rule=Host(`portal.{{ customer_domain }}`)"
+      - "traefik.http.routers.portal-{{ inventory_hostname }}.rule=Host(`backendportal.{{ customer_domain }}`)"
       - "traefik.http.routers.portal-{{ inventory_hostname }}.entrypoints=websecure"
       - "traefik.http.routers.portal-{{ inventory_hostname }}.tls.certresolver=myresolver"
       - "traefik.http.services.portal-{{ inventory_hostname }}.loadbalancer.server.port=80"

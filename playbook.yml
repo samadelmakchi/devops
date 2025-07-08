@@ -461,7 +461,7 @@
       ansible.builtin.copy:
         dest: "{{ project_path }}/{{ inventory_hostname }}/portal-frontend/baseUrl.js"
         content: |
-          const baseUrl = 'http://{{ customer_url }}:{{ customer_portal_ports }}';
+          const baseUrl = 'http://backendportal.{{ customer_domain }}';
           export default baseUrl;
         mode: '0777'
       when: customer_state == 'update'
@@ -472,7 +472,7 @@
     - name: "⚙️ Set variables for .env.local content"
       ansible.builtin.set_fact:
         database_url: "mysql://{{ pu }}:{{ pp }}@{{ customer_containers }}-portal-db:3306/{{ pd }}?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
-        base_url: "http://{{ customer_url }}:{{ customer_gateway_ports }}"
+        base_url: "https://{{ customer_subdomain_gateway }}.{{ customer_domain }}"
       poll: 1
       when: customer_state == 'update'
 
@@ -528,7 +528,7 @@
         dest: "{{ project_path }}/{{ inventory_hostname }}/gateway/admin/application/config/my_config.php"
         content: |
           <?php defined('BASEPATH') OR exit('No direct script access allowed');
-          $config['base_url'] = "http://{{ customer_url }}:{{ customer_gateway_ports }}";
+          $config['base_url'] = "https://{{ customer_subdomain_gateway }}.{{ customer_domain }}";
         mode: '0777'
       when: customer_state == 'update'
       poll: 1
@@ -839,30 +839,6 @@
       when: customer_state == 'update'
       poll: 1
       changed_when: false
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ تست ها
-    # # اجرای تست‌های یکپارچگی، مهاجرت، استفاده‌پذیری، بار و پایگاه داده برای همه مشتریان
-    # - name: Run integration, migration, usability, load, and database tests for all customers
-    #   ansible.builtin.shell: |
-    #     cd "{{ project_path }}/test" && \
-    #     python3 test_integration.py && \       # تست‌های یکپارچگی برای بررسی تعامل بخش‌های مختلف سیستم
-    #     python3 test_migration.py && \         # تست‌های مهاجرت برای بررسی صحت فرآیند انتقال داده‌ها
-    #     python3 usability_test.py && \         # تست‌های استفاده‌پذیری برای ارزیابی تجربه کاربری
-    #     python3 test_load.py && \              # تست‌های بار برای بررسی رفتار سیستم تحت بار زیاد
-    #     python3 database_test.py && \          # تست‌های پایگاه داده برای بررسی صحت داده‌ها و عملیات پایگاه داده
-    #     python3 test_api.py && \               # تست‌هایی برای بررسی عملکرد و صحت API‌ها
-    #     python3 test_performance.py && \       # تست‌های عملکردی برای ارزیابی سرعت و پاسخ‌دهی سیستم
-    #     python3 test_security.py && \          # تست‌های امنیتی برای شناسایی آسیب‌پذیری‌ها و تهدیدات
-    #     python3 test_smoke.py && \             # تست‌های دود برای اطمینان از اینکه سیستم به درستی راه‌اندازی شده است
-    #     python3 test_acceptance.py && \        # تست‌های پذیرش برای بررسی اینکه سیستم نیازهای کاربر را برآورده می‌کند
-    #     python3 test_reliability.py && \       # تست‌های قابلیت اطمینان برای ارزیابی پایداری و عملکرد سیستم
-    #     python3 test_stress.py && \            # تست‌های استرس برای بررسی عملکرد سیستم تحت بارهای شدید
-    #     python3 test_ui.py && \                # تست‌های رابط کاربری برای بررسی تعامل کاربر با سیستم
-    #     python3 test_system.py && \            # تست‌های سیستم برای ارزیابی یکپارچگی کل سیستم
-    #     python3 test_regression.py && \        # تست‌های رگرسیون برای اطمینان از اینکه تغییرات جدید باعث اختلال در عملکردهای قبلی نمی‌شود
-    #   when: customer_state == 'update'
-    #   poll: 1
-    #   changed_when: true
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ بکاپ گرفتن
     # 📤 کپی کردن اسکریپت بکاپ روی سرور
