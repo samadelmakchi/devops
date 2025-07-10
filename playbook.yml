@@ -461,7 +461,7 @@
       ansible.builtin.copy:
         dest: "{{ project_path }}/{{ inventory_hostname }}/portal-frontend/baseUrl.js"
         content: |
-          const baseUrl = 'http://backendportal.{{ customer_domain }}';
+          const baseUrl = 'http://{{ customer_subdomain_backendportal }}.{{ customer_domain }}';
           export default baseUrl;
         mode: '0777'
       when: customer_state == 'update'

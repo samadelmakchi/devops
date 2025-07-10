@@ -17,9 +17,10 @@ all:
           customer_network_names: "simnad_network"
           customer_containers: "simnad_container"
           customer_url: "185.255.89.160"
-          customer_domain: "pardazeshafza.com"
+          customer_domain: "simnad.com"
           customer_subdomain_gateway: "admin"
           customer_subdomain_portal: "portal"
+          customer_subdomain_backendportal: "backendportal"
           customer_state: "update"
 
         nikan:
@@ -40,6 +41,7 @@ all:
           customer_domain: "pardazeshafza.com"
           customer_subdomain_gateway: "calibri"
           customer_subdomain_portal: "portal"
+          customer_subdomain_backendportal: "backendportal"
           customer_state: "update"
 
         test:
@@ -58,8 +60,9 @@ all:
           customer_containers: "test_container"
           customer_url: "185.255.89.160"
           customer_domain: "pardazeshafza.com"
-          customer_subdomain_gateway: "calibri"
-          customer_subdomain_portal: "portal"
+          customer_subdomain_gateway: "testcalibri"
+          customer_subdomain_portal: "testportal"
+          customer_subdomain_backendportal: "testbackendportal"
           customer_state: "update"
 
   vars:
