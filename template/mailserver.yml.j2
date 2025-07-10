@@ -2,7 +2,7 @@ services:
   mailserver:
     image: docker.io/mailserver/docker-mailserver:latest
     container_name: mailserver
-    hostname: mail
+    hostname: mailserver
     domainname: {{ domain }}
     env_file: mailserver/config/dms-settings.env
     ports:
