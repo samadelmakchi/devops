@@ -15,10 +15,10 @@ services:
       INSTANCE_NAME: {{ customer_containers }}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend-{{ inventory_hostname }}.rule=Host(`{{ customer_subdomain_portal }}.{{ customer_domain }}`)"
-      - "traefik.http.routers.frontend-{{ inventory_hostname }}.entrypoints=websecure"
-      - "traefik.http.routers.frontend-{{ inventory_hostname }}.tls.certresolver=myresolver"
-      - "traefik.http.services.frontend-{{ inventory_hostname }}.loadbalancer.server.port=5173"
+      - "traefik.http.routers.{{ customer_subdomain_portal }}.rule=Host(`{{ customer_subdomain_portal }}.{{ customer_domain }}`)"
+      - "traefik.http.routers.{{ customer_subdomain_portal }}.entrypoints=websecure"
+      - "traefik.http.routers.{{ customer_subdomain_portal }}.tls.certresolver=myresolver"
+      - "traefik.http.services.{{ customer_subdomain_portal }}.loadbalancer.server.port=5173"
 
 networks:
   {{ customer_network_names }}:

@@ -3,8 +3,8 @@ services:
     image: docker.io/mailserver/docker-mailserver:latest
     container_name: mailserver
     hostname: mail
-    domainname: elmakchi.ir
-    env_file: config/dms-settings.env
+    domainname: {{ domain }}
+    env_file: mailserver/config/dms-settings.env
     ports:
       - "25:25"
       - "143:143"

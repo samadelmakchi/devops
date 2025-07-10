@@ -257,42 +257,99 @@
       poll: 1
       when: install_uptime_kuma is false and ruptime_kuma_file.stat.exists
 
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Splunk
-    - name: Generate splunk.yml from template
-      ansible.builtin.template:
-        src: template/splunk.yml.j2
-        dest: tools/splunk.yml
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Loki
+    - name: Copy Loki config folder
+      ansible.builtin.copy:
+        src: template/loki/
+        dest: tools/loki/
         owner: root
         group: root
         mode: '0644'
       poll: 1
-      when: install_splunk is true
+      when: install_loki is true
 
-    - name: Set up Splunk using Docker Compose
+    - name: Generate loki.yml from template
+      ansible.builtin.template:
+        src: template/loki.yml.j2
+        dest: tools/loki.yml
+        owner: root
+        group: root
+        mode: '0644'
+      poll: 1
+      when: install_loki is true
+
+    - name: Set up Loki using Docker Compose
       community.docker.docker_compose_v2:
         project_src: tools
         files:
-          - splunk.yml
+          - loki.yml
         state: present
         pull: always
         recreate: auto
       poll: 1
-      when: install_splunk is true
+      when: install_loki is true
 
-    - name: Check if splunk.yml file exists
+    - name: Check if loki.yml file exists
       ansible.builtin.stat:
-        path: "{{ playbook_dir }}/tools/splunk.yml"
-      register: splunk_file
+        path: "{{ playbook_dir }}/tools/loki.yml"
+      register: loki_file
       poll: 1
 
-    - name: Tear down Splunk container if install_splunk is false
+    - name: Tear down Loki container if install_loki is false
       community.docker.docker_compose_v2:
         project_src: tools
         files:
-          - splunk.yml
+          - loki.yml
         state: absent
       poll: 1
-      when: install_splunk is false and splunk_file.stat.exists
+      when: install_loki is false and loki_file.stat.exists
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Tempo
+    - name: Copy Tempo config folder
+      ansible.builtin.copy:
+        src: template/tempo/
+        dest: tools/tempo/
+        owner: root
+        group: root
+        mode: '0644'
+      poll: 1
+      when: install_tempo is true
+
+    - name: Generate tempo.yml from template
+      ansible.builtin.template:
+        src: template/tempo.yml.j2
+        dest: tools/tempo.yml
+        owner: root
+        group: root
+        mode: '0644'
+      poll: 1
+      when: install_tempo is true
+
+    - name: Set up Tempo using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - tempo.yml
+        state: present
+        pull: always
+        recreate: auto
+      poll: 1
+      when: install_tempo is true
+
+    - name: Check if tempo.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/tempo.yml"
+      register: tempo_file
+      poll: 1
+
+    - name: Tear down Tempo container if install_tempo is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - tempo.yml
+        state: absent
+      poll: 1
+      when: install_tempo is false and tempo_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Grafana
     - name: Generate grafana.yml from template
