@@ -8,14 +8,12 @@ services:
       - "--providers.docker=true"
       - "--entryPoints.web.address=:80"
       - "--entryPoints.websecure.address=:443"
-      # - "--entryPoints.web.http.redirections.entryPoint.to=websecure"
-      # - "--entryPoints.web.http.redirections.entryPoint.scheme=https"
-      # - "--entryPoints.web.http.redirections.entryPoint.permanent=true"
+      - "--entryPoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entryPoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entryPoints.web.http.redirections.entryPoint.permanent=true"
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
       - "--certificatesresolvers.myresolver.acme.email={{ email }}"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-
-      - "--certificatesresolvers.myresolver.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "./letsencrypt:/letsencrypt"
@@ -26,17 +24,11 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      # Router برای HTTPS
-      - "traefik.http.routers.traefik-secure.rule=Host(`traefik.{{ domain }}`)"
-      - "traefik.http.routers.traefik-secure.entrypoints=websecure"
-      - "traefik.http.routers.traefik-secure.tls.certresolver=myresolver"
-      - "traefik.http.routers.traefik-secure.service=api@internal"
-      - "traefik.http.routers.traefik-secure.middlewares=auth"
-      # Router برای HTTP (بدون SSL)
-      - "traefik.http.routers.traefik-insecure.rule=Host(`traefik.{{ domain }}`)"
-      - "traefik.http.routers.traefik-insecure.entrypoints=web" # استفاده از entrypoint 'web'
-      - "traefik.http.routers.traefik-insecure.service=api@internal"
-      - "traefik.http.routers.traefik-insecure.middlewares=auth" # میان‌افزارها را در صورت نیاز اضافه کنید
+      - "traefik.http.routers.traefik.rule=Host(`traefik.{{ domain }}`)"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls.certresolver=myresolver"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.middlewares=auth"
       - "traefik.http.middlewares.auth.basicauth.users=admin:$$apr1$$ZjqNihhn$$W/jOU6F1QXZt4YRATR86O0"
 
 volumes:
