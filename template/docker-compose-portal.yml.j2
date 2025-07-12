@@ -14,10 +14,10 @@ services:
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.{{ customer_subdomain_backendportal }}.rule=Host(`{{ customer_subdomain_backendportal }}.{{ customer_domain }}`)"
-      - "traefik.http.routers.{{ customer_subdomain_backendportal }}.entrypoints=websecure"
-      - "traefik.http.routers.{{ customer_subdomain_backendportal }}.tls.certresolver=myresolver"
-      - "traefik.http.services.{{ customer_subdomain_backendportal }}.loadbalancer.server.port=80"
+      - "traefik.http.routers.{{ customer_containers }}-portal.rule=Host(`{{ customer_subdomain_backendportal }}.{{ customer_domain }}`)"
+      - "traefik.http.routers.{{ customer_containers }}-portal.entrypoints=websecure"
+      - "traefik.http.routers.{{ customer_containers }}-portal.tls.certresolver=myresolver"
+      - "traefik.http.services.{{ customer_containers }}-portal.loadbalancer.server.port=80"
 
   {{ customer_containers }}-portal-db:
     image: mariadb:10.11
