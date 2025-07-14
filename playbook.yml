@@ -841,8 +841,8 @@
       changed_when: false
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ بکاپ گرفتن
-    # 📤 کپی کردن اسکریپت بکاپ روی سرور
-    - name: "📤 Copy backup script to the server"
+    # 📤 کپی کردن اسکریپت بکاپ فایل‌ها روی سرور
+    - name: "📤 Copy volume backup script to the server"
       ansible.builtin.copy:
         content: |
           #!/bin/bash
@@ -854,8 +854,8 @@
           chmod 777 "$BACKUP_DIR"
 
           # فایل گزارش
-          BACKUP_LOG="{{ log_path }}/backup/{{ inventory_hostname }}.txt"
-          save_log "🚀 Backup started at $(date)"
+          BACKUP_LOG="{{ log_path }}/backup/{{ inventory_hostname }}_volumes.txt"
+          save_log "🚀 Volume backup started at $(date)"
 
           # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           # بررسی فضای دیسک
@@ -906,6 +906,45 @@
           done
 
           # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          save_log "🏁 Volume backup completed at $(date)"
+          save_log "----------------------------------------------------------------------------------"
+
+          # تابع ذخیره لاگ
+          save_log() {
+            local message="$1"
+            echo "$message" | tee -a "$BACKUP_LOG" | logger -t backup_volumes
+          }
+        dest: "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
+        mode: '0777'  # اعطای دسترسی اجرایی به اسکریپت
+      when: customer_state == 'update'
+      poll: 1
+
+    # 📤 کپی کردن اسکریپت بکاپ پایگاه داده‌ها روی سرور
+    - name: "📤 Copy database backup script to the server"
+      ansible.builtin.copy:
+        content: |
+          #!/bin/bash
+
+          # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          # مسیر بکاپ
+          BACKUP_DIR="{{ backup_path }}/{{ inventory_hostname }}/$(date +'%Y-%m-%d-%H-%M-%S')"
+          mkdir -p $BACKUP_DIR
+          chmod 777 "$BACKUP_DIR"
+
+          # فایل گزارش
+          BACKUP_LOG="{{ log_path }}/backup/{{ inventory_hostname }}_databases.txt"
+          save_log "🚀 Database backup started at $(date)"
+
+          # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          # بررسی فضای دیسک
+          REQUIRED_SPACE_MB=100
+          AVAILABLE_SPACE_MB=$(df "$BACKUP_DIR" | awk 'NR==2 {print int($4/1024)}')
+          if (( AVAILABLE_SPACE_MB < REQUIRED_SPACE_MB )); then
+            save_log "🖴❌ Not enough disk space. Required: ${REQUIRED_SPACE_MB}MB, Available: ${AVAILABLE_SPACE_MB}MB"
+            exit 1
+          fi
+
+          # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           # گرفتن لیست از دیتابیس‌ها از فایل مخصوص هر مشتری
           DATABASES="{{ info_path }}/databases/{{ inventory_hostname }}.txt"
 
@@ -941,70 +980,41 @@
           done < "$DATABASES"
 
           # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-          # ارسال فایل بکاپ به تلگرام
-          # save_log "📤 Sending backup files to Telegram..."
-          # TELEGRAM_TOKEN="8104111863:AAG1Lic90mVzbFKbfOonWjh4oBZtEmCBQmY"
-          # CHAT_ID="-1002529041410"
-          # for FILE in "$BACKUP_DIR"/*.gz; do
-          #   if [ -f "$FILE" ]; then
-          #     RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument" \
-          #       -F document=@"$FILE" \
-          #       -F chat_id="$CHAT_ID")
-          #     if [[ "$RESPONSE" == *'"ok":true'* ]]; then
-          #       save_log "📤✅ Sent $FILE to Telegram"
-          #     else
-          #       save_log "📤❌ Failed to send $FILE to Telegram"
-          #     fi
-          #   fi
-          # done
-
-          # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-          # ارسال فایل به FTP
-          # save_log "🌐 Sending backup files to FTP..."
-          # FTP_SERVER="ftp.example.com"
-          # FTP_USER="ftp_username"
-          # FTP_PASSWORD="ftp_password"
-          # FTP_PATH="/backups/localhost"
-          # for FILE in "$BACKUP_DIR"/*.gz; do
-          #   if [ -f "$FILE" ]; then
-          #     curl -s -T "$FILE" ftp://$FTP_SERVER$FTP_PATH/ --user "$FTP_USER:$FTP_PASSWORD"
-          #     if [[ $? -eq 0 ]]; then
-          #       save_log "🌐✅ Sent $FILE to FTP at $(date)"save_log "
-          #     else
-          #       save_log "🌐❌ Error sending $FILE to FTP"
-          #     fi
-          #   fi
-          # done
-
-          # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-          save_log "🏁 Backup completed at $(date)"
+          save_log "🏁 Database backup completed at $(date)"
           save_log "----------------------------------------------------------------------------------"
 
-          # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          # تابع ذخیره لاگ
           save_log() {
             local message="$1"
-            local tag="${2:-backup.log}"  # تگ Fluentd (پیش‌فرض: backup.log)
-            local fluentd_url="${3:-http://fluentd:9880/$tag}"
-
-            echo "$message" | tee -a "$BACKUP_LOG" | logger -t backup_script
-
-            # ارسال به fluentd از طریق in_http
-            log_json=$(jq -n --arg msg "$message" '{log: $msg}')
-            curl -s -X POST -H "Content-Type: application/json" -d "$log_json" "$fluentd_url" > /dev/null
+            echo "$message" | tee -a "$BACKUP_LOG" | logger -t backup_databases
           }
-        dest: "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
+        dest: "{{ backup_path }}/{{ inventory_hostname }}/backup_databases.sh"
         mode: '0777'  # اعطای دسترسی اجرایی به اسکریپت
       when: customer_state == 'update'
       poll: 1
 
-    # ⏰ تنظیم زمان‌بندی اجرای بکاپ با استفاده از cron
-    - name: "⏰ Set up cron job for backup"
+    # ⏰ تنظیم زمان‌بندی اجرای بکاپ فایل‌ها با استفاده از cron
+    - name: "⏰ Set up cron job for volume backup"
       ansible.builtin.cron:
-        name: "Backup Docker Volumes and Databases"
+        name: "Backup Docker Volumes"
         minute: "0"
-        hour: "0,8,16"  # اجرای بکاپ سه بار در روز (0:00، 8:00، 16:00)
+        hour: "0"
+        day: "*"
+        weekday: "0"  # اجرای بکاپ فایل‌ها هر یکشنبه ساعت 00:00
         job: "/bin/bash {{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
         user: root
-        state: present  # این باعث می‌شود فقط اگر کرون جاب وجود نداشته باشد، تعریف شود
+        state: present
+      poll: 1
+      when: customer_state == 'update'
+
+    # ⏰ تنظیم زمان‌بندی اجرای بکاپ پایگاه داده‌ها با استفاده از cron
+    - name: "⏰ Set up cron job for database backup"
+      ansible.builtin.cron:
+        name: "Backup Databases"
+        minute: "30"
+        hour: "0,8,16"  # اجرای بکاپ دیتابیس‌ها سه بار در روز (0:30، 8:30، 16:30)
+        job: "/bin/bash {{ backup_path }}/{{ inventory_hostname }}/backup_databases.sh"
+        user: root
+        state: present
       poll: 1
       when: customer_state == 'update'
