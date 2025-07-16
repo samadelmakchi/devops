@@ -6,9 +6,14 @@ services:
     ports:
       - "9281:80"
     environment:
-      - PMA_HOSTS=calibri-crm-database,calibri-gateway-database
+      - PMA_HOSTS=nikan_container-gateway-db,nikan_container-portal-db,test_container-gateway-db,test_container-portal-db,simnad_container-gateway-db,simnad_container-portal-db
       - PMA_PORT=3306
-      - PMA_ARBITRARY=1
+      - PMA_SECRET_KEY=AhaeyrDpsmnAVPtOzsaY5ANM3PW7h98hIIR9fjgoq84=
+    volumes:
+      - ./custom.conf:/etc/apache2/conf-available/custom.conf
+      - ./phpmyadmin/config.secret.inc.php:/etc/phpmyadmin/config.secret.inc.php
+    command: >
+      bash -c "a2enconf custom && apache2-foreground"
     networks:
       - traefik_reverse_proxy
     labels:

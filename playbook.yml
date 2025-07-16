@@ -461,7 +461,7 @@
       ansible.builtin.copy:
         dest: "{{ project_path }}/{{ inventory_hostname }}/portal-frontend/baseUrl.js"
         content: |
-          const baseUrl = 'http://{{ customer_subdomain_backendportal }}.{{ customer_domain }}';
+          const baseUrl = 'https://{{ customer_subdomain_backendportal }}.{{ customer_domain }}';
           export default baseUrl;
         mode: '0777'
       when: customer_state == 'update'
@@ -560,14 +560,6 @@
       poll: 1
       when: backup_script.stat.exists and customer_state == 'update'
       changed_when: true
-
-    # # 🌐 ساخت شبکه مخصوص به هر مشتری
-    # - name: "🌐 Create Docker network for each customer"
-    #   community.docker.docker_network:
-    #     name: "{{ customer_network_names }}"
-    #     state: present
-    #   poll: 1
-    #   when: customer_state == 'update'
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر gateway
     # 🧩 یافتن همه کانتینرهای مرتبط با سرویس gateway
