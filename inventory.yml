@@ -14,7 +14,6 @@ all:
           customer_gateway_ports: 8061
           customer_portal_ports: 7061
           customer_portal_frontend_ports: 6061
-          customer_network_names: "simnad_network"
           customer_containers: "simnad_container"
           customer_url: "185.255.89.160"
           customer_domain: "simnad.com"
@@ -35,7 +34,6 @@ all:
           customer_gateway_ports: 8062
           customer_portal_ports: 7062
           customer_portal_frontend_ports: 6062
-          customer_network_names: "nikan_network"
           customer_containers: "nikan_container"
           customer_url: "185.255.89.160"
           customer_domain: "pardazeshafza.com"
@@ -56,7 +54,6 @@ all:
           customer_gateway_ports: 8063
           customer_portal_ports: 7063
           customer_portal_frontend_ports: 6063
-          customer_network_names: "test_network"
           customer_containers: "test_container"
           customer_url: "185.255.89.160"
           customer_domain: "pardazeshafza.com"
