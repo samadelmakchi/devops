@@ -10,7 +10,6 @@ services:
     ports:
       - {{ customer_portal_ports }}:80
     networks:
-      - {{ customer_network_names }}
       - traefik_reverse_proxy
     labels:
       - "traefik.enable=true"
@@ -33,13 +32,8 @@ services:
       - ./init/:/docker-entrypoint-initdb.d/
       - ./db:/var/lib/mysql
     networks:
-      - {{ customer_network_names }}
       - traefik_reverse_proxy
 
 networks:
-  {{ customer_network_names }}:
-    name: {{ customer_network_names }}
-    driver: bridge
-    external: true
   traefik_reverse_proxy:
     external: true

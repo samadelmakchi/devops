@@ -561,13 +561,13 @@
       when: backup_script.stat.exists and customer_state == 'update'
       changed_when: true
 
-    # 🌐 ساخت شبکه مخصوص به هر مشتری
-    - name: "🌐 Create Docker network for each customer"
-      community.docker.docker_network:
-        name: "{{ customer_network_names }}"
-        state: present
-      poll: 1
-      when: customer_state == 'update'
+    # # 🌐 ساخت شبکه مخصوص به هر مشتری
+    # - name: "🌐 Create Docker network for each customer"
+    #   community.docker.docker_network:
+    #     name: "{{ customer_network_names }}"
+    #     state: present
+    #   poll: 1
+    #   when: customer_state == 'update'
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر gateway
     # 🧩 یافتن همه کانتینرهای مرتبط با سرویس gateway

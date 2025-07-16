@@ -9,7 +9,6 @@ services:
     ports:
       - "{{ customer_gateway_ports }}:80"
     networks:
-      - "{{ customer_network_names }}"
       - traefik_reverse_proxy
     environment:
       INSTANCE_NAME: {{ customer_containers }}
@@ -34,13 +33,8 @@ services:
       MYSQL_PASSWORD: {{ gateway_mysql_password }}
       INSTANCE_NAME: {{ customer_containers }}
     networks:
-      - {{ customer_network_names }}
       - traefik_reverse_proxy
 
 networks:
-  {{ customer_network_names }}:
-    name: {{ customer_network_names }}
-    driver: bridge
-    external: true
   traefik_reverse_proxy:
     external: true

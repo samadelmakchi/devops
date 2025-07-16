@@ -7,9 +7,8 @@ services:
       - ../:/app
     command: bash -c "npm install && npm run dev"
     ports:
-      - {{ customer_portal_frontend_ports }}:80
+      - {{ customer_portal_frontend_ports }}:5173
     networks:
-      - {{ customer_network_names }}
       - traefik_reverse_proxy
     environment:
       INSTANCE_NAME: {{ customer_containers }}
@@ -18,13 +17,9 @@ services:
       - "traefik.http.routers.{{ customer_containers }}-portal-frontend.rule=Host(`{{ customer_subdomain_portal }}.{{ customer_domain }}`)"
       - "traefik.http.routers.{{ customer_containers }}-portal-frontend.entrypoints=websecure"
       - "traefik.http.routers.{{ customer_containers }}-portal-frontend.tls.certresolver=myresolver"
-      - "traefik.http.services.{{ customer_containers }}-portal-frontend.loadbalancer.server.port=80"
+      - "traefik.http.services.{{ customer_containers }}-portal-frontend.loadbalancer.server.port=5173"
 
 networks:
-  {{ customer_network_names }}:
-    name: {{ customer_network_names }}
-    driver: bridge
-    external: true
   traefik_reverse_proxy:
     external: true
 
