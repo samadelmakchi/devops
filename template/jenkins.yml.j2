@@ -5,11 +5,9 @@ services:
     restart: unless-stopped
     ports:
       - "4441:8080"    # پورت برای دسترسی به رابط کاربری Jenkins
-      - "50000:50000"  # پورت برای ارتباط با سرورهای جانبی (مثلاً برای اتصال ایجنت‌ها)
-    environment:
-      - JENKINS_OPTS=--prefix=/jenkins  # تنظیم prefix برای URL Jenkins (در صورت نیاز)
+      - "50000:50000"  # پورت برای ارتباط با ایجنت‌ها
     volumes:
-      - jenkins_home:/var/jenkins_home  # داده‌ها و پیکربندی‌های Jenkins در این حجم ذخیره می‌شود
+      - jenkins_home:/var/jenkins_home  # داده‌ها و پیکربندی‌های Jenkins
     networks:
       - traefik_reverse_proxy
     labels:
@@ -20,7 +18,7 @@ services:
       - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
 
 volumes:
-  jenkins_home:  # داده‌ها و تنظیمات Jenkins در این حجم ذخیره می‌شود
+  jenkins_home:
 
 networks:
   traefik_reverse_proxy:

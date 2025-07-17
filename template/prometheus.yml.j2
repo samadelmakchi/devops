@@ -20,6 +20,8 @@ services:
       - "traefik.http.routers.prometheus.entrypoints=websecure"
       - "traefik.http.routers.prometheus.tls.certresolver=myresolver"
       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+      - "traefik.http.routers.prometheus.middlewares=prometheus-auth"
+      - "traefik.http.middlewares.prometheus-auth.basicauth.users=admin:$$apr1$$ZjqNihhn$$W/jOU6F1QXZt4YRATR86O0"
 
 volumes:
   prometheus_data:
