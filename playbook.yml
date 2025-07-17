@@ -300,7 +300,7 @@
                 projects
                 | map(attribute='branch_var')
                 | map('extract', hostvars[inventory_hostname])
-                | map('regex_search', '^(dev|test|main)$')
+                | map('regex_search', '^(dev|test|main|ahmadi)$')
                 | map('default', 'main')
               )
             )
