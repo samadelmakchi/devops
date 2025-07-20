@@ -358,6 +358,16 @@
       poll: 1
       when: customer_state == 'update'
 
+    # 📑 کپی کردن فایل Dockerfile اختصاصی
+    - name: "📑 Copy Dockerfile files to customer project"
+      ansible.builtin.template:
+        src: "template/Dockerfile.j2"
+        dest: "{{ project_path }}/{{ inventory_hostname }}/portal-frontend/docker/Dockerfile"
+        mode: '0777'
+        force: yes
+      poll: 1
+      when: customer_state == 'update'
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ غیر فعال کردن شکن برای گیت لب
     # 🌐 بازگرداندن DNS به حالت پیش‌فرض اگر گیت‌لب استفاده شده باشد
     - name: "🌐 Restore default DNS in resolved.conf if repo_source is gitlab"
@@ -566,6 +576,32 @@
     - name: "💾 Run backup script for volumes and databases"
       ansible.builtin.shell: |
         bash "{{ backup_path }}/{{ inventory_hostname }}/backup_volumes.sh"
+      register: backup_result
+      async: 1800 # حداکثر زمان برای اجرای اسکریپت (۳۰ دقیقه)
+      poll: 1
+      when: backup_script.stat.exists and customer_state == 'update'
+      changed_when: true
+
+    # 🕵️ چک کردن وجود فایل backup_databases.sh
+    - name: "🕵️ Check if backup_databases.sh exists"
+      ansible.builtin.stat:
+        path: "{{ backup_path }}/{{ inventory_hostname }}/backup_databases.sh"
+      register: backup_script
+      poll: 1
+      when: customer_state == 'update'
+
+    # ▶️ اجرای اسکریپت بکاپ برای دیتابیس‌ها و ولوم‌ها تنها در صورتی که فایل موجود باشد
+    - name: ▶️ heck if backup script exists
+      ansible.builtin.stat:
+        path: "{{ backup_path }}/{{ inventory_hostname }}/backup_databases.sh"
+      register: backup_script
+      poll: 1
+      when: customer_state == 'update'
+
+    # 💾 اجرای اسکریپت پشتیبان برای حجم ها و پایگاه های داده
+    - name: "💾 Run backup script for volumes and databases"
+      ansible.builtin.shell: |
+        bash "{{ backup_path }}/{{ inventory_hostname }}/backup_databases.sh"
       register: backup_result
       async: 1800 # حداکثر زمان برای اجرای اسکریپت (۳۰ دقیقه)
       poll: 1

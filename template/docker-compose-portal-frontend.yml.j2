@@ -1,13 +1,13 @@
 services:
   {{ customer_containers }}-portal-frontend:
     container_name: {{ customer_containers }}-portal-frontend
-    image: node:22
-    working_dir: /app
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - ../:/app:ro
-    command: bash -c "npm install && npm run dev"
     ports:
-      - {{ customer_portal_frontend_ports }}:5173
+      - {{ customer_portal_frontend_ports }}:80
     networks:
       - traefik_reverse_proxy
     environment:
@@ -17,9 +17,20 @@ services:
       - "traefik.http.routers.{{ customer_containers }}-portal-frontend.rule=Host(`{{ customer_subdomain_portal }}.{{ customer_domain }}`)"
       - "traefik.http.routers.{{ customer_containers }}-portal-frontend.entrypoints=websecure"
       - "traefik.http.routers.{{ customer_containers }}-portal-frontend.tls.certresolver=myresolver"
-      - "traefik.http.services.{{ customer_containers }}-portal-frontend.loadbalancer.server.port=5173"
+      - "traefik.http.services.{{ customer_containers }}-portal-frontend.loadbalancer.server.port=80"
 
 networks:
   traefik_reverse_proxy:
     external: true
 
+# فراخوانی با نود
+# 5173
+    # image: node:22
+    # working_dir: /app
+    # command: bash -c "npm install && npm run dev"
+
+# فراخوانی با انجینکس
+# 80
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
