@@ -8,7 +8,7 @@ services:
     volumes:
       - ../:/app:ro  # read-only برای امنیت بیشتر
     ports:
-      - {{ customer_portal_frontend_ports }}::80  # پورت Nginx به جای Vite
+      - {{ customer_portal_frontend_ports }}:80  # پورت Nginx به جای Vite
     networks:
       - traefik_reverse_proxy
     environment:
