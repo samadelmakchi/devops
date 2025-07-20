@@ -2,8 +2,8 @@ services:
   {{ customer_containers }}-portal-frontend:
     container_name: {{ customer_containers }}-portal-frontend
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: {{ project_path }}/{{ inventory_hostname }}/portal-frontend
+      dockerfile: docker/Dockerfile
     volumes:
       - ../:/app:ro
     ports:
@@ -32,5 +32,5 @@ networks:
 # فراخوانی با انجینکس
 # 80
     # build:
-    #   context: .
-    #   dockerfile: Dockerfile
+    #   context: /home/calibri/{{ inventory_hostname }}/portal-frontend
+    #   dockerfile: docker/Dockerfile
