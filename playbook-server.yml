@@ -36,6 +36,7 @@
         owner: root
         group: root
         mode: '0644'
+        force: yes
       poll: 1
       when: install_traefik is true
 
@@ -73,6 +74,7 @@
         owner: root
         group: root
         mode: '0644'
+        force: yes
       poll: 1
       when: install_portainer is true
 
@@ -110,6 +112,7 @@
         owner: root
         group: root
         mode: '0644'
+        force: yes
       poll: 1
       when: install_jenkins is true
 
@@ -147,6 +150,7 @@
         owner: root
         group: root
         mode: '0644'
+        force: yes
       poll: 1
       when: install_rabbitmq is true
 
@@ -191,6 +195,7 @@
         owner: root
         group: root
         mode: '0644'
+        force: yes
       poll: 1
       when: install_apprise is true
 
@@ -228,6 +233,7 @@
         owner: root
         group: root
         mode: '0644'
+        force: yes
       poll: 1
       when: install_uptime_kuma is true
 
@@ -275,6 +281,7 @@
         owner: root
         group: root
         mode: '0644'
+        force: yes
       poll: 1
       when: install_loki is true
 
@@ -322,6 +329,7 @@
         owner: root
         group: root
         mode: '0644'
+        force: yes
       poll: 1
       when: install_tempo is true
 
@@ -359,6 +367,7 @@
         owner: root
         group: root
         mode: '0644'
+        force: yes
       poll: 1
       when: install_grafana is true
 
@@ -406,6 +415,7 @@
         owner: root
         group: root
         mode: '0644'
+        force: yes
       poll: 1
       when: install_prometheus is true
 
@@ -453,6 +463,7 @@
         owner: root
         group: root
         mode: '0644'
+        force: yes
       poll: 1
       when: install_mailserver is true
 
@@ -500,6 +511,7 @@
         owner: root
         group: root
         mode: '0644'
+        force: yes
       poll: 1
       when: install_nginx is true
 
@@ -537,6 +549,7 @@
         owner: root
         group: root
         mode: '0644'
+        force: yes
       poll: 1
       when: install_phpmyadmin is true
 
@@ -574,6 +587,7 @@
         owner: root
         group: root
         mode: '0644'
+        force: yes
       poll: 1
       when: install_pgadmin is true
 

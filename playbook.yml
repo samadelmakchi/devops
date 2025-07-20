@@ -343,7 +343,18 @@
         src: "template/{{ item.compose_file }}"
         dest: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}/docker/docker-compose.yml"
         mode: '0777'
+        force: yes
       loop: "{{ projects }}"
+      poll: 1
+      when: customer_state == 'update'
+
+    # 📝 کپی کردن فایل nginx.conf اختصاصی
+    - name: "📝 Copy nginx.conf files to customer project"
+      ansible.builtin.template:
+        src: "template/nginx.conf.j2"
+        dest: "{{ project_path }}/{{ inventory_hostname }}/portal-frontend/docker/nginx.conf"
+        mode: '0777'
+        force: yes
       poll: 1
       when: customer_state == 'update'
 
