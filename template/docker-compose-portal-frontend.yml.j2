@@ -19,3 +19,7 @@ services:
       - "traefik.http.routers.{{ customer_containers }}-portal-frontend.entrypoints=websecure"
       - "traefik.http.routers.{{ customer_containers }}-portal-frontend.tls.certresolver=myresolver"
       - "traefik.http.services.{{ customer_containers }}-portal-frontend.loadbalancer.server.port=80"
+
+networks:
+  traefik_reverse_proxy:
+    external: true
