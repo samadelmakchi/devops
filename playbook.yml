@@ -1070,3 +1070,19 @@
         state: present
       poll: 1
       when: customer_state == 'update'
+
+    # ⏰ حذف کرون جاب بکاپ فایل‌ها وقتی customer_state برابر با down باشد
+    - name: "⏰ Remove cron job for volume backup"
+      ansible.builtin.cron:
+        name: "Backup Docker Volumes"
+        state: absent
+      poll: 1
+      when: customer_state == 'down'
+
+    # ⏰ حذف کرون جاب بکاپ پایگاه داده‌ها وقتی customer_state برابر با down باشد
+    - name: "⏰ Remove cron job for database backup"
+      ansible.builtin.cron:
+        name: "Backup Databases"
+        state: absent
+      poll: 1
+      when: customer_state == 'down'
