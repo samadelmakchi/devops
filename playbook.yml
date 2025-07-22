@@ -633,7 +633,6 @@
       changed_when: false
       failed_when: false
       poll: 1
-      when: customer_state in ['update', 'down']
 
     # 🛑 توقف کانتینرهای مرتبط با سرویس gateway
     - name: "🛑 Stop matching containers for gateway"
@@ -675,6 +674,54 @@
       register: docker_compose_job
       changed_when: false
 
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر portal
+    # 🧩 یافتن همه کانتینرهای مرتبط با سرویس portal
+    - name: "🧩 Find all matching containers for portal"
+      ansible.builtin.shell: |
+        docker ps -a --filter "name={{ customer_containers }}-portal" --filter "name={{ customer_containers }}-portal-db" -q
+      register: matching_containers_portal
+      changed_when: false
+      failed_when: false
+      poll: 1
+
+    # 🛑 توقف کانتینرهای مرتبط با سرویس portal
+    - name: "🛑 Stop matching containers for portal"
+      ansible.builtin.shell: |
+        docker stop {{ matching_containers_portal.stdout_lines | join(' ') }}
+      when: matching_containers_portal.stdout != "" and customer_state in ['update', 'down']
+      register: stop_result
+      failed_when: stop_result.rc != 0 and '"No such container"' not in stop_result.stderr
+      poll: 1
+      changed_when: stop_result.stdout != ""
+
+    # ❌ کشتن کانتینرهای باقی‌مانده (در صورت توقف نشدن) برای portal
+    - name: "❌ Kill matching containers (if not already stopped) for portal"
+      ansible.builtin.shell: |
+        docker kill {{ matching_containers_portal.stdout_lines | join(' ') }} || true
+      when: matching_containers_portal.stdout != "" and customer_state in ['update', 'down']
+      register: kill_result
+      failed_when: false
+      poll: 1
+      changed_when: "'is not running' not in kill_result.stderr and kill_result.stdout != ''"
+
+    # 🧹 حذف کانتینرهای مرتبط با سرویس portal
+    - name: "🧹 Remove matching containers for portal"
+      ansible.builtin.shell: |
+        docker rm {{ matching_containers_portal.stdout_lines | join(' ') }}
+      when: matching_containers_portal.stdout != "" and customer_state in ['update', 'down']
+      register: rm_result
+      failed_when: rm_result.rc != 0 and '"No such container"' not in rm_result.stderr
+      poll: 1
+      changed_when: rm_result.stdout != ""
+
+    # 🚀 اجرای docker-compose برای سرویس portal
+    - name: "🚀 Run docker-compose for portal"
+      ansible.builtin.command:
+        cmd: docker compose -p {{ customer_containers }}-portal -f "{{ project_path }}/{{ inventory_hostname }}/portal/docker/docker-compose.yml" up -d
+      when: customer_state == 'update'
+      poll: 1
+      changed_when: false
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر portal-frontend
     # 🧩 یافتن همه کانتینرهای مرتبط با سرویس portal-frontend
     - name: "🧩 Find all matching containers for portal-frontend"
@@ -684,7 +731,6 @@
       changed_when: false
       poll: 1
       failed_when: false
-      when: customer_state in ['update', 'down']
 
     # 🛑 توقف کانتینرهای مرتبط با سرویس portal-frontend
     - name: "🛑 Stop matching containers for portal-frontend"
@@ -723,55 +769,6 @@
           docker compose -p {{ inventory_hostname }}-portal-frontend
           -f "{{ project_path }}/{{ inventory_hostname }}/portal-frontend/docker/docker-compose.yml"
           up -d
-      when: customer_state == 'update'
-      poll: 1
-      changed_when: false
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر portal
-    # 🧩 یافتن همه کانتینرهای مرتبط با سرویس portal
-    - name: "🧩 Find all matching containers for portal"
-      ansible.builtin.shell: |
-        docker ps -a --filter "name={{ customer_containers }}-portal" --filter "name={{ customer_containers }}-portal-db" -q
-      register: matching_containers_portal
-      changed_when: false
-      failed_when: false
-      when: customer_state in ['update', 'down']
-      poll: 1
-
-    # 🛑 توقف کانتینرهای مرتبط با سرویس portal
-    - name: "🛑 Stop matching containers for portal"
-      ansible.builtin.shell: |
-        docker stop {{ matching_containers_portal.stdout_lines | join(' ') }}
-      when: matching_containers_portal.stdout != "" and customer_state in ['update', 'down']
-      register: stop_result
-      failed_when: stop_result.rc != 0 and '"No such container"' not in stop_result.stderr
-      poll: 1
-      changed_when: stop_result.stdout != ""
-
-    # ❌ کشتن کانتینرهای باقی‌مانده (در صورت توقف نشدن) برای portal
-    - name: "❌ Kill matching containers (if not already stopped) for portal"
-      ansible.builtin.shell: |
-        docker kill {{ matching_containers_portal.stdout_lines | join(' ') }} || true
-      when: matching_containers_portal.stdout != "" and customer_state in ['update', 'down']
-      register: kill_result
-      failed_when: false
-      poll: 1
-      changed_when: "'is not running' not in kill_result.stderr and kill_result.stdout != ''"
-
-    # 🧹 حذف کانتینرهای مرتبط با سرویس portal
-    - name: "🧹 Remove matching containers for portal"
-      ansible.builtin.shell: |
-        docker rm {{ matching_containers_portal.stdout_lines | join(' ') }}
-      when: matching_containers_portal.stdout != "" and customer_state in ['update', 'down']
-      register: rm_result
-      failed_when: rm_result.rc != 0 and '"No such container"' not in rm_result.stderr
-      poll: 1
-      changed_when: rm_result.stdout != ""
-
-    # 🚀 اجرای docker-compose برای سرویس portal
-    - name: "🚀 Run docker-compose for portal"
-      ansible.builtin.command:
-        cmd: docker compose -p {{ customer_containers }}-portal -f "{{ project_path }}/{{ inventory_hostname }}/portal/docker/docker-compose.yml" up -d
       when: customer_state == 'update'
       poll: 1
       changed_when: false
