@@ -116,16 +116,26 @@
       poll: 1
       when: install_jenkins is true
 
+    - name: Ensure traefik_reverse_proxy network exists
+      community.docker.docker_network:
+        name: traefik_reverse_proxy
+        state: present
+      when: install_jenkins is true
+
     - name: Set up Jenkins using Docker Compose
       community.docker.docker_compose_v2:
         project_src: tools
         files:
           - jenkins.yml
         state: present
-        pull: always
+        pull: missing
         recreate: auto
       poll: 1
       when: install_jenkins is true
+      register: docker_compose_result
+      retries: 3
+      delay: 5
+      until: docker_compose_result is success
 
     - name: Check if jenkins.yml file exists
       ansible.builtin.stat:
@@ -141,6 +151,67 @@
         state: absent
       poll: 1
       when: install_jenkins is false and jenkins_file.stat.exists
+
+    - name: Wait for Jenkins container to be ready
+      ansible.builtin.wait_for:
+        host: localhost
+        port: 4441
+        state: started
+        delay: 10
+        timeout: 300
+      when: install_jenkins is true
+
+    - name: Install Java 17 for Jenkins CLI
+      ansible.builtin.package:
+        name: openjdk-17-jre
+        state: present
+      when: install_jenkins is true
+
+    - name: Get initial admin password from Jenkins container
+      ansible.builtin.command:
+        cmd: docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+      register: initial_password
+      when: install_jenkins is true
+      changed_when: false
+      failed_when: initial_password.rc != 0 or initial_password.stdout == ""
+
+    - name: Debug initial admin password
+      ansible.builtin.debug:
+        msg: "Initial password: {{ initial_password.stdout }}"
+      when: install_jenkins is true
+
+    - name: Download Jenkins CLI jar
+      ansible.builtin.uri:
+        url: http://localhost:4441/jnlpJars/jenkins-cli.jar
+        method: GET
+        dest: /tmp/jenkins-cli.jar
+        force: yes
+        owner: root
+        group: root
+        mode: '0644'
+        status_code: [200, 304]
+      when: install_jenkins is true
+
+    # - name: Update Jenkins admin password
+    #   ansible.builtin.command:
+    #     cmd: >
+    #       java -jar /tmp/jenkins-cli.jar -s http://localhost:4441 -auth admin:{{ initial_password.stdout }} groovy = <
+    #       import hudson.model.User;
+    #       import jenkins.security.ApiTokenProperty;
+    #       def user = User.get('admin', false);
+    #       user.setPassword('{{ new_admin_password }}');
+    #       user.save();
+    #   register: update_password
+    #   timeout: 60
+    #   when: install_jenkins is true
+    #   vars:
+    #     new_admin_password: "SMD6165"
+    #   failed_when: update_password.rc != 0
+
+    # - name: Debug password update result
+    #   ansible.builtin.debug:
+    #     msg: "Password update result: rc={{ update_password.rc }}, stdout={{ update_password.stdout }}, stderr={{ update_password.stderr }}"
+    #   when: install_jenkins is true
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RabbitMQ
     - name: Generate rabbitmq.yml from template
@@ -261,7 +332,7 @@
           - uptime_kuma.yml
         state: absent
       poll: 1
-      when: install_uptime_kuma is false and ruptime_kuma_file.stat.exists
+      when: install_uptime_kuma is false and uptime_kuma_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Loki
     - name: Copy Loki config folder
