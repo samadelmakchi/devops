@@ -1,0 +1,21 @@
+{
+  "capabilities": [
+    {
+      "platform": "Android",
+      "browserName": "Chrome",
+      "maxInstances": 1
+    }
+  ],
+  "configuration": {
+    "cleanUpCycle": 2000,
+    "timeout": 30000,
+    "proxy": "org.openqa.grid.selenium.proxy.DefaultRemoteProxy",
+    "url": "http://appium-server-android:4723",
+    "host": "appium-server-android",
+    "port": 4723,
+    "register": true,
+    "registerCycle": 5000,
+    "hubHost": "selenium-hub",
+    "hubPort": 4444
+  }
+}

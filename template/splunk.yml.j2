@@ -1,0 +1,31 @@
+services:
+  splunk:
+    image: splunk/splunk:latest
+    container_name: splunk
+    environment:
+      SPLUNK_PASSWORD: "admin"
+      SPLUNK_START_ARGS: "--accept-license"
+      SPLUNK_ENABLE_LISTENER: "true"         # فعال‌سازی listener برای دریافت داده‌ها
+      SPLUNK_FORWARD_SERVER: "false"         # استفاده از این سرویس به عنوان سرور برای دریافت داده
+    ports:
+      - "8580:8000"  # رابط کاربری Splunk
+      - "8088:8088"  # HTTP Event Collector
+      - "9997:9997"  # پورت پیش‌فرض برای دریافت داده‌ها
+    volumes:
+      - splunk_data:/opt/splunk/var
+    restart: always
+    networks:
+      - traefik_reverse_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.splunk.rule=Host(`splunk.{{ domain }}`)"
+      - "traefik.http.routers.splunk.entrypoints=websecure"
+      - "traefik.http.routers.splunk.tls.certresolver=myresolver"
+      - "traefik.http.services.splunk.loadbalancer.server.port=8000"
+
+networks:
+  traefik_reverse_proxy:
+    external: true 
+
+volumes:
+  splunk_data:

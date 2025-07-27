@@ -1,0 +1,21 @@
+services:
+  bind9:
+    image: internetsystemsconsortium/bind9:9.18
+    container_name: bind9
+    restart: unless-stopped
+    command: ["named", "-u", "bind", "-f", "-c", "/etc/bind/named.conf"]
+    environment:
+      - TZ=Asia/Tehran
+    ports:
+      - "5353:53/udp"
+      - "5353:53/tcp"
+    volumes:
+      - ./etc/bind:/etc/bind
+      - ./var/cache:/var/cache/bind
+      - ./var/lib:/var/lib/bind
+      - ./var/log:/var/log
+
+networks:
+  traefik_reverse_proxy:
+    external: true
+

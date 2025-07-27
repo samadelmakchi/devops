@@ -1,0 +1,16 @@
+auditbeat.modules:
+  - module: file_integrity
+    paths:
+      - /etc
+      - /var/log
+
+  - module: auditd
+    enabled: true
+
+output.logstash:
+  hosts: ["fluentd:24224"]
+
+# output.elasticsearch:
+#   hosts: ["http://elasticsearch:9200"]
+#   # username: "elastic"
+#   # password: "yourpassword"

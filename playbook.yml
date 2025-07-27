@@ -9,21 +9,9 @@
     info_path: "{{ project_path }}/info"         # مسیر اطلاعات
     log_path: "{{ project_path }}/log"           # مسیر لاگ ها
 
-    # اطلاعات دیتابیس مشتریان
-    portal_database_type: "mysql"
-    portal_mysql_root_password: "1234"
-    portal_mysql_password: "1234"
-    portal_mysql_user: "root"
-    portal_mysql_db_name: "calibri_portal"
-    pu: "root"
-    pp: "1234"
-    pd: "calibri_portal"
-
-    gateway_database_type: "mysql"
-    gateway_mysql_root_password: "1234"
-    gateway_mysql_password: "1234"
-    gateway_mysql_user: "calibri_gateway"
-    gateway_mysql_db_name: "calibri_gateway"
+    pu: "{{ portal_mysql_user }}"
+    pp: "{{ portal_mysql_password }}"
+    pd: "{{ portal_mysql_db_name }}"
 
   tasks:
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ایجاد پوشه‌ها و فایل‌ها

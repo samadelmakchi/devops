@@ -1,0 +1,26 @@
+services:
+  rancher:
+    image: rancher/rancher:latest
+    container_name: rancher
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - "4101:80"
+      - "4443:443"
+    volumes:
+      - ./rancher_data:/var/lib/rancher
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rancher.rule=Host(`rancher.{{ domain }}`)"
+      - "traefik.http.routers.rancher.entrypoints=websecure"
+      - "traefik.http.routers.rancher.tls.certresolver=myresolver"
+      - "traefik.http.services.rancher.loadbalancer.server.port=443"
+    networks:
+      - traefik_reverse_proxy
+
+volumes:
+  rancher_data:
+
+networks:
+  traefik_reverse_proxy:
+    external: true

@@ -1,0 +1,19 @@
+heartbeat.monitors:
+  - type: http
+    name: nginx-homepage
+    schedule: '@every 10s'
+    urls: ["http://nginx"]
+    check.response.status: 200
+
+  - type: tcp
+    name: mysql-tcp
+    schedule: '@every 10s'
+    hosts: ["mysql:3306"]
+
+output.logstash:
+  hosts: ["fluentd:24224"]
+
+# output.elasticsearch:
+#   hosts: ["http://elasticsearch:9200"]
+#   # username: "elastic"
+#   # password: "yourpassword"
