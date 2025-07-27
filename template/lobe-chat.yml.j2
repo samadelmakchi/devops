@@ -1,0 +1,38 @@
+services:
+  lobe-chat:
+    container_name: lobe-chat
+    image: lobehub/lobe-chat:latest
+    restart: unless-stopped
+    ports:
+      - "3210:3210"
+    environment:
+      - TZ=Etc/UTC
+      - OPENAI_API_KEY=sk-xxxx
+      - ACCESS_CODE=lobe66
+      - OPENAI_PROXY_URL=https://api.openai.com/v1
+    networks:
+      - traefik_reverse_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lobe-chat.rule=Host(`lobe.{{ domain }}`)"
+      - "traefik.http.routers.lobe-chat.entrypoints=websecure"
+      - "traefik.http.routers.lobe-chat.tls=true"
+      - "traefik.http.routers.lobe-chat.tls.certresolver=myresolver"
+      - "traefik.http.services.lobe-chat.loadbalancer.server.port=3210"
+      - "traefik.http.routers.lobe-chat-http.rule=Host(`lobe.{{ domain }}`)"
+      - "traefik.http.routers.lobe-chat-http.entrypoints=web"
+      - "traefik.http.routers.lobe-chat-http.middlewares=lobe-chat-https-redirect"
+      - "traefik.http.middlewares.lobe-chat-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.lobe-chat-https-redirect.redirectscheme.permanent=true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3210"]
+      interval: 60s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+networks:
+  traefik_reverse_proxy:
+    name: traefik_reverse_proxy
+    driver: bridge
+    external: true
