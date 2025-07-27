@@ -1,0 +1,57 @@
+version: '3.6'
+services:
+  odoo:
+    container_name: odoo
+    image: odoo:18.0
+    restart: unless-stopped
+    depends_on:
+      - odoo-db
+    environment:
+      - HOST=odoo-db
+      - USER=odoo
+      - PASSWORD=your-db-password-change-me
+      - DB_NAME=odoo
+      - ADMIN_PASSWORD=your-admin-password-change-me
+    ports:
+      - "8069:8069"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.odoo.rule=Host(`odoo.{{ domain }}`)"
+      - "traefik.http.routers.odoo.entrypoints=websecure"
+      - "traefik.http.routers.odoo.tls.certresolver=myresolver"
+      - "traefik.http.services.odoo.loadbalancer.server.port=8069"
+    networks:
+      - traefik_reverse_proxy
+    volumes:
+      - ./odoo/data:/var/lib/odoo
+      - ./odoo/addons:/mnt/extra-addons
+      - ./odoo/config:/etc/odoo
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8069"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  odoo-db:
+    container_name: odoo-db
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=your-db-password-change-me
+      - POSTGRES_DB=postgres
+    volumes:
+      - ./odoo-db:/var/lib/postgresql/data
+    networks:
+      - traefik_reverse_proxy
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "odoo"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+networks:
+  traefik_reverse_proxy:
+    external: true

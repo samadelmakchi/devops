@@ -1,0 +1,45 @@
+services:
+  ntfy:
+    container_name: ntfy
+    image: binwiederhier/ntfy:latest
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+      - NTFY_BASE_URL=https://ntfy.{{ domain }}
+      - NTFY_BEHIND_PROXY=true
+      - NTFY_AUTH_DEFAULT_ACCESS=deny-all
+      - NTFY_AUTH_FILE=/app/data/user.db
+      - NTFY_CACHE_FILE=/app/data/cache.db
+    ports:
+      - "8000:80"
+    command:
+      - serve
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ntfy.rule=Host(`ntfy.{{ domain }}`)"
+      - "traefik.http.routers.ntfy.entrypoints=websecure"
+      - "traefik.http.routers.ntfy.tls=true"
+      - "traefik.http.routers.ntfy.tls.certresolver=myresolver"
+      - "traefik.http.services.ntfy.loadbalancer.server.port=80"
+      - "traefik.http.services.ntfy.loadbalancer.passhostheader=true"
+      - "traefik.http.routers.ntfy.middlewares=ntfy-websocket"
+      - "traefik.http.middlewares.ntfy-websocket.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.middlewares.ntfy-websocket.headers.customrequestheaders.Connection=upgrade"
+      - "traefik.http.middlewares.ntfy-websocket.headers.customrequestheaders.Upgrade=websocket"
+    volumes:
+      - ./ntfy/data:/app/data
+      - ./ntfy/cache:/app/cache
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - traefik_reverse_proxy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+networks:
+  traefik_reverse_proxy:
+    external: true

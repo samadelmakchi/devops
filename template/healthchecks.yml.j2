@@ -1,0 +1,51 @@
+services:
+  healthchecks:
+    container_name: healthchecks
+    image: lscr.io/linuxserver/healthchecks:latest
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - SITE_ROOT=https://healthchecks.{{ domain }}
+      - SITE_NAME=Healthchecks
+      - SUPERUSER_EMAIL=admin@{{ domain }}
+      - SUPERUSER_PASSWORD=your-superuser-password-change-me
+      - ALLOWED_HOSTS=healthchecks.{{ domain }}
+      - SECRET_KEY=your-secret-key-change-me
+      - DEFAULT_FROM_EMAIL=noreply@{{ domain }}
+      - EMAIL_HOST=your-smtp-host-change-me
+      - EMAIL_PORT=587
+      - EMAIL_HOST_USER=your-smtp-user-change-me
+      - EMAIL_HOST_PASSWORD=your-smtp-password-change-me
+      - EMAIL_USE_TLS=True
+      - APPRISE_ENABLED=False
+    ports:
+      - "8000:8000"
+      - "2525:2525"
+    volumes:
+      - ./healthchecks/config:/config
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.healthchecks.rule=Host(`healthchecks.{{ domain }}`)"
+      - "traefik.http.routers.healthchecks.entrypoints=websecure"
+      - "traefik.http.routers.healthchecks.tls=true"
+      - "traefik.http.routers.healthchecks.tls.certresolver=myresolver"
+      - "traefik.http.services.healthchecks.loadbalancer.server.port=8000"
+      - "traefik.http.routers.healthchecks-http.rule=Host(`healthchecks.{{ domain }}`)"
+      - "traefik.http.routers.healthchecks-http.entrypoints=web"
+      - "traefik.http.routers.healthchecks-http.middlewares=healthchecks-https-redirect"
+      - "traefik.http.middlewares.healthchecks-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.healthchecks-https-redirect.redirectscheme.permanent=true"
+    networks:
+      - traefik_reverse_proxy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 60s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+networks:
+  traefik_reverse_proxy:
+    external: true

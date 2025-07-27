@@ -1,0 +1,63 @@
+services:
+  mtproxy:
+    container_name: mtproxy
+    image: mtproxy/mtproxy:latest
+    restart: unless-stopped
+    environment:
+      - SECRET=your-secret-key-change-me
+      - TAG=your-promotion-tag-change-me
+      - WORKERS=1
+      - TZ=Etc/UTC
+    volumes:
+      - ./mtproxy/data:/data
+    ports:
+      - "443:443"
+      - "2398:2398"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mtproxy-web.rule=Host(`mtproxy.{{ domain }}`)"
+      - "traefik.http.routers.mtproxy-web.entrypoints=websecure"
+      - "traefik.http.routers.mtproxy-web.tls=true"
+      - "traefik.http.routers.mtproxy-web.tls.certresolver=myresolver"
+      - "traefik.http.services.mtproxy-web.loadbalancer.server.port=2398"
+      - "traefik.http.routers.mtproxy-web-http.rule=Host(`mtproxy.{{ domain }}`)"
+      - "traefik.http.routers.mtproxy-web-http.entrypoints=web"
+      - "traefik.http.routers.mtproxy-web-http.middlewares=mtproxy-https-redirect"
+      - "traefik.http.middlewares.mtproxy-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.mtproxy-https-redirect.redirectscheme.permanent=true"
+      - "traefik.tcp.routers.mtproxy-tcp.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.mtproxy-tcp.entrypoints=mtproxy-tcp"
+      - "traefik.tcp.routers.mtproxy-tcp.service=mtproxy-tcp"
+      - "traefik.tcp.services.mtproxy-tcp.loadbalancer.server.port=443"
+    networks:
+      - traefik_reverse_proxy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2398/stats"]
+      interval: 60s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  traefik:
+    container_name: traefik
+    image: traefik:v3.0
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/traefik.yml:ro
+      - ./traefik/acme.json:/acme.json
+    networks:
+      - traefik_reverse_proxy
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+networks:
+  traefik_reverse_proxy:
+    external: true

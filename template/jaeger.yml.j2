@@ -1,0 +1,29 @@
+services:
+  jaeger:
+    container_name: jaeger
+    image: jaegertracing/all-in-one:1.60
+    restart: unless-stopped
+    environment:
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+      - "9411:9411" # Zipkin
+      - "14250:14250" # gRPC (Jaeger Thrift)
+      - "14268:14268" # HTTP (Jaeger Thrift)
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jaeger.rule=Host(`jaeger.{{ domain }}`)"
+      - "traefik.http.routers.jaeger.entrypoints=websecure"
+      - "traefik.http.routers.jaeger.tls.certresolver=myresolver"
+      - "traefik.http.services.jaeger.loadbalancer.server.port=16686"
+    networks:
+      - traefik_reverse_proxy
+    volumes:
+      - ./jaeger:/data
+
+networks:
+  traefik_reverse_proxy:
+    external: true

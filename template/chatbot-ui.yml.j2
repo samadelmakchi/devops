@@ -1,0 +1,108 @@
+services:
+  chatbot-ui:
+    container_name: chatbot-ui
+    image: ghcr.io/mckaywrigley/chatbot-ui:main
+    restart: unless-stopped
+    depends_on:
+      supabase-kong:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    environment:
+      - OPENAI_API_KEY=sk-dummy
+      - OPENAI_API_HOST=http://ollama:11434
+      - NEXT_PUBLIC_SUPABASE_URL=http://supabase-kong:8000
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key-change-me
+      - SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-key-change-me
+      - NEXTAUTH_URL=https://chatbot-ui.{{ domain }}
+      - NEXTAUTH_SECRET=your-nextauth-secret-change-me
+    ports:
+      - "3000:3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.chatbot-ui.rule=Host(`chatbot-ui.{{ domain }}`)"
+      - "traefik.http.routers.chatbot-ui.entrypoints=websecure"
+      - "traefik.http.routers.chatbot-ui.tls=true"
+      - "traefik.http.routers.chatbot-ui.tls.certresolver=myresolver"
+      - "traefik.http.services.chatbot-ui.loadbalancer.server.port=3000"
+      - "traefik.http.services.chatbot-ui.loadbalancer.passhostheader=true"
+      - "traefik.http.routers.chatbot-ui.middlewares=chatbot-ui-websocket"
+      - "traefik.http.middlewares.chatbot-ui-websocket.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.middlewares.chatbot-ui-websocket.headers.customrequestheaders.Connection=upgrade"
+      - "traefik.http.middlewares.chatbot-ui-websocket.headers.customrequestheaders.Upgrade=websocket"
+    networks:
+      - traefik_reverse_proxy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  ollama:
+    container_name: ollama
+    image: ollama/ollama:0.3.12
+    restart: unless-stopped
+    volumes:
+      - ./ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    networks:
+      - traefik_reverse_proxy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  supabase-db:
+    container_name: supabase-db
+    image: supabase/postgres:15.1.1.61
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=your-supabase-db-password-change-me
+      - POSTGRES_DB=postgres
+    volumes:
+      - ./supabase-db:/var/lib/postgresql/data
+    networks:
+      - traefik_reverse_proxy
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  supabase-kong:
+    container_name: supabase-kong
+    image: kong:3.7
+    restart: unless-stopped
+    environment:
+      - KONG_DATABASE=off
+      - KONG_PROXY_ACCESS_LOG=/dev/stdout
+      - KONG_ADMIN_ACCESS_LOG=/dev/stdout
+      - KONG_PROXY_ERROR_LOG=/dev/stderr
+      - KONG_ADMIN_ERROR_LOG=/dev/stderr
+      - KONG_ADMIN_LISTEN=0.0.0.0:8001
+      - KONG_ADMIN_GUI_URL=http://supabase-kong:8001
+      - KONG_PORTAL_GUI_HOST=supabase-kong:8000
+      - KONG_PORTAL_API_URL=http://supabase-kong:8000
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    networks:
+      - traefik_reverse_proxy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+networks:
+  traefik_reverse_proxy:
+    external: true

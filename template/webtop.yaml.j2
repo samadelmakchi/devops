@@ -1,0 +1,49 @@
+services:
+  webtop:
+    container_name: webtop
+    image: lscr.io/linuxserver/webtop:ubuntu-mate
+    restart: unless-stopped
+    security_opt:
+      - seccomp:unconfined #optional
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - SUBFOLDER=/ #optional
+      - TITLE=Webtop #optional
+      - CUSTOM_USER=admin #change to desired username
+      - PASSWORD=your-password-change-me #change to secure password
+      - LC_ALL=fa_IR.UTF-8 #set language to Persian
+      - DOCKER_MODS=linuxserver/mods:universal-package-install #optional for installing extra packages
+      - INSTALL_PACKAGES=libfuse2|git|vim #optional pre-installed packages
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    volumes:
+      - ./webtop/config:/config
+      - /var/run/docker.sock:/var/run/docker.sock #optional
+    shm_size: "1gb" #optional
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.webtop.rule=Host(`webtop.{{ domain }}`)"
+      - "traefik.http.routers.webtop.entrypoints=websecure"
+      - "traefik.http.routers.webtop.tls=true"
+      - "traefik.http.routers.webtop.tls.certresolver=myresolver"
+      - "traefik.http.services.webtop.loadbalancer.server.port=3000"
+      - "traefik.http.routers.webtop-http.rule=Host(`webtop.{{ domain }}`)"
+      - "traefik.http.routers.webtop-http.entrypoints=web"
+      - "traefik.http.routers.webtop-http.middlewares=webtop-https-redirect"
+      - "traefik.http.middlewares.webtop-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.webtop-https-redirect.redirectscheme.permanent=true"
+    networks:
+      - traefik_reverse_proxy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 60s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+networks:
+  traefik_reverse_proxy:
+    external: true

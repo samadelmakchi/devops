@@ -1,0 +1,64 @@
+services:
+  openproject:
+    container_name: openproject
+    image: openproject/openproject:14
+    restart: unless-stopped
+    depends_on:
+      - openproject_db
+    environment:
+      - OPENPROJECT_HOST__NAME=openproject.{{ domain }}
+      - OPENPROJECT_HTTPS=true
+      - OPENPROJECT_RAILS_ENV=production
+      - OPENPROJECT_SECRET_KEY_BASE=your-secret-key-change-me
+      - OPENPROJECT_DATABASE_URL=postgresql://openproject:your-db-password-change-me@openproject_db:5432/openproject
+      - OPENPROJECT_RAILS_CACHE_STORE=memcache
+      - OPENPROJECT_ADMIN_USER=admin
+      - OPENPROJECT_ADMIN_EMAIL=admin@{{ domain }}
+      - OPENPROJECT_ADMIN_PASSWORD=your-admin-password-change-me
+      - TZ=Etc/UTC
+    volumes:
+      - ./openproject/pgdata:/var/openproject/pgdata
+      - ./openproject/assets:/var/openproject/assets
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.openproject.rule=Host(`openproject.{{ domain }}`)"
+      - "traefik.http.routers.openproject.entrypoints=websecure"
+      - "traefik.http.routers.openproject.tls=true"
+      - "traefik.http.routers.openproject.tls.certresolver=myresolver"
+      - "traefik.http.services.openproject.loadbalancer.server.port=8080"
+      - "traefik.http.routers.openproject-http.rule=Host(`openproject.{{ domain }}`)"
+      - "traefik.http.routers.openproject-http.entrypoints=web"
+      - "traefik.http.routers.openproject-http.middlewares=openproject-https-redirect"
+      - "traefik.http.middlewares.openproject-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.openproject-https-redirect.redirectscheme.permanent=true"
+    networks:
+      - traefik_reverse_proxy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 60s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  openproject_db:
+    container_name: openproject_db
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=openproject
+      - POSTGRES_PASSWORD=your-db-password-change-me
+      - POSTGRES_DB=openproject
+    volumes:
+      - ./openproject/db:/var/lib/postgresql/data
+    networks:
+      - traefik_reverse_proxy
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "openproject"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+networks:
+  traefik_reverse_proxy:
+    external: true

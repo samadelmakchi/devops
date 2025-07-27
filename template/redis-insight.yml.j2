@@ -1,0 +1,24 @@
+services:
+  redisinsight:
+    container_name: redisinsight
+    image: redis/redisinsight:2.56
+    restart: unless-stopped
+    volumes:
+      - ./redisinsight:/data
+    ports:
+      - "5540:5540"
+    environment:
+      - REDISINSIGHT_HOST=0.0.0.0
+      - REDISINSIGHT_PORT=5540
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.redisinsight.rule=Host(`redisinsight.{{ domain }}`)"
+      - "traefik.http.routers.redisinsight.entrypoints=websecure"
+      - "traefik.http.routers.redisinsight.tls.certresolver=myresolver"
+      - "traefik.http.services.redisinsight.loadbalancer.server.port=5540"
+    networks:
+      - traefik_reverse_proxy
+
+networks:
+  traefik_reverse_proxy:
+    external: true

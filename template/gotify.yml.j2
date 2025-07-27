@@ -1,0 +1,63 @@
+services:
+  gotify:
+    container_name: gotify
+    image: gotify/server:2.6
+    restart: unless-stopped
+    depends_on:
+      - gotify-db
+    environment:
+      - GOTIFY_DATABASE_DIALECT=postgres
+      - GOTIFY_DATABASE_CONNECTION=host=gotify-db port=5432 user=gotify dbname=gotify password=your-db-password-change-me sslmode=disable
+      - GOTIFY_DEFAULTUSER_NAME=admin
+      - GOTIFY_DEFAULTUSER_PASS=your-admin-password-change-me
+      - GOTIFY_REGISTRATION=false
+      - TZ=UTC
+    ports:
+      - "80:80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gotify.rule=Host(`gotify.{{ domain }}`)"
+      - "traefik.http.routers.gotify.entrypoints=websecure"
+      - "traefik.http.routers.gotify.tls=true"
+      - "traefik.http.routers.gotify.tls.certresolver=myresolver"
+      - "traefik.http.services.gotify.loadbalancer.server.port=80"
+      - "traefik.http.services.gotify.loadbalancer.passhostheader=true"
+      - "traefik.http.routers.gotify.middlewares=gotify-websocket"
+      - "traefik.http.middlewares.gotify-websocket.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.middlewares.gotify-websocket.headers.customrequestheaders.Connection=upgrade"
+      - "traefik.http.middlewares.gotify-websocket.headers.customrequestheaders.Upgrade=websocket"
+    volumes:
+      - ./gotify/data:/app/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - traefik_reverse_proxy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  gotify-db:
+    container_name: gotify-db
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=gotify
+      - POSTGRES_PASSWORD=your-db-password-change-me
+      - POSTGRES_DB=gotify
+    volumes:
+      - ./gotify-db:/var/lib/postgresql/data
+    networks:
+      - traefik_reverse_proxy
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "gotify"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+networks:
+  traefik_reverse_proxy:
+    external: true

@@ -1,0 +1,62 @@
+services:
+  planka:
+    container_name: planka
+    image: ghcr.io/plankanban/planka:latest
+    restart: unless-stopped
+    command: >
+      bash -c "for i in `seq 1 30`; do ./start.sh && s=$$? && break || s=$$?; echo \"Tried $$i times. Waiting 5 seconds...\"; sleep 5; done; (exit $$s)"
+    depends_on:
+      - planka_db
+    environment:
+      - BASE_URL=https://planka.{{ domain }}
+      - DATABASE_URL=postgresql://planka:your-db-password-change-me@planka_db/planka
+      - SECRET_KEY=your-secret-key-change-me
+      - TRUST_PROXY=0
+      - TZ=Etc/UTC
+    volumes:
+      - ./planka/user-avatars:/app/public/user-avatars
+      - ./planka/project-background-images:/app/public/project-background-images
+      - ./planka/attachments:/app/private/attachments
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.planka.rule=Host(`planka.{{ domain }}`)"
+      - "traefik.http.routers.planka.entrypoints=websecure"
+      - "traefik.http.routers.planka.tls=true"
+      - "traefik.http.routers.planka.tls.certresolver=myresolver"
+      - "traefik.http.services.planka.loadbalancer.server.port=1337"
+      - "traefik.http.routers.planka-http.rule=Host(`planka.{{ domain }}`)"
+      - "traefik.http.routers.planka-http.entrypoints=web"
+      - "traefik.http.routers.planka-http.middlewares=planka-https-redirect"
+      - "traefik.http.middlewares.planka-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.planka-https-redirect.redirectscheme.permanent=true"
+    networks:
+      - traefik_reverse_proxy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:1337"]
+      interval: 60s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  planka_db:
+    container_name: planka_db
+    image: postgres:14-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=planka
+      - POSTGRES_PASSWORD=your-db-password-change-me
+      - POSTGRES_DB=planka
+    volumes:
+      - ./planka/db-data:/var/lib/postgresql/data
+    networks:
+      - traefik_reverse_proxy
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "planka"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+networks:
+  traefik_reverse_proxy:
+    external: true
