@@ -120,3 +120,14 @@ ansible-playbook -i inventory.local.yml playbook-test.yml --ask-become-pass
 
 🐘 pgAdmin (9282)
 
+```mermaid
+graph TD
+  A[شروع] --> B{آیا وارد شده‌ای؟}
+  B -- بله --> C[نمایش داشبورد]
+  B -- خیر --> D[نمایش فرم ورود]
+  D --> E[اعتبارسنجی اطلاعات]
+  E --> B
+
+flowchart LR
+    id1(This is the text in the box)
+```
