@@ -131,7 +131,4 @@ graph TD
    D --> E[اعتبارسنجی اطلاعات]
    E --> B
 
-flowchart LR
-   id1(This is the text in the box)
-
 ```
