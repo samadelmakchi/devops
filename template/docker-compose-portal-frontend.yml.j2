@@ -5,7 +5,7 @@ services:
       context: {{ project_path }}/{{ inventory_hostname }}/portal-frontend
       dockerfile: docker/Dockerfile
     volumes:
-      - ../:/app:ro
+      - ../:/app
     ports:
       - {{ customer_portal_frontend_ports }}:80
     networks:
