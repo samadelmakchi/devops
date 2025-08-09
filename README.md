@@ -112,10 +112,4 @@ ansible-playbook -i inventory.local.yml playbook-test.yml --ask-become-pass
 
 🐰 RabbitMQ (4102)
 
-📬 Apprise (4103)
-
-✉️ Mailserver (4104)
-
 🗄️ phpMyAdmin (9281)
-
-🐘 pgAdmin (9282)

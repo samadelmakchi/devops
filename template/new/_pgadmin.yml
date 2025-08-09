@@ -1,0 +1,38 @@
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PgAdmin
+    - name: Generate pgadmin.yml from template
+      ansible.builtin.template:
+        src: template/pgadmin.yml.j2
+        dest: tools/pgadmin.yml
+        owner: root
+        group: root
+        mode: '0644'
+        force: yes
+      poll: 1
+      when: install_pgadmin is true
+
+    - name: Set up PgAdmin using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - pgadmin.yml
+        state: present
+        pull: always
+        recreate: auto
+      poll: 1
+      when: install_pgadmin is true
+
+    - name: Check if pgadmin.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/pgadmin.yml"
+      register: pgadmin_file
+      poll: 1
+
+    - name: Tear down PgAdmin container if install_pgadmin is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - pgadmin.yml
+        state: absent
+      poll: 1
+      when: install_pgadmin is false and pgadmin_file.stat.exists

@@ -1,0 +1,38 @@
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Apprise
+    - name: Generate apprise.yml from template
+      ansible.builtin.template:
+        src: template/apprise.yml.j2
+        dest: tools/apprise.yml
+        owner: root
+        group: root
+        mode: '0644'
+        force: yes
+      poll: 1
+      when: install_apprise is true
+
+    - name: Set up Apprise using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - apprise.yml
+        state: present
+        pull: always
+        recreate: auto
+      poll: 1
+      when: install_apprise is true
+
+    - name: Check if apprise.yml file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tools/apprise.yml"
+      register: apprise_file
+      poll: 1
+
+    - name: Tear down Apprise container if install_apprise is false
+      community.docker.docker_compose_v2:
+        project_src: tools
+        files:
+          - apprise.yml
+        state: absent
+      poll: 1
+      when: install_apprise is false and apprise_file.stat.exists

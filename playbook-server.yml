@@ -258,44 +258,6 @@
       poll: 1
       when: install_rabbitmq is false and rabbitmq_file.stat.exists
 
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Apprise
-    - name: Generate apprise.yml from template
-      ansible.builtin.template:
-        src: template/apprise.yml.j2
-        dest: tools/apprise.yml
-        owner: root
-        group: root
-        mode: '0644'
-        force: yes
-      poll: 1
-      when: install_apprise is true
-
-    - name: Set up Apprise using Docker Compose
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - apprise.yml
-        state: present
-        pull: always
-        recreate: auto
-      poll: 1
-      when: install_apprise is true
-
-    - name: Check if apprise.yml file exists
-      ansible.builtin.stat:
-        path: "{{ playbook_dir }}/tools/apprise.yml"
-      register: apprise_file
-      poll: 1
-
-    - name: Tear down Apprise container if install_apprise is false
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - apprise.yml
-        state: absent
-      poll: 1
-      when: install_apprise is false and apprise_file.stat.exists
-
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Uptime Kuma
     - name: Generate uptime_kuma.yml from template
       ansible.builtin.template:
@@ -516,54 +478,6 @@
       poll: 1
       when: install_prometheus is false and prometheus_file.stat.exists
 
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Mailserver
-    - name: Copy Mailserver config folder
-      ansible.builtin.copy:
-        src: template/mailserver/
-        dest: tools/mailserver/
-        owner: root
-        group: root
-        mode: '0644'
-      poll: 1
-      when: install_mailserver is true
-
-    - name: Generate mailserver.yml from template
-      ansible.builtin.template:
-        src: template/mailserver.yml.j2
-        dest: tools/mailserver.yml
-        owner: root
-        group: root
-        mode: '0644'
-        force: yes
-      poll: 1
-      when: install_mailserver is true
-
-    - name: Set up Mailserver using Docker Compose
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - mailserver.yml
-        state: present
-        pull: always
-        recreate: auto
-      poll: 1
-      when: install_mailserver is true
-
-    - name: Check if mailserver.yml file exists
-      ansible.builtin.stat:
-        path: "{{ playbook_dir }}/tools/mailserver.yml"
-      register: mailserver_file
-      poll: 1
-
-    - name: Tear down Mailserver container if install_mailserver is false
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - mailserver.yml
-        state: absent
-      poll: 1
-      when: install_mailserver is false and mailserver_file.stat.exists
-
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Nginx
     - name: Copy Nginx config folder
       ansible.builtin.copy:
@@ -649,44 +563,6 @@
         state: absent
       poll: 1
       when: install_phpmyadmin is false and phpmyadmin_file.stat.exists
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PgAdmin
-    - name: Generate pgadmin.yml from template
-      ansible.builtin.template:
-        src: template/pgadmin.yml.j2
-        dest: tools/pgadmin.yml
-        owner: root
-        group: root
-        mode: '0644'
-        force: yes
-      poll: 1
-      when: install_pgadmin is true
-
-    - name: Set up PgAdmin using Docker Compose
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - pgadmin.yml
-        state: present
-        pull: always
-        recreate: auto
-      poll: 1
-      when: install_pgadmin is true
-
-    - name: Check if pgadmin.yml file exists
-      ansible.builtin.stat:
-        path: "{{ playbook_dir }}/tools/pgadmin.yml"
-      register: pgadmin_file
-      poll: 1
-
-    - name: Tear down PgAdmin container if install_pgadmin is false
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - pgadmin.yml
-        state: absent
-      poll: 1
-      when: install_pgadmin is false and pgadmin_file.stat.exists
 
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
