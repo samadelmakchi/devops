@@ -22,14 +22,14 @@
       poll: 1
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Traefik
-    - name: Create traefik_reverse_proxy Docker network
+    - name: "🛣️ Create traefik_reverse_proxy Docker network"
       community.docker.docker_network:
         name: traefik_reverse_proxy
         state: present
       poll: 1
       when: install_traefik is true
 
-    - name: Generate traefik.yml from template
+    - name: "🛣️ Generate traefik.yml from template"
       ansible.builtin.template:
         src: template/traefik.yml.j2
         dest: tools/traefik.yml
@@ -40,7 +40,7 @@
       poll: 1
       when: install_traefik is true
 
-    - name: Set up Traefik using Docker Compose
+    - name: "🛣️ Set up Traefik using Docker Compose"
       community.docker.docker_compose_v2:
         project_src: tools
         files:
@@ -51,13 +51,13 @@
       poll: 1
       when: install_traefik is true
 
-    - name: Check if traefik.yml file exists
+    - name: "🛣️ Check if traefik.yml file exists"
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/traefik.yml"
       poll: 1
       register: traefik_file
 
-    - name: Tear down traefik container if install_traefik is false
+    - name: "🛣️ Tear down traefik container if install_traefik is false"
       community.docker.docker_compose_v2:
         project_src: tools
         files:
@@ -67,7 +67,7 @@
       when: install_traefik is false and traefik_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Portainer
-    - name: Generate portainer.yml from template
+    - name: "🐳 Generate portainer.yml from template"
       ansible.builtin.template:
         src: template/portainer.yml.j2
         dest: tools/portainer.yml
@@ -78,7 +78,7 @@
       poll: 1
       when: install_portainer is true
 
-    - name: Set up Portainer using Docker Compose
+    - name: "🐳 Set up Portainer using Docker Compose"
       community.docker.docker_compose_v2:
         project_src: tools
         files:
@@ -89,13 +89,13 @@
       poll: 1
       when: install_portainer is true
 
-    - name: Check if portainer.yml file exists
+    - name: "🐳 Check if portainer.yml file exists"
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/portainer.yml"
       poll: 1
       register: portainer_file
 
-    - name: Tear down Portainer container if install_portainer is false
+    - name: "🐳 Tear down Portainer container if install_portainer is false"
       community.docker.docker_compose_v2:
         project_src: tools
         files:
@@ -105,7 +105,7 @@
       when: install_portainer is false and portainer_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Jenkins
-    - name: Generate jenkins.yml from template
+    - name: "♻️ Generate jenkins.yml from template"
       ansible.builtin.template:
         src: template/jenkins.yml.j2
         dest: tools/jenkins.yml
@@ -116,13 +116,13 @@
       poll: 1
       when: install_jenkins is true
 
-    - name: Ensure traefik_reverse_proxy network exists
+    - name: "♻️ Ensure traefik_reverse_proxy network exists"
       community.docker.docker_network:
         name: traefik_reverse_proxy
         state: present
       when: install_jenkins is true
 
-    - name: Set up Jenkins using Docker Compose
+    - name: "♻️ Set up Jenkins using Docker Compose"
       community.docker.docker_compose_v2:
         project_src: tools
         files:
@@ -137,13 +137,13 @@
       delay: 5
       until: docker_compose_result is success
 
-    - name: Check if jenkins.yml file exists
+    - name: "♻️ Check if jenkins.yml file exists"
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/jenkins.yml"
       register: jenkins_file
       poll: 1
 
-    - name: Tear down Jenkins container if install_jenkins is false
+    - name: "♻️ Tear down Jenkins container if install_jenkins is false"
       community.docker.docker_compose_v2:
         project_src: tools
         files:
@@ -152,7 +152,7 @@
       poll: 1
       when: install_jenkins is false and jenkins_file.stat.exists
 
-    - name: Wait for Jenkins container to be ready
+    - name: "♻️ Wait for Jenkins container to be ready"
       ansible.builtin.wait_for:
         host: localhost
         port: 4441
@@ -161,13 +161,13 @@
         timeout: 300
       when: install_jenkins is true
 
-    - name: Install Java 17 for Jenkins CLI
+    - name: "♻️ Install Java 17 for Jenkins CLI"
       ansible.builtin.package:
         name: openjdk-17-jre
         state: present
       when: install_jenkins is true
 
-    - name: Get initial admin password from Jenkins container
+    - name: "♻️ Get initial admin password from Jenkins container"
       ansible.builtin.command:
         cmd: docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
       register: initial_password
@@ -175,12 +175,12 @@
       changed_when: false
       failed_when: initial_password.rc != 0 or initial_password.stdout == ""
 
-    - name: Debug initial admin password
+    - name: "♻️ Debug initial admin password"
       ansible.builtin.debug:
         msg: "Initial password: {{ initial_password.stdout }}"
       when: install_jenkins is true
 
-    - name: Download Jenkins CLI jar
+    - name: "♻️ Download Jenkins CLI jar"
       ansible.builtin.uri:
         url: http://localhost:4441/jnlpJars/jenkins-cli.jar
         method: GET
@@ -192,29 +192,8 @@
         status_code: [200, 304]
       when: install_jenkins is true
 
-    # - name: Update Jenkins admin password
-    #   ansible.builtin.command:
-    #     cmd: >
-    #       java -jar /tmp/jenkins-cli.jar -s http://localhost:4441 -auth admin:{{ initial_password.stdout }} groovy = <
-    #       import hudson.model.User;
-    #       import jenkins.security.ApiTokenProperty;
-    #       def user = User.get('admin', false);
-    #       user.setPassword('{{ new_admin_password }}');
-    #       user.save();
-    #   register: update_password
-    #   timeout: 60
-    #   when: install_jenkins is true
-    #   vars:
-    #     new_admin_password: "SMD6165"
-    #   failed_when: update_password.rc != 0
-
-    # - name: Debug password update result
-    #   ansible.builtin.debug:
-    #     msg: "Password update result: rc={{ update_password.rc }}, stdout={{ update_password.stdout }}, stderr={{ update_password.stderr }}"
-    #   when: install_jenkins is true
-
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RabbitMQ
-    - name: Generate rabbitmq.yml from template
+    - name: "🐰 Generate rabbitmq.yml from template"
       ansible.builtin.template:
         src: template/rabbitmq.yml.j2
         dest: tools/rabbitmq.yml
@@ -225,7 +204,7 @@
       poll: 1
       when: install_rabbitmq is true
 
-    - name: Set up RabbitMQ using Docker Compose
+    - name: "🐰 Set up RabbitMQ using Docker Compose"
       community.docker.docker_compose_v2:
         project_src: tools
         files:
@@ -236,20 +215,20 @@
       poll: 1
       when: install_rabbitmq is true
 
-    - name: Enable RabbitMQ management plugin
+    - name: "🐰 Enable RabbitMQ management plugin"
       community.docker.docker_container_exec:
         container: rabbitmq
         command: rabbitmq-plugins enable rabbitmq_management
       poll: 1
       when: install_rabbitmq is true
 
-    - name: Check if rabbitmq.yml file exists
+    - name: "🐰 Check if rabbitmq.yml file exists"
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/rabbitmq.yml"
       register: rabbitmq_file
       poll: 1
 
-    - name: Tear down RabbitMQ container if install_rabbitmq is false
+    - name: "🐰 Tear down RabbitMQ container if install_rabbitmq is false"
       community.docker.docker_compose_v2:
         project_src: tools
         files:
@@ -259,7 +238,7 @@
       when: install_rabbitmq is false and rabbitmq_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Uptime Kuma
-    - name: Generate uptime_kuma.yml from template
+    - name: "⏰ Generate uptime_kuma.yml from template"
       ansible.builtin.template:
         src: template/uptime_kuma.yml.j2
         dest: tools/uptime_kuma.yml
@@ -270,7 +249,7 @@
       poll: 1
       when: install_uptime_kuma is true
 
-    - name: Set up Uptime Kuma using Docker Compose
+    - name: "⏰ Set up Uptime Kuma using Docker Compose"
       community.docker.docker_compose_v2:
         project_src: tools
         files:
@@ -281,13 +260,13 @@
       poll: 1
       when: install_uptime_kuma is true
 
-    - name: Check if uptime_kuma.yml file exists
+    - name: "⏰ Check if uptime_kuma.yml file exists"
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/uptime_kuma.yml"
       register: uptime_kuma_file
       poll: 1
 
-    - name: Tear down Uptime Kuma container if install_uptime_kuma is false
+    - name: "⏰ Tear down Uptime Kuma container if install_uptime_kuma is false"
       community.docker.docker_compose_v2:
         project_src: tools
         files:
@@ -296,104 +275,18 @@
       poll: 1
       when: install_uptime_kuma is false and uptime_kuma_file.stat.exists
 
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Loki
-    - name: Copy Loki config folder
-      ansible.builtin.copy:
-        src: template/loki/
-        dest: tools/loki/
-        owner: root
-        group: root
-        mode: '0644'
-      poll: 1
-      when: install_loki is true
-
-    - name: Generate loki.yml from template
-      ansible.builtin.template:
-        src: template/loki.yml.j2
-        dest: tools/loki.yml
-        owner: root
-        group: root
-        mode: '0644'
-        force: yes
-      poll: 1
-      when: install_loki is true
-
-    - name: Set up Loki using Docker Compose
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - loki.yml
-        state: present
-        pull: always
-        recreate: auto
-      poll: 1
-      when: install_loki is true
-
-    - name: Check if loki.yml file exists
-      ansible.builtin.stat:
-        path: "{{ playbook_dir }}/tools/loki.yml"
-      register: loki_file
-      poll: 1
-
-    - name: Tear down Loki container if install_loki is false
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - loki.yml
-        state: absent
-      poll: 1
-      when: install_loki is false and loki_file.stat.exists
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Tempo
-    - name: Copy Tempo config folder
-      ansible.builtin.copy:
-        src: template/tempo/
-        dest: tools/tempo/
-        owner: root
-        group: root
-        mode: '0644'
-      poll: 1
-      when: install_tempo is true
-
-    - name: Generate tempo.yml from template
-      ansible.builtin.template:
-        src: template/tempo.yml.j2
-        dest: tools/tempo.yml
-        owner: root
-        group: root
-        mode: '0644'
-        force: yes
-      poll: 1
-      when: install_tempo is true
-
-    - name: Set up Tempo using Docker Compose
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - tempo.yml
-        state: present
-        pull: always
-        recreate: auto
-      poll: 1
-      when: install_tempo is true
-
-    - name: Check if tempo.yml file exists
-      ansible.builtin.stat:
-        path: "{{ playbook_dir }}/tools/tempo.yml"
-      register: tempo_file
-      poll: 1
-
-    - name: Tear down Tempo container if install_tempo is false
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - tempo.yml
-        state: absent
-      poll: 1
-      when: install_tempo is false and tempo_file.stat.exists
-
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Grafana
-    - name: Generate grafana.yml from template
+    - name: "📈 Copy Grafana config folder"
+      ansible.builtin.copy:
+        src: template/grafana/
+        dest: tools/grafana/
+        owner: root
+        group: root
+        mode: '0644'
+      poll: 1
+      when: install_grafana is true
+
+    - name: "📈 Generate grafana.yml from template"
       ansible.builtin.template:
         src: template/grafana.yml.j2
         dest: tools/grafana.yml
@@ -404,7 +297,7 @@
       poll: 1
       when: install_grafana is true
 
-    - name: Set up Grafana using Docker Compose
+    - name: "📈 Set up Grafana using Docker Compose"
       community.docker.docker_compose_v2:
         project_src: tools
         files:
@@ -415,13 +308,13 @@
       poll: 1
       when: install_grafana is true
 
-    - name: Check if grafana.yml file exists
+    - name: "📈 Check if grafana.yml file exists"
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/grafana.yml"
       register: grafana_file
       poll: 1
 
-    - name: Tear down Grafana container if install_grafana is false
+    - name: "📈 Tear down Grafana container if install_grafana is false"
       community.docker.docker_compose_v2:
         project_src: tools
         files:
@@ -430,56 +323,8 @@
       poll: 1
       when: install_grafana is false and grafana_file.stat.exists
 
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Pometheus
-    - name: Copy Prometheus config folder
-      ansible.builtin.copy:
-        src: template/prometheus/
-        dest: tools/prometheus/
-        owner: root
-        group: root
-        mode: '0644'
-      poll: 1
-      when: install_prometheus is true
-
-    - name: Generate prometheus.yml from template
-      ansible.builtin.template:
-        src: template/prometheus.yml.j2
-        dest: tools/prometheus.yml
-        owner: root
-        group: root
-        mode: '0644'
-        force: yes
-      poll: 1
-      when: install_prometheus is true
-
-    - name: Set up Pometheus using Docker Compose
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - prometheus.yml
-        state: present
-        pull: always
-        recreate: auto
-      poll: 1
-      when: install_prometheus is true
-
-    - name: Check if prometheus.yml file exists
-      ansible.builtin.stat:
-        path: "{{ playbook_dir }}/tools/prometheus.yml"
-      register: prometheus_file
-      poll: 1
-
-    - name: Tear down Pometheus container if install_prometheus is false
-      community.docker.docker_compose_v2:
-        project_src: tools
-        files:
-          - prometheus.yml
-        state: absent
-      poll: 1
-      when: install_prometheus is false and prometheus_file.stat.exists
-
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Nginx
-    - name: Copy Nginx config folder
+    - name: "🌐 Copy Nginx config folder"
       ansible.builtin.copy:
         src: template/nginx/
         dest: tools/nginx/
@@ -489,7 +334,7 @@
       poll: 1
       when: install_nginx is true
 
-    - name: Generate nginx.yml from template
+    - name: "🌐 Generate nginx.yml from template"
       ansible.builtin.template:
         src: template/nginx.yml.j2
         dest: tools/nginx.yml
@@ -500,7 +345,7 @@
       poll: 1
       when: install_nginx is true
 
-    - name: Set up Nginx using Docker Compose
+    - name: "🌐 Set up Nginx using Docker Compose"
       community.docker.docker_compose_v2:
         project_src: tools
         files:
@@ -511,13 +356,13 @@
       poll: 1
       when: install_nginx is true
 
-    - name: Check if nginx.yml file exists
+    - name: "🌐 Check if nginx.yml file exists"
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/nginx.yml"
       register: nginx_file
       poll: 1
 
-    - name: Tear down nginx container if install_nginx is false
+    - name: "🌐 Tear down nginx container if install_nginx is false"
       community.docker.docker_compose_v2:
         project_src: tools
         files:
@@ -527,7 +372,7 @@
       when: install_nginx is false and nginx_file.stat.exists
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ phpMyAdmin
-    - name: Generate phpmyadmin.yml from template
+    - name: "🗄️ Generate phpmyadmin.yml from template"
       ansible.builtin.template:
         src: template/phpmyadmin.yml.j2
         dest: tools/phpmyadmin.yml
@@ -538,7 +383,7 @@
       poll: 1
       when: install_phpmyadmin is true
 
-    - name: Set up phpMyAdmin using Docker Compose
+    - name: "🗄️ Set up phpMyAdmin using Docker Compose"
       community.docker.docker_compose_v2:
         project_src: tools
         files:
@@ -549,13 +394,13 @@
       poll: 1
       when: install_phpmyadmin is true
 
-    - name: Check if phpmyadmin.yml file exists
+    - name: "🗄️ Check if phpmyadmin.yml file exists"
       ansible.builtin.stat:
         path: "{{ playbook_dir }}/tools/phpmyadmin.yml"
       register: phpmyadmin_file
       poll: 1
 
-    - name: Tear down phpMyAdmin container if install_phpmyadmin is false
+    - name: "🗄️ Tear down phpMyAdmin container if install_phpmyadmin is false"
       community.docker.docker_compose_v2:
         project_src: tools
         files:

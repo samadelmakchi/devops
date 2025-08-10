@@ -5,12 +5,9 @@ all:
 
     install_traefik: true
     install_portainer: true
-    install_rabbitmq: false
-    install_uptime_kuma: false
-    install_loki: false
-    install_tempo: false
-    install_grafana: false
-    install_prometheus: false
-    install_jenkins: false
-    install_nginx: false
-    install_phpmyadmin: false
+    install_rabbitmq: true
+    install_uptime_kuma: true
+    install_grafana: true
+    install_jenkins: true
+    install_nginx: true
+    install_phpmyadmin: true

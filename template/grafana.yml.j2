@@ -1,4 +1,16 @@
 services:
+  loki:
+    image: grafana/loki:3.4.1
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./grafana/loki-config.yaml:/etc/loki/loki-config.yaml
+      - loki-data:/loki
+    command:
+      - -config.file=/etc/loki/loki-config.yaml
+    networks:
+      - traefik_reverse_proxy
+
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -12,6 +24,7 @@ services:
       - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s/
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
     networks:
       - traefik_reverse_proxy
     labels:
@@ -21,9 +34,44 @@ services:
       - "traefik.http.routers.grafana.tls.certresolver=myresolver"
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./grafana/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+    networks:
+      - traefik_reverse_proxy
+
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tempo
+    restart: unless-stopped
+    ports:
+      - "3200:3200"   # Tempo HTTP API
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    volumes:
+      - ./grafana/tempo-config.yaml:/etc/tempo/tempo.yaml
+      - tempo-data:/tmp/tempo
+    command:
+      - --config.file=/etc/tempo/tempo.yaml
+    networks:
+      - traefik_reverse_proxy
+
 volumes:
   grafana_data:
+  loki-data:
+  prometheus_data:
+  tempo-data:
 
 networks:
   traefik_reverse_proxy:
-    external: true 
+    external: true

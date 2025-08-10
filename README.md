@@ -94,19 +94,15 @@ ansible-playbook -i inventory.local.yml playbook-test.yml --ask-become-pass
 
 ### 💢 ابزارهای دواپس
 
-🛣️ Traefik (80) (user: admin - pass: admin)
+🛣️ Traefik (80)
 
-📊 Splunk (8580)
-
-🔥 Prometheus (9090)
-
-📈 Grafana (9091)
+📈 Grafana [Prometheus:9090 / Loki:3100 / Tempo:3200] (9091)
 
 ⏰ Uptime Kuma (9092)
 
 ♻️ Jenkins (4441)
 
-🐳 Portainer (4100) (set user and pass)
+🐳 Portainer (4100)
 
 🌐 Nginx (4101)
 
