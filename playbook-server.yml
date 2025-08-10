@@ -22,8 +22,8 @@
       poll: 1
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ فعال سازی شکن
-    # 🌐 پیکربندی DNS سرویس Shecan در resolved.conf
-    - name: "🌐 Configure Shecan DNS in resolved.conf"
+    # 📡 پیکربندی DNS سرویس Shecan در resolved.conf
+    - name: "📡 Configure Shecan DNS in resolved.conf"
       ansible.builtin.copy:
         content: |
           # This file is part of systemd.
@@ -48,15 +48,15 @@
         mode: '0644'
       poll: 1
 
-    # 🔄 ریستارت سرویس systemd-resolved
-    - name: "🔄 Restart systemd-resolved service"
+    # 📡 ریستارت سرویس systemd-resolved
+    - name: "📡 Restart systemd-resolved service"
       ansible.builtin.systemd:
         name: systemd-resolved
         state: restarted
       poll: 1
 
-    # 🔗 ایجاد لینک سمبلیک برای /etc/resolv.conf به /run/systemd/resolve/resolv.conf
-    - name: "🔗 Create symbolic link for /etc/resolv.conf"
+    # 📡 ایجاد لینک سمبلیک برای /etc/resolv.conf به /run/systemd/resolve/resolv.conf
+    - name: "📡 Create symbolic link for /etc/resolv.conf"
       ansible.builtin.file:
         src: /run/systemd/resolve/resolv.conf
         dest: /etc/resolv.conf
@@ -64,8 +64,8 @@
         force: true
       poll: 1
 
-    # 🛠 تنظیم دستی DNSهای Shecan در /etc/resolv.conf (در صورت نیاز)
-    - name: "🛠 Manually set Shecan DNS in /etc/resolv.conf"
+    # 📡 تنظیم دستی DNSهای Shecan در /etc/resolv.conf (در صورت نیاز)
+    - name: "📡 Manually set Shecan DNS in /etc/resolv.conf"
       ansible.builtin.copy:
         content: |
           nameserver 178.22.122.100
