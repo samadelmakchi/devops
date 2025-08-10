@@ -205,45 +205,33 @@
       poll: 1
       when: install_jenkins is false and jenkins_file.stat.exists
 
-    - name: "♻️ Wait for Jenkins container to be ready"
-      ansible.builtin.wait_for:
-        host: localhost
-        port: 4441
-        state: started
-        delay: 10
-        timeout: 300
-      when: install_jenkins is true
+    # - name: "♻️ Wait for Jenkins container to be ready"
+    #   ansible.builtin.wait_for:
+    #     host: localhost
+    #     port: 4441
+    #     state: started
+    #     delay: 10
+    #     timeout: 300
+    #   when: install_jenkins is true
 
-    - name: "♻️ Install Java 17 for Jenkins CLI"
-      ansible.builtin.package:
-        name: openjdk-17-jre
-        state: present
-      when: install_jenkins is true
+    # - name: "♻️ Install Java 17 for Jenkins CLI"
+    #   ansible.builtin.package:
+    #     name: openjdk-17-jre
+    #     state: present
+    #   when: install_jenkins is true
 
-    - name: "♻️ Get initial admin password from Jenkins container"
-      ansible.builtin.command:
-        cmd: docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
-      register: initial_password
-      when: install_jenkins is true
-      changed_when: false
-      failed_when: initial_password.rc != 0 or initial_password.stdout == ""
+    # - name: "♻️ Get initial admin password from Jenkins container"
+    #   ansible.builtin.command:
+    #     cmd: docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+    #   register: initial_password
+    #   when: install_jenkins is true
+    #   changed_when: false
+    #   failed_when: initial_password.rc != 0 or initial_password.stdout == ""
 
-    - name: "♻️ Debug initial admin password"
-      ansible.builtin.debug:
-        msg: "Initial password: {{ initial_password.stdout }}"
-      when: install_jenkins is true
-
-    - name: "♻️ Download Jenkins CLI jar"
-      ansible.builtin.uri:
-        url: http://localhost:4441/jnlpJars/jenkins-cli.jar
-        method: GET
-        dest: /tmp/jenkins-cli.jar
-        force: yes
-        owner: root
-        group: root
-        mode: '0644'
-        status_code: [200, 304]
-      when: install_jenkins is true
+    # - name: "♻️ Debug initial admin password"
+    #   ansible.builtin.debug:
+    #     msg: "Initial password: {{ initial_password.stdout }}"
+    #   when: install_jenkins is true
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RabbitMQ
     - name: "🐰 Generate rabbitmq.yml from template"
