@@ -6,20 +6,24 @@ all:
           ansible_connection: local
           customer_name: "سیمناد"
           customer_gateway_git_branches: "dev"
-          customer_gateway_git_tags: "02.69-dev"
+          customer_gateway_git_tags: ""
           customer_portal_git_branches: "dev"
-          customer_portal_git_tags: "01-dev"
+          customer_portal_git_tags: ""
           customer_portal_frontend_git_branches: "dev"
-          customer_portal_frontend_git_tags: "01-dev"
+          customer_portal_frontend_git_tags: ""
+          customer_websocket_git_branches: "dev"
+          customer_websocket_git_tags: ""
           customer_gateway_ports: 8061
           customer_portal_ports: 7061
           customer_portal_frontend_ports: 6061
+          customer_websocket_ports: 5061
           customer_containers: "simnad_container"
           customer_url: "185.255.89.160"
           customer_domain: "simnad.com"
-          customer_subdomain_gateway: "admin"
+          customer_subdomain_gateway: "calibri"
           customer_subdomain_portal: "portal"
           customer_subdomain_backendportal: "backendportal"
+          customer_subdomain_websocket: "websocket"
           portal_database_type: "mysql"
           portal_mysql_root_password: "1234"
           portal_mysql_password: "1234"
@@ -36,20 +40,24 @@ all:
           ansible_connection: local
           customer_name: "نیکان"
           customer_gateway_git_branches: "dev"
-          customer_gateway_git_tags: "02.69-dev"
+          customer_gateway_git_tags: ""
           customer_portal_git_branches: "dev"
-          customer_portal_git_tags: "01-dev"
-          customer_portal_frontend_git_branches: "smd-test"
-          customer_portal_frontend_git_tags: "tag-00.01"
+          customer_portal_git_tags: ""
+          customer_portal_frontend_git_branches: "dev"
+          customer_portal_frontend_git_tags: ""
+          customer_websocket_git_branches: "dev"
+          customer_websocket_git_tags: ""
           customer_gateway_ports: 8062
           customer_portal_ports: 7062
           customer_portal_frontend_ports: 6062
+          customer_websocket_ports: 5062
           customer_containers: "nikan_container"
           customer_url: "185.255.89.160"
           customer_domain: "pardazeshafza.com"
           customer_subdomain_gateway: "calibri"
           customer_subdomain_portal: "portal"
           customer_subdomain_backendportal: "backendportal"
+          customer_subdomain_websocket: "websocket"
           portal_database_type: "mysql"
           portal_mysql_root_password: "1234"
           portal_mysql_password: "1234"
@@ -66,20 +74,24 @@ all:
           ansible_connection: local
           customer_name: "تست"
           customer_gateway_git_branches: "dev"
-          customer_gateway_git_tags: "02.69-dev"
+          customer_gateway_git_tags: ""
           customer_portal_git_branches: "dev"
-          customer_portal_git_tags: "01-dev"
-          customer_portal_frontend_git_branches: "smd-test"
-          customer_portal_frontend_git_tags: "tag-00.02"
+          customer_portal_git_tags: ""
+          customer_portal_frontend_git_branches: "dev"
+          customer_portal_frontend_git_tags: ""
+          customer_websocket_git_branches: "dev"
+          customer_websocket_git_tags: ""
           customer_gateway_ports: 8063
           customer_portal_ports: 7063
           customer_portal_frontend_ports: 6063
+          customer_websocket_ports: 5063
           customer_containers: "test_container"
           customer_url: "185.255.89.160"
           customer_domain: "pardazeshafza.com"
           customer_subdomain_gateway: "testcalibri"
           customer_subdomain_portal: "testportal"
           customer_subdomain_backendportal: "testbackendportal"
+          customer_subdomain_websocket: "testwebsocket"
           portal_database_type: "mysql"
           portal_mysql_root_password: "1234"
           portal_mysql_password: "1234"

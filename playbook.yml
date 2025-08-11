@@ -196,6 +196,15 @@
             tag_var: "customer_portal_frontend_git_tags"
             compose_file: "docker-compose-portal-frontend.yml.j2"
 
+          - name: "websocket"
+            repo: >-
+              {{ "git@gitlab.com:nasser-man/calibri-websocket-server.git" if repo_source == "gitlab"
+                else "git@github.com:nasserman/calibri-websocket-server.git" }}
+            folder: "websocket"
+            branch_var: "customer_websocket_git_branches"
+            tag_var: "customer_websocket_git_tags"
+            compose_file: "docker-compose-websocket.yml.j2"
+
     # 🔍 بررسی وجود دایرکتوری مشتری
     - name: "🛠️ Check if customer base folder exists"
       ansible.builtin.stat:
@@ -756,6 +765,57 @@
         cmd: >
           docker compose -p {{ inventory_hostname }}-portal-frontend
           -f "{{ project_path }}/{{ inventory_hostname }}/portal-frontend/docker/docker-compose.yml"
+          up -d
+      when: customer_state == 'update'
+      poll: 1
+      changed_when: false
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ اجرای داکر کامپوزر websocket
+    # 🧩 یافتن همه کانتینرهای مرتبط با سرویس websocket
+    - name: "🧩 Find all matching containers for websocket"
+      ansible.builtin.shell: |
+        docker ps -a --filter "name={{ customer_containers }}-websocket" -q
+      register: matching_containers_portal_frontend
+      changed_when: false
+      poll: 1
+      failed_when: false
+
+    # 🛑 توقف کانتینرهای مرتبط با سرویس websocket
+    - name: "🛑 Stop matching containers for websocket"
+      ansible.builtin.shell: |
+        docker stop {{ matching_containers_portal_frontend.stdout_lines | join(' ') }}
+      when: matching_containers_portal_frontend.stdout != "" and customer_state in ['update', 'down']
+      register: stop_result
+      failed_when: stop_result.rc != 0 and '"No such container"' not in stop_result.stderr
+      poll: 1
+      changed_when: stop_result.stdout != ""
+
+    # ❌ کشتن کانتینرهای باقی‌مانده (در صورت توقف نشدن) برای websocket
+    - name: "❌ Kill matching containers (if not already stopped) for websocket"
+      ansible.builtin.shell: |
+        docker kill {{ matching_containers_portal_frontend.stdout_lines | join(' ') }} || true
+      when: matching_containers_portal_frontend.stdout != "" and customer_state in ['update', 'down']
+      register: kill_result
+      failed_when: false
+      poll: 1
+      changed_when: "'is not running' not in kill_result.stderr and kill_result.stdout != ''"
+
+    # 🧹 حذف کانتینرهای مرتبط با سرویس websocket
+    - name: "🧹 Remove matching containers for websocket"
+      ansible.builtin.shell: |
+        docker rm {{ matching_containers_portal_frontend.stdout_lines | join(' ') }}
+      when: matching_containers_portal_frontend.stdout != "" and customer_state in ['update', 'down']
+      register: rm_result
+      failed_when: rm_result.rc != 0 and '"No such container"' not in rm_result.stderr
+      poll: 1
+      changed_when: rm_result.stdout != ""
+
+    # 🚀 اجرای docker-compose برای سرویس websocket
+    - name: 🚀 Run docker-compose for websocket
+      ansible.builtin.command:
+        cmd: >
+          docker compose -p {{ inventory_hostname }}-websocket
+          -f "{{ project_path }}/{{ inventory_hostname }}/websocket/docker/docker-compose.yml"
           up -d
       when: customer_state == 'update'
       poll: 1
