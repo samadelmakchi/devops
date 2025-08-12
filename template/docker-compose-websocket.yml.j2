@@ -9,8 +9,8 @@ services:
     networks:
       - traefik_reverse_proxy
     environment:
-      - NODE_ENV=production
-      - INSTANCE_NAME: {{ customer_containers }}
+      NODE_ENV: production
+      INSTANCE_NAME: {{ customer_containers }}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.{{ customer_containers }}-websocket.rule=Host(`{{ customer_subdomain_websocket }}.{{ customer_domain }}`)"

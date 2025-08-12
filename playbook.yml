@@ -354,15 +354,33 @@
       poll: 1
       when: customer_state == 'update'
 
-    # 📋 کپی کردن فایل docker-compose اختصاصی
+    # 📂 ساخت مسیر مقصد برای همه پروژه‌ها
+    - name: "📂 Ensure docker-compose destination directory exists"
+      ansible.builtin.file:
+        path: >-
+          {{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}/
+          {%- if item.name != 'websocket' -%}
+          docker
+          {%- endif -%}
+        state: directory
+        mode: '0777'
+      loop: "{{ projects }}"
+      when: customer_state == 'update'
+
+    # 📋 کپی کردن docker-compose
     - name: "📋 Copy docker-compose files to customer project"
       ansible.builtin.template:
         src: "template/{{ item.compose_file }}"
-        dest: "{{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}/docker/docker-compose.yml"
+        dest: >-
+          {{ project_path }}/{{ inventory_hostname }}/{{ item.folder }}/
+          {%- if item.name != 'websocket' -%}
+          docker/docker-compose.yml
+          {%- else -%}
+          docker-compose.yml
+          {%- endif -%}
         mode: '0777'
         force: yes
       loop: "{{ projects }}"
-      poll: 1
       when: customer_state == 'update'
 
     # 📝 کپی کردن فایل nginx.conf اختصاصی
@@ -815,7 +833,7 @@
       ansible.builtin.command:
         cmd: >
           docker compose -p {{ inventory_hostname }}-websocket
-          -f "{{ project_path }}/{{ inventory_hostname }}/websocket/docker/docker-compose.yml"
+          -f "{{ project_path }}/{{ inventory_hostname }}/websocket/docker-compose.yml"
           up -d
       when: customer_state == 'update'
       poll: 1

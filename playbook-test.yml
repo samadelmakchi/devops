@@ -1,4 +1,4 @@
----
+# اجرای تمام تست‌های خودکار برای هر مشتری
 - name: Run all automated tests for each customer
   hosts: local
   vars:
