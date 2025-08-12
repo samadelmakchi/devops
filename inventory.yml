@@ -11,7 +11,7 @@ all:
           customer_portal_git_tags: ""
           customer_portal_frontend_git_branches: "dev"
           customer_portal_frontend_git_tags: ""
-          customer_websocket_git_branches: "dev"
+          customer_websocket_git_branches: "main"
           customer_websocket_git_tags: ""
           customer_gateway_ports: 8061
           customer_portal_ports: 7061
@@ -45,7 +45,7 @@ all:
           customer_portal_git_tags: ""
           customer_portal_frontend_git_branches: "dev"
           customer_portal_frontend_git_tags: ""
-          customer_websocket_git_branches: "dev"
+          customer_websocket_git_branches: "main"
           customer_websocket_git_tags: ""
           customer_gateway_ports: 8062
           customer_portal_ports: 7062
@@ -79,7 +79,7 @@ all:
           customer_portal_git_tags: ""
           customer_portal_frontend_git_branches: "dev"
           customer_portal_frontend_git_tags: ""
-          customer_websocket_git_branches: "dev"
+          customer_websocket_git_branches: "main"
           customer_websocket_git_tags: ""
           customer_gateway_ports: 8063
           customer_portal_ports: 7063
