@@ -14,7 +14,7 @@ services:
       - "traefik.http.services.cdn.loadbalancer.server.port=80"
     volumes:
       - ./nginx:/usr/share/nginx/html 
-    restart: always
+    restart: unless-stopped
 
 networks:
   traefik_reverse_proxy:

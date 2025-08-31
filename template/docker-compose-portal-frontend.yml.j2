@@ -6,6 +6,7 @@ services:
     command: bash -c "npm install && npm run dev"
     volumes:
       - ../:/app
+    restart: unless-stopped
     ports:
       - {{ customer_portal_frontend_ports }}:5173
     networks:

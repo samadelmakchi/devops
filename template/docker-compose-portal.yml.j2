@@ -11,6 +11,7 @@ services:
       - {{ customer_portal_ports }}:80
     networks:
       - traefik_reverse_proxy
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.{{ customer_containers }}-portal.rule=Host(`{{ customer_subdomain_backendportal }}.{{ customer_domain }}`)"
@@ -31,6 +32,7 @@ services:
     volumes:
       - ./init/:/docker-entrypoint-initdb.d/
       - ./db:/var/lib/mysql
+    restart: unless-stopped
     networks:
       - traefik_reverse_proxy
 

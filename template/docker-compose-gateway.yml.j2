@@ -12,6 +12,7 @@ services:
       - traefik_reverse_proxy
     environment:
       INSTANCE_NAME: {{ customer_containers }}
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.{{ customer_containers }}-gateway.rule=Host(`{{ customer_subdomain_gateway }}.{{ customer_domain }}`)"
@@ -26,6 +27,7 @@ services:
     volumes:
       - ./init/:/docker-entrypoint-initdb.d/
       - ./db:/var/lib/mysql
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: {{ gateway_mysql_root_password }}
       MYSQL_DATABASE: {{ gateway_mysql_db_name }}

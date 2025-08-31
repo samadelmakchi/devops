@@ -11,6 +11,7 @@ services:
     environment:
       NODE_ENV: production
       INSTANCE_NAME: {{ customer_containers }}
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.{{ customer_containers }}-websocket.rule=Host(`{{ customer_subdomain_websocket }}.{{ customer_domain }}`)"
